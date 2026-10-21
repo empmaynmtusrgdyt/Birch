@@ -36,7 +36,7 @@ std::mutex& graphvizMutex() {
     return m;
 }
 
-// Строковые параметры cgraph в старых версиях (2.42 в Ubuntu) — char*, хотя не изменяются.
+// Строковые параметры cgraph объявлены как char*, хотя не изменяются.
 char* cstr(const char* s) { return const_cast<char*>(s); }
 
 void setAttr(void* obj, const char* name, const QByteArray& value) {

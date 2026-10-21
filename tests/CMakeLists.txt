@@ -7,7 +7,7 @@ function(birch_add_test name)
         BIRCH_EXAMPLES_DIR="${PROJECT_SOURCE_DIR}/resources/examples")
     birch_set_warnings(${name})
     # Консольное приложение, без бандла
-    set_target_properties(${name} PROPERTIES MACOSX_BUNDLE OFF WIN32_EXECUTABLE OFF)
+    set_target_properties(${name} PROPERTIES MACOSX_BUNDLE OFF)
     add_test(NAME ${name} COMMAND ${name})
     # Без окон: тесты работают и на CI без дисплея
     set_tests_properties(${name} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

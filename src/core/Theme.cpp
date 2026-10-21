@@ -6,16 +6,9 @@ namespace {
 
 QStringList defaultFonts() {
     return {
-        QStringLiteral("Inter"),           // если установлен — самый «современный» вариант
-        QStringLiteral("SF Pro Text"),     // macOS (при установленных SF-шрифтах)
-        QStringLiteral("Helvetica Neue"),  // macOS
-        QStringLiteral("Segoe UI"),        // Windows
-        QStringLiteral("Noto Sans"),       // Linux
-        QStringLiteral("Ubuntu"),
-        QStringLiteral("Cantarell"),
-        QStringLiteral("DejaVu Sans"),
-        QStringLiteral("Liberation Sans"),
-        QStringLiteral("Arial"),
+        QStringLiteral("Inter"),           // если установлен пользователем
+        QStringLiteral("SF Pro Text"),     // если установлены SF-шрифты Apple
+        QStringLiteral("Helvetica Neue"),  // есть в любой macOS
         QStringLiteral("Helvetica"),
     };
 }

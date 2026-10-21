@@ -97,9 +97,7 @@ MainWindow::MainWindow(QWidget* parent)
     statusBar()->addWidget(statusInfo_, 1);
     statusBar()->setSizeGripEnabled(false);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this] { applyTheme(); });
-#endif  // в Qt 6.4 смену темы ловим через QEvent::PaletteChange (changeEvent)
 
     restoreSession();  // включает тему -> applyTheme()
     renderNow();
@@ -689,10 +687,8 @@ bool MainWindow::isDark() const {
     case ThemeMode::Dark: return true;
     case ThemeMode::System: break;
     }
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     const Qt::ColorScheme scheme = QGuiApplication::styleHints()->colorScheme();
     if (scheme != Qt::ColorScheme::Unknown) return scheme == Qt::ColorScheme::Dark;
-#endif
     return palette().color(QPalette::Window).lightness() < 128;
 }
 

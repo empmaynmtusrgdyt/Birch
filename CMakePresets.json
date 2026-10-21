@@ -1,72 +1,21 @@
 {
   "version": 3,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 21,
-    "patch": 0
-  },
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
   "configurePresets": [
-    {
-      "name": "base",
-      "hidden": true,
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
     {
       "name": "macos",
       "displayName": "macOS (Homebrew)",
-      "inherits": "base",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
-      },
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_PREFIX_PATH": "/opt/homebrew;/usr/local"
-      }
-    },
-    {
-      "name": "linux",
-      "displayName": "Linux (apt)",
-      "inherits": "base",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
-    },
-    {
-      "name": "windows-vcpkg",
-      "displayName": "Windows (vcpkg, MSVC)",
-      "inherits": "base",
-      "generator": "Visual Studio 17 2022",
-      "architecture": "x64",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      },
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
     }
   ],
   "buildPresets": [
-    {
-      "name": "macos",
-      "configurePreset": "macos"
-    },
-    {
-      "name": "linux",
-      "configurePreset": "linux"
-    },
-    {
-      "name": "windows-vcpkg",
-      "configurePreset": "windows-vcpkg",
-      "configuration": "Release"
-    }
+    { "name": "macos", "configurePreset": "macos" }
+  ],
+  "testPresets": [
+    { "name": "macos", "configurePreset": "macos", "output": { "outputOnFailure": true } }
   ]
 }

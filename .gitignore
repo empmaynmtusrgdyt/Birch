@@ -1,10 +1,8 @@
 build/
 out/
-vcpkg_installed/
 CMakeUserPresets.json
 compile_commands.json
 .DS_Store
 .vscode/
 .idea/
-*.user
 .cache/

@@ -36,7 +36,6 @@ int main(int argc, char* argv[]) {
     QApplication::setOrganizationDomain(QStringLiteral("birch.app"));
     QApplication::setApplicationVersion(QStringLiteral(BIRCH_VERSION));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/app.svg")));
-    QGuiApplication::setDesktopFileName(QStringLiteral("birch"));  // Linux/Wayland: связь с birch.desktop
 
     QCommandLineParser cli;
     cli.setApplicationDescription(QStringLiteral("Блок-схемы из текста"));
