@@ -1,0 +1,13 @@
+{
+  "name": "birch",
+  "version": "0.1.0",
+  "description": "Text-to-flowchart desktop app (Qt 6 + Graphviz)",
+  "dependencies": [
+    {
+      "name": "qtbase",
+      "default-features": true
+    },
+    "qtsvg",
+    "graphviz"
+  ]
+}

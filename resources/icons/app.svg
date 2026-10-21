@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34405A"/>
+      <stop offset="1" stop-color="#1D2331"/>
+    </linearGradient>
+  </defs>
+  <!-- Поля ~10% по краям — как у иконок macOS -->
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <g fill="none" stroke="#C9D3E3" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M512 352v88"/>
+    <path d="M512 584v52H340v58M512 636h172v58"/>
+  </g>
+  <rect x="352" y="232" width="320" height="120" rx="60" fill="#5FD1A0"/>
+  <path d="M512 440l132 72-132 72-132-72z" fill="#F2C14E"/>
+  <rect x="220" y="694" width="240" height="112" rx="32" fill="#7AA7FF"/>
+  <rect x="564" y="694" width="240" height="112" rx="32" fill="#FF9F8E"/>
+</svg>
