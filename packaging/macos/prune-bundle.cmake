@@ -90,7 +90,11 @@ while(_changed)
                     file(CHMOD "${_contents}/Frameworks/${_name}"
                          PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
                     execute_process(COMMAND install_name_tool -id "@rpath/${_name}"
-                                            "${_contents}/Frameworks/${_name}" ERROR_QUIET)
+                                            "${_contents}/Frameworks/${_name}"
+                                    RESULT_VARIABLE _rc ERROR_VARIABLE _err)
+                    if(NOT _rc EQUAL 0)
+                        message(WARNING "install_name_tool -id ${_name}: ${_err}")
+                    endif()
                     set(_changed TRUE)
                     break()
                 endif()
@@ -104,12 +108,23 @@ _birch_macho_files(_files)
 set(_problems "")
 foreach(_bin IN LISTS _files)
     execute_process(COMMAND otool -L "${_bin}" OUTPUT_VARIABLE _out ERROR_QUIET)
+    # Собственный идентификатор библиотеки (LC_ID_DYLIB) otool -L тоже печатает,
+    # но это не зависимость: при запуске он не используется.
+    execute_process(COMMAND otool -D "${_bin}" OUTPUT_VARIABLE _id_out ERROR_QUIET)
+    string(REPLACE "\n" ";" _id_lines "${_id_out}")
+    set(_own_id "")
+    list(LENGTH _id_lines _id_count)
+    if(_id_count GREATER 1)
+        list(GET _id_lines 1 _own_id)
+        string(STRIP "${_own_id}" _own_id)
+    endif()
+
     string(REPLACE "\n" ";" _lines "${_out}")
     list(REMOVE_AT _lines 0)  # первая строка — имя самого файла
     foreach(_line IN LISTS _lines)
         string(STRIP "${_line}" _line)
         string(REGEX REPLACE " \\(compatibility.*" "" _dep "${_line}")
-        if(_dep STREQUAL "" OR _dep MATCHES "^(/System/|/usr/lib/)")
+        if(_dep STREQUAL "" OR _dep STREQUAL _own_id OR _dep MATCHES "^(/System/|/usr/lib/)")
             continue()
         endif()
         if(_dep MATCHES "^@(rpath|executable_path/\\.\\./Frameworks|loader_path/\\.\\./\\.\\./\\.\\.)/(.+)$")
