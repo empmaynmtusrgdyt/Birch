@@ -224,17 +224,10 @@ jobs:
             theme-*.png
 
   # ---------------------------------------------------------------------------
-  # Две версии: Server 2022 (основа Windows 10, стиль windowsvista -> Fusion)
-  # и Server 2025 (основа Windows 11, стиль windows11). Пакеты — из первой.
+  # Server 2022 — основа Windows 10: стиль windowsvista, Birch заменяет его на Fusion
   windows:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.image }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { name: "Windows (Server 2022)", image: "windows-2022", tag: "windows", publish: true }
-          - { name: "Windows (Server 2025)", image: "windows-2025", tag: "windows-2025", publish: false }
+    name: Windows
+    runs-on: windows-2022
     env:
       QT_QPA_PLATFORM: offscreen
     steps:
@@ -266,13 +259,13 @@ jobs:
         run: |
           # Birch.exe — GUI-приложение: ждём его завершения явно
           $p = Start-Process build\windows\Release\Birch.exe -Wait -PassThru `
-                 -ArgumentList "--screenshot", "screenshot-${{ matrix.tag }}.png", "resources\examples\welcome.birch"
+                 -ArgumentList "--screenshot", "screenshot-windows.png", "resources\examples\welcome.birch"
           if ($p.ExitCode -ne 0) { throw "Birch.exe завершился с кодом $($p.ExitCode)" }
-          if (-not (Test-Path screenshot-${{ matrix.tag }}.png)) { throw "нет снимка" }
+          if (-not (Test-Path screenshot-windows.png)) { throw "нет снимка" }
       - uses: actions/upload-artifact@v4
         with:
-          name: screenshot-${{ matrix.tag }}
-          path: screenshot-${{ matrix.tag }}.png
+          name: screenshot-windows
+          path: screenshot-windows.png
       - name: Пакеты .zip и установщик NSIS
         run: |
           cd build\windows
@@ -302,23 +295,12 @@ jobs:
           # Установленный Birch с настоящей платформой windows и родным стилем
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
-          foreach ($theme in "dark", "light") {
-            $shot = Join-Path $PWD "theme-$theme.png"
-            $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
-                   -ArgumentList "--theme", $theme, "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
-            if ($p.ExitCode -ne 0) { throw "Birch.exe --theme $theme завершился с кодом $($p.ExitCode)" }
-            $info = Get-Content "$shot.txt"
-            "${theme}: $($info -join ' ')"
-            $lightness = [int](($info | Where-Object { $_ -like "lightness=*" }) -replace "lightness=", "")
-            if ($theme -eq "dark" -and $lightness -ge 100) { throw "Тёмная тема не применилась к редактору (яркость фона $lightness)" }
-            if ($theme -eq "light" -and $lightness -le 155) { throw "Светлая тема не применилась к редактору (яркость фона $lightness)" }
-          }
+          .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: theme-${{ matrix.tag }}
+          name: theme-windows
           path: theme-*.png
       - uses: actions/upload-artifact@v4
-        if: matrix.publish
         with:
           name: package-windows
           path: |
@@ -326,12 +308,40 @@ jobs:
             build/windows/Birch-*-windows-x64.zip
             screenshot-windows-installed.png
 
+  # Server 2025 — основа Windows 11: стиль windows11. Ставим тот же установщик,
+  # что собран на Server 2022 (Visual Studio 2022 здесь нет).
+  windows-11:
+    name: Установка на Windows 11 (Server 2025)
+    needs: windows
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-windows
+          path: package
+      - name: Тихая установка
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem package -Recurse -Filter Birch-*-windows-x64.exe | Select-Object -First 1
+          $p = Start-Process $installer.FullName -ArgumentList "/S", "/D=C:\BirchTest" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "установщик завершился с кодом $($p.ExitCode)" }
+      - name: Тема применяется ко всему окну
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: theme-windows-11
+          path: theme-*.png
+
   # ---------------------------------------------------------------------------
   # Тег v* -> черновик релиза. Публикуется вручную после проверки описания.
   release:
     name: Черновик релиза
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [macos, deb-install, arch, appimage, windows]
+    needs: [macos, deb-install, arch, appimage, windows, windows-11]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
