@@ -37,6 +37,28 @@ Theme Theme::light() {
     return t;
 }
 
+Theme Theme::monochrome(bool dark) {
+    const QColor ink = dark ? QColor(Qt::white) : QColor(Qt::black);
+    const QColor paper = dark ? QColor(Qt::black) : QColor(Qt::white);
+    const NodeStyle node{paper, ink, ink};
+
+    Theme t;
+    t.name = dark ? QStringLiteral("mono-dark") : QStringLiteral("mono-light");
+    t.background = paper;
+    t.edge = ink;
+    t.edgeText = ink;
+    t.process = node;
+    t.decision = node;
+    t.terminal = node;
+    t.fontFamilies = defaultFonts();
+    return t;
+}
+
+Theme Theme::select(bool dark, bool mono) {
+    if (mono) return monochrome(dark);
+    return dark ? Theme::dark() : Theme::light();
+}
+
 Theme Theme::dark() {
     Theme t;
     t.name = QStringLiteral("dark");

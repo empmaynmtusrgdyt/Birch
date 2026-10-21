@@ -82,6 +82,40 @@ private slots:
         }
     }
 
+    void monochromeUsesOnlyBlackAndWhite_data() {
+        QTest::addColumn<bool>("dark");
+        QTest::newRow("light") << false;
+        QTest::newRow("dark") << true;
+    }
+
+    void monochromeUsesOnlyBlackAndWhite() {
+        QFETCH(bool, dark);
+        Renderer renderer;
+        RenderOptions opt;
+        opt.theme = Theme::monochrome(dark);
+        const auto r = renderer.render(parseOk(exampleSource()), opt);
+        QVERIFY2(r.ok(), qPrintable(r.error));
+
+        // Все цвета в SVG (fill, stroke) — только чёрный или белый.
+        static const QRegularExpression colorRe(QStringLiteral("(?:fill|stroke)=\"(#[0-9a-fA-F]{6})\""));
+        int colors = 0;
+        for (auto it = colorRe.globalMatch(QString::fromUtf8(r.svg)); it.hasNext(); ++colors) {
+            const QString c = it.next().captured(1).toLower();
+            QVERIFY2(c == QStringLiteral("#000000") || c == QStringLiteral("#ffffff"), qPrintable(c));
+        }
+        QVERIFY(colors > 10);  // цвета действительно есть, регулярка не промахнулась
+
+        QCOMPARE(r.image.pixelColor(1, 1), dark ? QColor(Qt::black) : QColor(Qt::white));
+        dump(r, QStringLiteral("example-") + opt.theme.name);
+    }
+
+    void themeSelect() {
+        QCOMPARE(Theme::select(false, false).name, Theme::light().name);
+        QCOMPARE(Theme::select(true, false).name, Theme::dark().name);
+        QCOMPARE(Theme::select(false, true).name, QStringLiteral("mono-light"));
+        QCOMPARE(Theme::select(true, true).name, QStringLiteral("mono-dark"));
+    }
+
     void emptyDiagramGivesNullImage() {
         Renderer renderer;
         const auto r = renderer.render(Diagram{});

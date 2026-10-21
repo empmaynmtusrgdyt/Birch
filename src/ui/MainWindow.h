@@ -75,6 +75,7 @@ private:
     // Оформление
     void setThemeMode(ThemeMode mode);
     bool isDark() const;
+    Theme previewTheme() const;
     void applyTheme();
     QIcon icon(const QString& name) const;
     void updateTitle();
@@ -106,6 +107,7 @@ private:
     QAction* exportSvgAct_ = nullptr;
     QAction* copyImageAct_ = nullptr;
     QAction* horizontalAct_ = nullptr;
+    QAction* monochromeAct_ = nullptr;
     QAction* transparentAct_ = nullptr;
     QAction* zoomInAct_ = nullptr;
     QAction* zoomOutAct_ = nullptr;

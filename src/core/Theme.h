@@ -34,6 +34,11 @@ struct Theme {
 
     static Theme light();
     static Theme dark();
+    // Чёрно-белая: для печати и документов. Фигуры различаются только формой
+    // и толщиной обводки. dark = белые линии на чёрном фоне.
+    static Theme monochrome(bool dark = false);
+    // Цветная или чёрно-белая, светлая или тёмная — одной функцией.
+    static Theme select(bool dark, bool monochrome);
 };
 
 }  // namespace birch

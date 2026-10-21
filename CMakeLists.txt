@@ -101,6 +101,7 @@ qt_add_resources(Birch "birch_resources"
         resources/icons/direction.svg
         resources/icons/download.svg
         resources/icons/fit.svg
+        resources/icons/monochrome.svg
         resources/icons/render.svg
         resources/icons/zoom-in.svg
         resources/icons/zoom-out.svg

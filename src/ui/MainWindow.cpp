@@ -49,6 +49,7 @@ const QString exportTheme = QStringLiteral("export/theme");
 const QString transparent = QStringLiteral("export/transparent");
 const QString lastDir = QStringLiteral("export/lastDir");
 const QString horizontal = QStringLiteral("render/horizontal");
+const QString monochrome = QStringLiteral("render/monochrome");
 const QString autoRender = QStringLiteral("render/auto");
 const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
@@ -154,6 +155,17 @@ void MainWindow::createActions() {
         renderNow();
     });
 
+    monochromeAct_ = new QAction(tr("Чёрно-белая схема"), this);
+    monochromeAct_->setIconText(tr("Ч/Б"));  // короткая подпись на панели инструментов
+    monochromeAct_->setCheckable(true);
+    monochromeAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B));
+    monochromeAct_->setToolTip(tr("Чёрно-белая схема — для печати и документов (%1)")
+                                   .arg(monochromeAct_->shortcut().toString(QKeySequence::NativeText)));
+    connect(monochromeAct_, &QAction::toggled, this, [this] {
+        preview_->setCanvasColor(previewTheme().background);
+        renderNow();
+    });
+
     transparentAct_ = new QAction(tr("Прозрачный фон"), this);
     transparentAct_->setCheckable(true);
 
@@ -214,7 +226,7 @@ void MainWindow::createMenus() {
     QMenu* view = menuBar()->addMenu(tr("Вид"));
     view->addActions({renderAct_, autoRenderAct_});
     view->addSeparator();
-    view->addAction(horizontalAct_);
+    view->addActions({horizontalAct_, monochromeAct_});
     view->addSeparator();
     view->addActions({zoomInAct_, zoomOutAct_, zoomResetAct_, zoomFitAct_});
     view->addSeparator();
@@ -245,6 +257,7 @@ void MainWindow::createToolBar() {
     tb->addAction(copyImageAct_);
     tb->addSeparator();
     tb->addAction(horizontalAct_);
+    tb->addAction(monochromeAct_);
 
     auto* spacer = new QWidget(tb);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -392,7 +405,7 @@ void MainWindow::showProblems(const QList<Diagnostic>& diagnostics) {
 
 RenderOptions MainWindow::previewOptions() const {
     RenderOptions opt;
-    opt.theme = isDark() ? Theme::dark() : Theme::light();
+    opt.theme = previewTheme();
     opt.direction = horizontalAct_->isChecked() ? LayoutDirection::LeftToRight : LayoutDirection::TopToBottom;
     opt.rasterize = false;  // превью рисует вектор
     return opt;
@@ -400,8 +413,9 @@ RenderOptions MainWindow::previewOptions() const {
 
 RenderOptions MainWindow::exportOptions() const {
     RenderOptions opt = previewOptions();
-    if (exportTheme_ == ExportTheme::Light) opt.theme = Theme::light();
-    if (exportTheme_ == ExportTheme::Dark) opt.theme = Theme::dark();
+    const bool mono = monochromeAct_->isChecked();
+    if (exportTheme_ == ExportTheme::Light) opt.theme = Theme::select(false, mono);
+    if (exportTheme_ == ExportTheme::Dark) opt.theme = Theme::select(true, mono);
     opt.transparentBackground = transparentAct_->isChecked();
     opt.scale = kExportScale;
     opt.rasterize = true;
@@ -608,6 +622,8 @@ void MainWindow::restoreSession() {
     {
         const QSignalBlocker b1(horizontalAct_);
         horizontalAct_->setChecked(s.value(keys::horizontal, false).toBool());
+        const QSignalBlocker b2(monochromeAct_);
+        monochromeAct_->setChecked(s.value(keys::monochrome, false).toBool());
     }
     autoRenderAct_->setChecked(s.value(keys::autoRender, true).toBool());
     transparentAct_->setChecked(s.value(keys::transparent, false).toBool());
@@ -640,6 +656,7 @@ void MainWindow::saveSession() {
     s.setValue(keys::windowState, saveState());
     s.setValue(keys::splitter, splitter_->saveState());
     s.setValue(keys::horizontal, horizontalAct_->isChecked());
+    s.setValue(keys::monochrome, monochromeAct_->isChecked());
     s.setValue(keys::autoRender, autoRenderAct_->isChecked());
     s.setValue(keys::transparent, transparentAct_->isChecked());
     s.setValue(keys::theme, static_cast<int>(themeMode_));
@@ -692,6 +709,8 @@ bool MainWindow::isDark() const {
     return palette().color(QPalette::Window).lightness() < 128;
 }
 
+Theme MainWindow::previewTheme() const { return Theme::select(isDark(), monochromeAct_->isChecked()); }
+
 QIcon MainWindow::icon(const QString& name) const {
     QFile f(QStringLiteral(":/icons/%1.svg").arg(name));
     if (!f.open(QIODevice::ReadOnly)) return {};
@@ -717,12 +736,13 @@ void MainWindow::applyTheme() {
 
     const bool dark = isDark();
     highlighter_->setDarkMode(dark);
-    preview_->setCanvasColor((dark ? Theme::dark() : Theme::light()).background);
+    preview_->setCanvasColor(previewTheme().background);
 
     renderAct_->setIcon(icon(QStringLiteral("render")));
     exportPngAct_->setIcon(icon(QStringLiteral("download")));
     copyImageAct_->setIcon(icon(QStringLiteral("copy")));
     horizontalAct_->setIcon(icon(QStringLiteral("direction")));
+    monochromeAct_->setIcon(icon(QStringLiteral("monochrome")));
     zoomInAct_->setIcon(icon(QStringLiteral("zoom-in")));
     zoomOutAct_->setIcon(icon(QStringLiteral("zoom-out")));
     zoomFitAct_->setIcon(icon(QStringLiteral("fit")));
