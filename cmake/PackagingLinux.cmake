@@ -15,7 +15,7 @@ install(FILES resources/icons/app.svg
 install(FILES packaging/linux/birch-mime.xml
         DESTINATION ${CMAKE_INSTALL_DATADIR}/mime/packages
         RENAME birch.xml)
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/birch)
+install(FILES LICENSE LICENSE-EXCEPTION DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/birch)
 
 set(BIRCH_MAINTAINER "Birch Maintainers <birch@users.noreply.github.com>"
     CACHE STRING "Контакт для пакета .deb")

@@ -221,6 +221,10 @@ Birch/
 
 ## Лицензия
 
-Birch распространяется по лицензии [GNU General Public License v3.0](LICENSE). Текст лицензии входит во все пакеты.
+Birch распространяется по лицензии [GNU General Public License v3.0](LICENSE) с [дополнительным разрешением](LICENSE-EXCEPTION) по разделу 7 GPLv3 на связывание с Graphviz. Оба текста входят во все пакеты.
 
-Birch использует [Qt](https://www.qt.io) (LGPL v3) и [Graphviz](https://graphviz.org) (Eclipse Public License 1.0); в готовые пакеты для macOS, Windows и AppImage их библиотеки входят в составе приложения.
+Зачем нужно разрешение: Birch использует [Graphviz](https://graphviz.org), который распространяется под Eclipse Public License 1.0, а она несовместима с GPL. В готовые пакеты для macOS, Windows и AppImage библиотеки Graphviz входят в составе приложения, и разрешение явно позволяет распространять такое объединение. Исходный код используемых частей Graphviz доступен на [gitlab.com/graphviz/graphviz](https://gitlab.com/graphviz/graphviz).
+
+Также используется [Qt](https://www.qt.io) под LGPL v3, она совместима с GPL v3.
+
+Если вы присылаете изменения в Birch, вы соглашаетесь распространять их на тех же условиях, включая дополнительное разрешение.

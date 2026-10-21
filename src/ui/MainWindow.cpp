@@ -802,7 +802,8 @@ void MainWindow::showAbout() {
                           "<p>Блок-схемы из текста — без ИИ, полностью офлайн.</p>"
                           "<p>Graphviz %2 · Qt %3</p>"
                           "<p>Распространяется по лицензии "
-                          "<a href=\"https://www.gnu.org/licenses/gpl-3.0.html\">GNU GPL v3</a>.</p>")
+                          "<a href=\"https://www.gnu.org/licenses/gpl-3.0.html\">GNU GPL v3</a> "
+                          "с дополнительным разрешением на связывание с Graphviz.</p>")
                            .arg(QApplication::applicationVersion(), Renderer::graphvizVersion(),
                                 QString::fromLatin1(qVersion())));
 }

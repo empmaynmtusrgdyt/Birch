@@ -1,0 +1,27 @@
+Birch is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 (see the LICENSE file),
+with the following additional permission.
+
+Additional permission under GNU GPL version 3 section 7
+
+If you modify this Program, or any covered work, by linking or combining it
+with Graphviz (or a modified version of that library), containing parts
+covered by the terms of the Eclipse Public License version 1.0 or any later
+version of the Eclipse Public License, the licensors of this Program grant you
+additional permission to convey the resulting work. Corresponding Source for a
+non-source form of such a combination shall include the source code for the
+parts of Graphviz used as well as that of the covered work.
+
+---------------------------------------------------------------------------
+Неофициальный перевод (юридическую силу имеет только текст на английском):
+
+Дополнительное разрешение по разделу 7 GNU GPL версии 3
+
+Если вы изменяете эту Программу или любое основанное на ней произведение,
+связывая или объединяя её с Graphviz (или изменённой версией этой
+библиотеки), содержащей части, на которые распространяется Eclipse Public
+License версии 1.0 или любой более поздней версии, лицензиары этой Программы
+дают вам дополнительное разрешение распространять получившееся произведение.
+Соответствующий исходный код для неисходной формы такого объединения должен
+включать исходный код использованных частей Graphviz, а также исходный код
+основанного на Программе произведения.

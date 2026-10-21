@@ -9,6 +9,7 @@ option(BIRCH_DEPLOY_QT "При установке копировать Qt и д�
 
 install(TARGETS Birch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES LICENSE DESTINATION . RENAME LICENSE.txt)
+install(FILES LICENSE-EXCEPTION DESTINATION . RENAME LICENSE-EXCEPTION.txt)
 
 if(BIRCH_DEPLOY_QT)
     qt_generate_deploy_app_script(
