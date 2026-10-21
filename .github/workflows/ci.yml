@@ -36,7 +36,15 @@ jobs:
       - name: Смоук-тест
         run: ./build/macos/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos.png resources/examples/welcome.birch
       - name: Пакет .dmg (с проверкой самодостаточности бандла)
-        run: cd build/macos && cpack
+        run: |
+          # hdiutil на машинах GitHub иногда падает с «Resource busy» — повторяем
+          cd build/macos
+          for attempt in 1 2 3; do
+            cpack && exit 0
+            echo "cpack: попытка $attempt не удалась, повтор через 15 с"
+            sleep 15
+          done
+          exit 1
       - name: Смоук-тест приложения из .dmg
         run: |
           hdiutil attach -nobrowse -readonly build/macos/Birch-*.dmg -mountpoint /tmp/birch-dmg
