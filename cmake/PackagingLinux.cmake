@@ -1,7 +1,9 @@
 # Linux: стандартная раскладка /usr и пакеты .deb / .tar.gz (cpack).
 #
-# Библиотеки берутся из системы. Для .deb зависимости вычисляет dpkg-shlibdeps;
-# платформенные плагины Qt (xcb, wayland) он не видит — добавляем их явно.
+# Библиотеки берутся из системы. Для .deb зависимости вычисляет dpkg-shlibdeps,
+# но он не видит то, что загружается динамически: платформенные плагины Qt
+# (xcb, wayland) и плагины раскладки Graphviz с их реестром (пакет graphviz;
+# в Ubuntu 26.04 без него «Layout type: "dot" not recognized»). Добавляем явно.
 # Самодостаточный AppImage собирается отдельно: packaging/linux/build-appimage.sh.
 
 install(TARGETS Birch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -33,4 +35,4 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
     "Блок-схемы из текста\n Строит блок-схемы по простому текстовому описанию с помощью Graphviz.\n Экспорт в PNG и SVG, копирование картинки в буфер обмена.")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${BIRCH_HOMEPAGE}")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "qt6-qpa-plugins")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "qt6-qpa-plugins, graphviz")
