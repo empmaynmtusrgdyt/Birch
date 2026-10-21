@@ -50,6 +50,11 @@ jobs:
           hdiutil attach -nobrowse -readonly build/macos/Birch-*.dmg -mountpoint /tmp/birch-dmg
           /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos-dmg.png resources/examples/welcome.birch
           codesign --verify --deep --strict /tmp/birch-dmg/Birch.app
+      - name: Тема применяется ко всему окну
+        run: |
+          .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
+          # Fusion — запасной стиль на Windows и Linux
+          .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch -style fusion
           hdiutil detach /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
@@ -57,6 +62,7 @@ jobs:
           path: |
             build/macos/Birch-*.dmg
             screenshot-macos-dmg.png
+            theme-*.png
 
   # ---------------------------------------------------------------------------
   # .deb собирается отдельно под каждый дистрибутив: имена пакетов библиотек
@@ -91,6 +97,8 @@ jobs:
         run: ctest --preset linux
       - name: Смоук-тест
         run: ./build/linux/birch --screenshot screenshot-${{ matrix.tag }}.png resources/examples/welcome.birch
+      - name: Тема применяется ко всему окну
+        run: .github/scripts/check-theme.sh ./build/linux/birch
       - name: Пакет .deb
         run: |
           cd build/linux && cpack -G DEB
@@ -171,6 +179,8 @@ jobs:
         run: |
           pacman -U --noconfirm ./birch-*.pkg.tar.zst
           birch --screenshot screenshot-arch-pkg.png resources/examples/welcome.birch
+      - name: Тема применяется ко всему окну
+        run: .github/scripts/check-theme.sh birch
       - uses: actions/upload-artifact@v4
         with:
           name: package-arch
@@ -201,17 +211,30 @@ jobs:
         run: |
           app=$(ls build/appimage/Birch*.AppImage)
           APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$app" --screenshot screenshot-appimage.png resources/examples/welcome.birch
+      - name: Тема применяется ко всему окну (X11 через Xvfb)
+        run: |
+          app=$(ls build/appimage/Birch*.AppImage)
+          APPIMAGE_EXTRACT_AND_RUN=1 .github/scripts/check-theme.sh xvfb-run -a "$app"
       - uses: actions/upload-artifact@v4
         with:
           name: package-appimage
           path: |
             build/appimage/Birch*.AppImage
             screenshot-appimage.png
+            theme-*.png
 
   # ---------------------------------------------------------------------------
+  # Две версии: Server 2022 (основа Windows 10, стиль windowsvista -> Fusion)
+  # и Server 2025 (основа Windows 11, стиль windows11). Пакеты — из первой.
   windows:
-    name: Windows
-    runs-on: windows-2022
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "Windows (Server 2022)", image: "windows-2022", tag: "windows", publish: true }
+          - { name: "Windows (Server 2025)", image: "windows-2025", tag: "windows-2025", publish: false }
     env:
       QT_QPA_PLATFORM: offscreen
     steps:
@@ -243,13 +266,13 @@ jobs:
         run: |
           # Birch.exe — GUI-приложение: ждём его завершения явно
           $p = Start-Process build\windows\Release\Birch.exe -Wait -PassThru `
-                 -ArgumentList "--screenshot", "screenshot-windows.png", "resources\examples\welcome.birch"
+                 -ArgumentList "--screenshot", "screenshot-${{ matrix.tag }}.png", "resources\examples\welcome.birch"
           if ($p.ExitCode -ne 0) { throw "Birch.exe завершился с кодом $($p.ExitCode)" }
-          if (-not (Test-Path screenshot-windows.png)) { throw "нет снимка" }
+          if (-not (Test-Path screenshot-${{ matrix.tag }}.png)) { throw "нет снимка" }
       - uses: actions/upload-artifact@v4
         with:
-          name: screenshot-windows
-          path: screenshot-windows.png
+          name: screenshot-${{ matrix.tag }}
+          path: screenshot-${{ matrix.tag }}.png
       - name: Пакеты .zip и установщик NSIS
         run: |
           cd build\windows
@@ -273,7 +296,29 @@ jobs:
           if (-not (Test-Path $shot)) { throw "нет снимка" }
           Get-ChildItem C:\BirchTest\bin -Filter *.dll | Measure-Object -Property Length -Sum |
             ForEach-Object { "DLL: $($_.Count) шт., $([math]::Round($_.Sum / 1MB, 1)) МБ" }
+      - name: Тема применяется ко всему окну
+        shell: pwsh
+        run: |
+          # Установленный Birch с настоящей платформой windows и родным стилем
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          foreach ($theme in "dark", "light") {
+            $shot = Join-Path $PWD "theme-$theme.png"
+            $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                   -ArgumentList "--theme", $theme, "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
+            if ($p.ExitCode -ne 0) { throw "Birch.exe --theme $theme завершился с кодом $($p.ExitCode)" }
+            $info = Get-Content "$shot.txt"
+            "${theme}: $($info -join ' ')"
+            $lightness = [int](($info | Where-Object { $_ -like "lightness=*" }) -replace "lightness=", "")
+            if ($theme -eq "dark" -and $lightness -ge 100) { throw "Тёмная тема не применилась к редактору (яркость фона $lightness)" }
+            if ($theme -eq "light" -and $lightness -le 155) { throw "Светлая тема не применилась к редактору (яркость фона $lightness)" }
+          }
       - uses: actions/upload-artifact@v4
+        with:
+          name: theme-${{ matrix.tag }}
+          path: theme-*.png
+      - uses: actions/upload-artifact@v4
+        if: matrix.publish
         with:
           name: package-windows
           path: |
