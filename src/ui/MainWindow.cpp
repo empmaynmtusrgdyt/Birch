@@ -71,6 +71,40 @@ QIcon dotIcon(const QColor& color) {
     return QIcon(pm);
 }
 
+// Стили, которые сами перекрашивают виджеты при смене светлой/тёмной темы
+// (QStyleHints::setColorScheme). Для остальных (Fusion, Breeze…) палитру задаём сами.
+bool styleFollowsColorScheme() {
+    const QString name = QApplication::style()->name().toLower();
+    return name == QLatin1String("macos") || name == QLatin1String("windows11");
+}
+
+QPalette darkPalette() {
+    const QColor window(0x2B2D31), base(0x1E1F22), text(0xE6E7EA), disabled(0x7A7F87);
+    QPalette p;
+    p.setColor(QPalette::Window, window);
+    p.setColor(QPalette::WindowText, text);
+    p.setColor(QPalette::Base, base);
+    p.setColor(QPalette::AlternateBase, window);
+    p.setColor(QPalette::ToolTipBase, window);
+    p.setColor(QPalette::ToolTipText, text);
+    p.setColor(QPalette::PlaceholderText, QColor(0x8A8F98));
+    p.setColor(QPalette::Text, text);
+    p.setColor(QPalette::Button, window);
+    p.setColor(QPalette::ButtonText, text);
+    p.setColor(QPalette::BrightText, QColor(0xFF6B6B));
+    p.setColor(QPalette::Light, QColor(0x3A3D42));
+    p.setColor(QPalette::Midlight, QColor(0x33363B));
+    p.setColor(QPalette::Mid, QColor(0x26282C));
+    p.setColor(QPalette::Dark, QColor(0x18191C));
+    p.setColor(QPalette::Shadow, QColor(0x101113));
+    p.setColor(QPalette::Highlight, QColor(0x3D6FD9));
+    p.setColor(QPalette::HighlightedText, Qt::white);
+    p.setColor(QPalette::Link, QColor(0x6CA0FF));
+    for (const auto role : {QPalette::WindowText, QPalette::Text, QPalette::ButtonText})
+        p.setColor(QPalette::Disabled, role, disabled);
+    return p;
+}
+
 QString defaultDirectory() {
     const QString pics = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     return pics.isEmpty() ? QDir::homePath() : pics;
@@ -711,6 +745,19 @@ bool MainWindow::isDark() const {
     return palette().color(QPalette::Window).lightness() < 128;
 }
 
+bool MainWindow::setThemeByName(const QString& name) {
+    if (name == QLatin1String("system")) setThemeMode(ThemeMode::System);
+    else if (name == QLatin1String("light")) setThemeMode(ThemeMode::Light);
+    else if (name == QLatin1String("dark")) setThemeMode(ThemeMode::Dark);
+    else return false;
+    return true;
+}
+
+QRect MainWindow::editorViewportRect() const {
+    const QWidget* vp = editor_->viewport();
+    return QRect(vp->mapTo(this, QPoint(0, 0)), vp->size());
+}
+
 Theme MainWindow::previewTheme() const { return Theme::select(isDark(), monochromeAct_->isChecked()); }
 
 QIcon MainWindow::icon(const QString& name) const {
@@ -732,10 +779,22 @@ QIcon MainWindow::icon(const QString& name) const {
     return result;
 }
 
+void MainWindow::applyPalette() {
+    if (styleFollowsColorScheme()) return;  // стиль перекрасится сам (macOS, Windows 11)
+
+    const Qt::ColorScheme system = QGuiApplication::styleHints()->colorScheme();
+    if (themeMode_ == ThemeMode::System && system == Qt::ColorScheme::Unknown) {
+        QApplication::setPalette(QPalette());  // тема системы неизвестна — палитра платформы
+        return;
+    }
+    QApplication::setPalette(isDark() ? darkPalette() : QApplication::style()->standardPalette());
+}
+
 void MainWindow::applyTheme() {
     if (applyingTheme_ || !editor_) return;
     applyingTheme_ = true;
 
+    applyPalette();
     const bool dark = isDark();
     highlighter_->setDarkMode(dark);
     preview_->setCanvasColor(previewTheme().background);

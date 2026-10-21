@@ -33,6 +33,10 @@ public:
     void openFromSystem(const QString& path);
     // false — не сохранять сессию при закрытии (смоук-тесты, --screenshot).
     void setSessionSaving(bool enabled) { sessionSaving_ = enabled; }
+    // Тема на этот запуск: "system", "light" или "dark" (смоук-тесты, --theme).
+    bool setThemeByName(const QString& name);
+    // Область текста редактора в координатах окна (смоук-тесты проверяют её цвет).
+    QRect editorViewportRect() const;
 
 signals:
     // Схема отрисована (ok) или рендер завершился ошибкой (!ok).
@@ -83,6 +87,7 @@ private:
     bool isDark() const;
     Theme previewTheme() const;
     void applyTheme();
+    void applyPalette();
     QIcon icon(const QString& name) const;
     void updateTitle();
     void updateZoomLabel(qreal zoom);
