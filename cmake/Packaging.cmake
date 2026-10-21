@@ -21,6 +21,9 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
 set(CPACK_PACKAGE_HOMEPAGE_URL "${BIRCH_HOMEPAGE}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "Birch")
 set(CPACK_STRIP_FILES ON)
+# Значения переменных доходят до генераторов как есть (без лишнего разбора
+# кавычек и обратных слешей) — важно для команд NSIS и описания .deb.
+set(CPACK_VERBATIM_VARIABLES ON)
 
 if(APPLE)
     include(PackagingMacOS)

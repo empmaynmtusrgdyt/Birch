@@ -223,3 +223,33 @@ jobs:
         with:
           name: screenshot-windows
           path: screenshot-windows.png
+      - name: Пакеты .zip и установщик NSIS
+        run: |
+          cd build\windows
+          cpack -C Release
+      - name: Тихая установка и смоук-тест с чистым PATH
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem build\windows\Birch-*-windows-x64.exe | Select-Object -First 1
+          $p = Start-Process $installer.FullName -ArgumentList "/S", "/D=C:\BirchTest" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "установщик завершился с кодом $($p.ExitCode)" }
+          if (-not (Test-Path "Registry::HKEY_CLASSES_ROOT\.birch")) { throw "нет связи с файлами .birch" }
+
+          # Без Qt и Graphviz из окружения сборки: все DLL должны быть в пакете.
+          # Настоящая платформа windows, а не offscreen — её windeployqt и кладёт.
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM
+          $shot = Join-Path $PWD "screenshot-windows-installed.png"
+          $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                 -ArgumentList "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
+          if ($p.ExitCode -ne 0) { throw "установленный Birch.exe завершился с кодом $($p.ExitCode)" }
+          if (-not (Test-Path $shot)) { throw "нет снимка" }
+          Get-ChildItem C:\BirchTest\bin -Filter *.dll | Measure-Object -Property Length -Sum |
+            ForEach-Object { "DLL: $($_.Count) шт., $([math]::Round($_.Sum / 1MB, 1)) МБ" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-windows
+          path: |
+            build/windows/Birch-*-windows-x64.exe
+            build/windows/Birch-*-windows-x64.zip
+            screenshot-windows-installed.png
