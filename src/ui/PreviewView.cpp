@@ -117,7 +117,7 @@ void PreviewView::applyFit() {
 }
 
 void PreviewView::wheelEvent(QWheelEvent* event) {
-    // ⌘ на macOS: Qt отображает его в ControlModifier
+    // ⌘ на macOS (Qt отображает его в ControlModifier), Ctrl на Windows и Linux
     if (event->modifiers() & Qt::ControlModifier) {
         const qreal steps = event->angleDelta().y() / 120.0;
         if (!qFuzzyIsNull(steps)) {

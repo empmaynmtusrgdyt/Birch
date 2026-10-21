@@ -4,7 +4,7 @@
 # gvplugin_dot_layout и gvplugin_core.
 #
 # Порядок поиска:
-#   1. pkg-config (Homebrew);
+#   1. pkg-config (Homebrew, Debian/Ubuntu, Arch);
 #   2. обычный find_path/find_library по CMAKE_PREFIX_PATH и GRAPHVIZ_ROOT.
 #
 # Результат:
@@ -47,7 +47,7 @@ foreach(_lib IN ITEMS gvc cgraph cdt)
         HINTS ${_gv_lib_hints})
 endforeach()
 
-# Плагины лежат в lib/graphviz (Homebrew) или рядом с основными библиотеками
+# Плагины лежат в lib/graphviz (Homebrew, Linux) или рядом с основными библиотеками (Windows)
 set(_gv_plugin_hints "")
 foreach(_d IN LISTS _gv_lib_hints)
     list(APPEND _gv_plugin_hints "${_d}" "${_d}/graphviz")
@@ -59,7 +59,9 @@ endif()
 
 foreach(_plugin IN ITEMS dot_layout core)
     find_library(Graphviz_plugin_${_plugin}_LIBRARY
+        # В Debian/Ubuntu у плагинов нет неверсионных .so-ссылок
         NAMES gvplugin_${_plugin} libgvplugin_${_plugin}
+              libgvplugin_${_plugin}.so.8 libgvplugin_${_plugin}.so.6
         HINTS ${_gv_plugin_hints}
         NO_DEFAULT_PATH)
 endforeach()

@@ -8,6 +8,7 @@
 namespace {
 
 // macOS отдаёт открываемые из Finder файлы событием, а не аргументом командной строки.
+// На Windows и Linux файл приходит аргументом.
 class FileOpenFilter : public QObject {
 public:
     explicit FileOpenFilter(birch::MainWindow* window) : window_(window) {}
@@ -36,6 +37,9 @@ int main(int argc, char* argv[]) {
     QApplication::setOrganizationDomain(QStringLiteral("birch.app"));
     QApplication::setApplicationVersion(QStringLiteral(BIRCH_VERSION));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/app.svg")));
+#if defined(Q_OS_LINUX)
+    QGuiApplication::setDesktopFileName(QStringLiteral("birch"));  // связь окна с birch.desktop
+#endif
 
     QCommandLineParser cli;
     cli.setApplicationDescription(QStringLiteral("Блок-схемы из текста"));

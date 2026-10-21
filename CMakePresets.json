@@ -3,19 +3,41 @@
   "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
   "configurePresets": [
     {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
       "name": "macos",
       "displayName": "macOS (Homebrew)",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_PREFIX_PATH": "/opt/homebrew;/usr/local"
-      }
+      "inherits": "base",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Darwin" },
+      "cacheVariables": { "CMAKE_PREFIX_PATH": "/opt/homebrew;/usr/local" }
+    },
+    {
+      "name": "linux",
+      "displayName": "Linux (системные Qt и Graphviz)",
+      "inherits": "base",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "windows",
+      "displayName": "Windows (MSVC 2022; Qt и Graphviz — через CMAKE_PREFIX_PATH и GRAPHVIZ_ROOT)",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     }
   ],
   "buildPresets": [
-    { "name": "macos", "configurePreset": "macos" }
+    { "name": "macos", "configurePreset": "macos" },
+    { "name": "linux", "configurePreset": "linux" },
+    { "name": "windows", "configurePreset": "windows", "configuration": "Release" }
   ],
   "testPresets": [
-    { "name": "macos", "configurePreset": "macos", "output": { "outputOnFailure": true } }
+    { "name": "macos", "configurePreset": "macos", "output": { "outputOnFailure": true } },
+    { "name": "linux", "configurePreset": "linux", "output": { "outputOnFailure": true } },
+    { "name": "windows", "configurePreset": "windows", "configuration": "Release", "output": { "outputOnFailure": true } }
   ]
 }

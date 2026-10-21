@@ -20,9 +20,15 @@
 
 #if defined(BIRCH_GRAPHVIZ_BUILTIN_PLUGINS)
 // Плагины слинкованы напрямую: регистрируем их, без поиска config в рантайме.
+// На Windows это данные из DLL — их нужно явно импортировать.
+#if defined(_WIN32)
+#define BIRCH_GV_IMPORT __declspec(dllimport)
+#else
+#define BIRCH_GV_IMPORT
+#endif
 extern "C" {
-extern gvplugin_library_t gvplugin_dot_layout_LTX_library;
-extern gvplugin_library_t gvplugin_core_LTX_library;
+BIRCH_GV_IMPORT extern gvplugin_library_t gvplugin_dot_layout_LTX_library;
+BIRCH_GV_IMPORT extern gvplugin_library_t gvplugin_core_LTX_library;
 }
 #endif
 
@@ -36,7 +42,7 @@ std::mutex& graphvizMutex() {
     return m;
 }
 
-// Строковые параметры cgraph объявлены как char*, хотя не изменяются.
+// Строковые параметры cgraph объявлены как char*, хотя не изменяются (в 2.42 — и значения).
 char* cstr(const char* s) { return const_cast<char*>(s); }
 
 void setAttr(void* obj, const char* name, const QByteArray& value) {

@@ -4,13 +4,18 @@ namespace birch {
 
 namespace {
 
+// Первый установленный шрифт из списка. Inter — если пользователь его поставил.
 QStringList defaultFonts() {
-    return {
-        QStringLiteral("Inter"),           // если установлен пользователем
-        QStringLiteral("SF Pro Text"),     // если установлены SF-шрифты Apple
-        QStringLiteral("Helvetica Neue"),  // есть в любой macOS
-        QStringLiteral("Helvetica"),
-    };
+#if defined(Q_OS_MACOS)
+    return {QStringLiteral("Inter"), QStringLiteral("SF Pro Text"), QStringLiteral("Helvetica Neue"),
+            QStringLiteral("Helvetica")};
+#elif defined(Q_OS_WIN)
+    return {QStringLiteral("Inter"), QStringLiteral("Segoe UI Variable Text"), QStringLiteral("Segoe UI"),
+            QStringLiteral("Arial")};
+#else
+    return {QStringLiteral("Inter"), QStringLiteral("Noto Sans"), QStringLiteral("Cantarell"),
+            QStringLiteral("Ubuntu"), QStringLiteral("DejaVu Sans"), QStringLiteral("Liberation Sans")};
+#endif
 }
 
 }  // namespace
