@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: ["**"]
+    tags: ["v*"]          # тег v1.2.3 -> черновик релиза со всеми пакетами
   pull_request:
   workflow_dispatch:
 
@@ -34,10 +35,20 @@ jobs:
         run: ctest --preset macos
       - name: Смоук-тест
         run: ./build/macos/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos.png resources/examples/welcome.birch
+      - name: Пакет .dmg (с проверкой самодостаточности бандла)
+        run: cd build/macos && cpack
+      - name: Смоук-тест приложения из .dmg
+        run: |
+          hdiutil attach -nobrowse -readonly build/macos/Birch-*.dmg -mountpoint /tmp/birch-dmg
+          /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos-dmg.png resources/examples/welcome.birch
+          codesign --verify --deep --strict /tmp/birch-dmg/Birch.app
+          hdiutil detach /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
-          name: screenshot-macos
-          path: screenshot-macos.png
+          name: package-macos
+          path: |
+            build/macos/Birch-*.dmg
+            screenshot-macos-dmg.png
 
   # ---------------------------------------------------------------------------
   # .deb собирается отдельно под каждый дистрибутив: имена пакетов библиотек
@@ -261,3 +272,34 @@ jobs:
             build/windows/Birch-*-windows-x64.exe
             build/windows/Birch-*-windows-x64.zip
             screenshot-windows-installed.png
+
+  # ---------------------------------------------------------------------------
+  # Тег v* -> черновик релиза. Публикуется вручную после проверки описания.
+  release:
+    name: Черновик релиза
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [macos, deb-install, arch, appimage, windows]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: artifacts
+      - name: Собрать файлы релиза
+        run: |
+          mkdir release
+          find artifacts -type f \( -name '*.dmg' -o -name '*.deb' -o -name '*.pkg.tar.zst' \
+               -o -name '*.AppImage' -o -name 'Birch-*-windows-x64.exe' -o -name 'Birch-*-windows-x64.zip' \) \
+               -exec cp {} release/ \;
+          ls -la release
+          cd release && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - name: Создать черновик релиза
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/* \
+            --repo "$GITHUB_REPOSITORY" --draft \
+            --title "Birch ${GITHUB_REF_NAME#v}" \
+            --notes "Черновик: описание будет добавлено перед публикацией."
