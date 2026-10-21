@@ -1,0 +1,29 @@
+# Пакет Birch для Arch Linux (подходит и для AUR).
+#
+#   makepkg -si        # собрать из исходников релиза и установить
+#
+# pkgver обновляется при каждом релизе; CI подставляет текущую версию сам.
+
+pkgname=birch
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="Блок-схемы из текста (Qt 6 + Graphviz)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/empmaynmtusrgdyt/Birch"
+license=('LicenseRef-unknown')
+depends=('qt6-base' 'qt6-svg' 'graphviz' 'hicolor-icon-theme')
+makedepends=('cmake')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+    cmake -S "Birch-$pkgver" -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DBIRCH_BUILD_TESTS=OFF
+    cmake --build build
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+}

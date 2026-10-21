@@ -171,9 +171,7 @@ endif()
 # ---------------------------------------------------------------------------
 # Установка и пакеты: cmake --install / cpack
 # ---------------------------------------------------------------------------
-if(APPLE)
-    include(Packaging)
-endif()
+include(Packaging)
 
 message(STATUS "Birch ${PROJECT_VERSION}: Qt ${Qt6_VERSION}, Graphviz ${Graphviz_VERSION}, "
                "builtin plugins: ${BIRCH_GRAPHVIZ_BUILTIN}")

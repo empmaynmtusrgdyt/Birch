@@ -52,7 +52,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            build-essential cmake pkg-config git ca-certificates \
+            build-essential cmake pkg-config git ca-certificates dpkg-dev file \
             qt6-base-dev qt6-svg-dev qt6-qpa-plugins libgl-dev \
             libgraphviz-dev graphviz fonts-noto-core
       - uses: actions/checkout@v4
@@ -68,6 +68,42 @@ jobs:
         with:
           name: screenshot-debian
           path: screenshot-debian.png
+      - name: Пакеты .deb и .tar.gz
+        run: cd build/linux && cpack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-deb
+          path: |
+            build/linux/*.deb
+            build/linux/*.tar.gz
+
+  # Пакет ставится в чистую систему через apt: проверка зависимостей .deb
+  deb-install:
+    name: Установка .deb (${{ matrix.image }})
+    needs: debian
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["debian:trixie", "ubuntu:26.04"]
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: package-deb
+      - name: apt install ./birch_*.deb
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ./birch_*.deb fonts-noto-core
+      - name: Смоук-тест установленного пакета
+        run: |
+          printf '(Старт) -> {Ок?} -> [Шаг] "Да" -> (Конец)\n' > test.birch
+          birch --screenshot screenshot.png test.birch
+          test -f /usr/share/applications/birch.desktop
+          test -f /usr/share/mime/packages/birch.xml
 
   # ---------------------------------------------------------------------------
   arch:
@@ -92,6 +128,58 @@ jobs:
         with:
           name: screenshot-arch
           path: screenshot-arch.png
+      - name: Пакет (makepkg из PKGBUILD)
+        run: |
+          ver=$(sed -n 's/^ *VERSION \([0-9.]*\)$/\1/p' CMakeLists.txt | head -1)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p /tmp/pkg
+          # Тот же архив, что GitHub отдаёт для тега: makepkg возьмёт его вместо скачивания
+          git archive --prefix="Birch-$ver/" -o "/tmp/pkg/birch-$ver.tar.gz" HEAD
+          sed "s/^pkgver=.*/pkgver=$ver/" packaging/arch/PKGBUILD > /tmp/pkg/PKGBUILD
+          useradd -m builder
+          chown -R builder /tmp/pkg
+          su builder -c "cd /tmp/pkg && makepkg --noconfirm"
+          cp /tmp/pkg/birch-*.pkg.tar.zst .
+      - name: Установка пакета и смоук-тест
+        run: |
+          pacman -U --noconfirm ./birch-*.pkg.tar.zst
+          birch --screenshot screenshot-arch-pkg.png resources/examples/welcome.birch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-arch
+          path: birch-*.pkg.tar.zst
+
+  # ---------------------------------------------------------------------------
+  appimage:
+    name: AppImage
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: true
+      - name: Зависимости (apt)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgraphviz-dev libgl1-mesa-dev libxkbcommon-dev libxkbcommon-x11-0 \
+            libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 \
+            libfuse2 file xvfb fonts-noto-core
+      - name: Сборка AppImage
+        run: ./packaging/linux/build-appimage.sh
+      - name: Смоук-тест AppImage (X11 через Xvfb)
+        run: |
+          app=$(ls build/appimage/Birch*.AppImage)
+          APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$app" --screenshot screenshot-appimage.png resources/examples/welcome.birch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-appimage
+          path: |
+            build/appimage/Birch*.AppImage
+            screenshot-appimage.png
 
   # ---------------------------------------------------------------------------
   windows:

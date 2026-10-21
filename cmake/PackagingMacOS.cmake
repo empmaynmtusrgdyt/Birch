@@ -1,4 +1,4 @@
-# Установка (cmake --install) и сборка .dmg (cpack).
+# macOS: установка Birch.app и .dmg (cpack).
 #
 # При установке macdeployqt кладёт Qt и все библиотеки (включая Graphviz) внутрь
 # Birch.app, затем packaging/macos/prune-bundle.cmake убирает лишнее, докопирует
@@ -55,14 +55,6 @@ endif()
 # ---------------------------------------------------------------------------
 # CPack: .dmg с Birch.app и ярлыком на «Программы»
 # ---------------------------------------------------------------------------
-string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" _birch_arch)
 set(CPACK_GENERATOR "DragNDrop")
-set(CPACK_PACKAGE_NAME "Birch")
-set(CPACK_PACKAGE_VENDOR "Birch")
-set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
-set(CPACK_PACKAGE_FILE_NAME "Birch-${PROJECT_VERSION}-macos-${_birch_arch}")
+set(CPACK_PACKAGE_FILE_NAME "Birch-${PROJECT_VERSION}-macos-${BIRCH_ARCH}")
 set(CPACK_DMG_VOLUME_NAME "Birch")
-set(CPACK_STRIP_FILES ON)
-
-include(CPack)

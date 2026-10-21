@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=Birch
+GenericName=Flowchart Editor
+GenericName[ru]=Редактор блок-схем
+Comment=Create flowcharts from text
+Comment[ru]=Блок-схемы из текста
+Exec=birch %f
+Icon=birch
+Terminal=false
+Categories=Graphics;Office;Qt;
+Keywords=flowchart;diagram;graphviz;блок-схема;диаграмма;
+MimeType=text/x-birch;
+StartupWMClass=birch
