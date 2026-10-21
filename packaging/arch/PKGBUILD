@@ -13,6 +13,7 @@ url="https://github.com/empmaynmtusrgdyt/Birch"
 license=('LicenseRef-unknown')
 depends=('qt6-base' 'qt6-svg' 'graphviz' 'hicolor-icon-theme')
 makedepends=('cmake')
+options=('!debug')  # без отдельного пакета birch-debug
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')
 
