@@ -10,7 +10,7 @@ pkgrel=1
 pkgdesc="Блок-схемы из текста (Qt 6 + Graphviz)"
 arch=('x86_64' 'aarch64')
 url="https://github.com/empmaynmtusrgdyt/Birch"
-license=('LicenseRef-unknown')
+license=('GPL-3.0-only')
 depends=('qt6-base' 'qt6-svg' 'graphviz' 'hicolor-icon-theme')
 makedepends=('cmake')
 options=('!debug')  # без отдельного пакета birch-debug
@@ -27,4 +27,5 @@ build() {
 
 package() {
     DESTDIR="$pkgdir" cmake --install build
+    install -Dm644 "Birch-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

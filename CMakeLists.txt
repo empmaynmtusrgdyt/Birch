@@ -136,8 +136,9 @@ birch_set_warnings(Birch)
 if(APPLE)
     # Бандл: иконка, Info.plist (в т.ч. тип файлов .birch)
     set(BIRCH_ICNS "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/app.icns")
-    set_source_files_properties("${BIRCH_ICNS}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(Birch PRIVATE "${BIRCH_ICNS}")
+    set(BIRCH_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+    set_source_files_properties("${BIRCH_ICNS}" "${BIRCH_LICENSE}" PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(Birch PRIVATE "${BIRCH_ICNS}" "${BIRCH_LICENSE}")
     set_target_properties(Birch PROPERTIES
         OUTPUT_NAME                        "Birch"
         MACOSX_BUNDLE_INFO_PLIST           "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/Info.plist.in"

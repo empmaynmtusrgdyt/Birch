@@ -218,3 +218,9 @@ Birch/
 | После смены параметров CMake ничего не меняется | Значения опций кэшируются: передайте их явно или удалите папку `build/<пресет>`. |
 
 Иконки приложения (`packaging/macos/app.icns`, `packaging/windows/app.ico`) генерируются из `resources/icons/app.svg` скриптом `packaging/generate-icons.sh`.
+
+## Лицензия
+
+Birch распространяется по лицензии [GNU General Public License v3.0](LICENSE). Текст лицензии входит во все пакеты.
+
+Birch использует [Qt](https://www.qt.io) (LGPL v3) и [Graphviz](https://graphviz.org) (Eclipse Public License 1.0); в готовые пакеты для macOS, Windows и AppImage их библиотеки входят в составе приложения.

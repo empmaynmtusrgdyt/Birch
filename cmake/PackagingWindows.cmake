@@ -8,6 +8,7 @@
 option(BIRCH_DEPLOY_QT "При установке копировать Qt и другие библиотеки рядом с Birch.exe" ON)
 
 install(TARGETS Birch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES LICENSE DESTINATION . RENAME LICENSE.txt)
 
 if(BIRCH_DEPLOY_QT)
     qt_generate_deploy_app_script(
@@ -52,6 +53,7 @@ set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\Birch.exe")
 set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
 set(CPACK_NSIS_MUI_FINISHPAGE_RUN "Birch.exe")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")  # страница лицензии в установщике
 
 # Файлы .birch открываются в Birch двойным щелчком
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS [=[

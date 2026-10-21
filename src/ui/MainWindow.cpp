@@ -800,7 +800,9 @@ void MainWindow::showAbout() {
     QMessageBox::about(this, tr("О программе Birch"),
                        tr("<h3>Birch %1</h3>"
                           "<p>Блок-схемы из текста — без ИИ, полностью офлайн.</p>"
-                          "<p>Graphviz %2 · Qt %3</p>")
+                          "<p>Graphviz %2 · Qt %3</p>"
+                          "<p>Распространяется по лицензии "
+                          "<a href=\"https://www.gnu.org/licenses/gpl-3.0.html\">GNU GPL v3</a>.</p>")
                            .arg(QApplication::applicationVersion(), Renderer::graphvizVersion(),
                                 QString::fromLatin1(qVersion())));
 }
