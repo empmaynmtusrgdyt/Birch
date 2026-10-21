@@ -99,6 +99,11 @@ if(Graphviz_FOUND)
     _gv_add_target(cgraph Graphviz_cgraph_LIBRARY)
     _gv_add_target(gvc    Graphviz_gvc_LIBRARY)
     set_property(TARGET Graphviz::cgraph APPEND PROPERTY INTERFACE_LINK_LIBRARIES Graphviz::cdt)
+    if(WIN32)
+        # Graphviz на Windows — DLL: с GVDLL заголовки помечают данные
+        # (Agdirected и т.п.) как __declspec(dllimport), иначе ошибка линковки.
+        set_property(TARGET Graphviz::cdt APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS GVDLL)
+    endif()
     set_property(TARGET Graphviz::gvc    APPEND PROPERTY INTERFACE_LINK_LIBRARIES Graphviz::cgraph Graphviz::cdt)
 
     if(Graphviz_PLUGINS_FOUND)

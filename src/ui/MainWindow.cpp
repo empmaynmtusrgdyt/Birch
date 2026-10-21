@@ -572,8 +572,8 @@ bool MainWindow::saveAs() {
 
 bool MainWindow::writeFile(const QString& path) {
     QSaveFile f(path);
-    const QByteArray data = editor_->toPlainText().toUtf8();
-    if (!f.open(QIODevice::WriteOnly) || f.write(data) != data.size() || !f.commit()) {
+    const QByteArray bytes = editor_->toPlainText().toUtf8();
+    if (!f.open(QIODevice::WriteOnly) || f.write(bytes) != bytes.size() || !f.commit()) {
         QMessageBox::warning(this, tr("Не удалось сохранить"), tr("%1\n\n%2").arg(path, f.errorString()));
         return false;
     }
