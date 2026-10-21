@@ -372,12 +372,14 @@ void MainWindow::onRendered(const RenderResult& result, qint64 elapsedMs) {
     if (!result.ok()) {
         renderError_->setText(result.error);
         renderError_->show();
+        emit previewRendered(false, result.error);
         return;  // старая картинка остаётся на месте
     }
     renderError_->hide();
     preview_->setSvg(result.svg);
 
     statusInfo_->setText(tr("Узлов: %1 · связей: %2 · %3 мс").arg(pendingNodes_).arg(pendingEdges_).arg(elapsedMs));
+    emit previewRendered(true, {});
 }
 
 void MainWindow::showProblems(const QList<Diagnostic>& diagnostics) {
@@ -676,7 +678,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         event->ignore();
         return;
     }
-    saveSession();
+    if (sessionSaving_) saveSession();
     event->accept();
 }
 

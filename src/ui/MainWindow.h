@@ -31,6 +31,12 @@ public:
     bool openFile(const QString& path);
     // Открытие по запросу системы (двойной щелчок в Finder и т.п.): спрашивает про несохранённое.
     void openFromSystem(const QString& path);
+    // false — не сохранять сессию при закрытии (смоук-тесты, --screenshot).
+    void setSessionSaving(bool enabled) { sessionSaving_ = enabled; }
+
+signals:
+    // Схема отрисована (ok) или рендер завершился ошибкой (!ok).
+    void previewRendered(bool ok, const QString& error);
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -130,6 +136,7 @@ private:
     ThemeMode themeMode_ = ThemeMode::System;
     ExportTheme exportTheme_ = ExportTheme::AsPreview;
     bool applyingTheme_ = false;
+    bool sessionSaving_ = true;
 };
 
 }  // namespace birch

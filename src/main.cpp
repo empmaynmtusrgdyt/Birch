@@ -2,6 +2,9 @@
 #include <QCommandLineParser>
 #include <QFileOpenEvent>
 #include <QIcon>
+#include <QTimer>
+
+#include <cstdio>
 
 #include "ui/MainWindow.h"
 
@@ -46,11 +49,40 @@ int main(int argc, char* argv[]) {
     cli.addHelpOption();
     cli.addVersionOption();
     cli.addPositionalArgument(QStringLiteral("file"), QStringLiteral("Файл .birch для открытия"));
+    // Смоук-тест для CI: дождаться первой отрисовки, сохранить снимок окна и выйти.
+    QCommandLineOption screenshotOption(QStringLiteral("screenshot"),
+                                        QStringLiteral("Сохранить снимок окна после отрисовки и выйти."),
+                                        QStringLiteral("file.png"));
+    screenshotOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    cli.addOption(screenshotOption);
     cli.process(app);
 
     birch::MainWindow window;
     FileOpenFilter fileOpenFilter(&window);
     app.installEventFilter(&fileOpenFilter);
+
+    const QString screenshot = cli.value(screenshotOption);
+    if (!screenshot.isEmpty()) {
+        window.setSessionSaving(false);
+        QObject::connect(&window, &birch::MainWindow::previewRendered, &app,
+                         [&](bool ok, const QString& error) {
+                             if (!ok) {
+                                 std::fprintf(stderr, "render error: %s\n", qPrintable(error));
+                                 QCoreApplication::exit(1);
+                                 return;
+                             }
+                             // Даём окну один цикл отрисоваться, затем снимаем его.
+                             QTimer::singleShot(500, &window, [&] {
+                                 const bool saved = window.grab().save(screenshot);
+                                 std::printf("screenshot %s: %s\n", saved ? "saved" : "FAILED", qPrintable(screenshot));
+                                 QCoreApplication::exit(saved ? 0 : 1);
+                             });
+                         });
+        QTimer::singleShot(30000, &app, [] {
+            std::fprintf(stderr, "screenshot: timeout, no render\n");
+            QCoreApplication::exit(2);
+        });
+    }
 
     if (!cli.positionalArguments().isEmpty()) window.openFile(cli.positionalArguments().constFirst());
     window.show();
