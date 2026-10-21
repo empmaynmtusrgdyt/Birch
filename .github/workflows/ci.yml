@@ -40,10 +40,18 @@ jobs:
           path: screenshot-macos.png
 
   # ---------------------------------------------------------------------------
-  debian:
-    name: Debian 13
+  # .deb собирается отдельно под каждый дистрибутив: имена пакетов библиотек
+  # различаются (например, Graphviz в Ubuntu 26.04 — не libgvc6, как в Debian 13).
+  deb:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
-    container: debian:trixie
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "Debian 13",    image: "debian:trixie", tag: "debian13" }
+          - { name: "Ubuntu 26.04", image: "ubuntu:26.04",  tag: "ubuntu26.04" }
     env:
       DEBIAN_FRONTEND: noninteractive
       QT_QPA_PLATFORM: offscreen
@@ -54,7 +62,7 @@ jobs:
           apt-get install -y --no-install-recommends \
             build-essential cmake pkg-config git ca-certificates dpkg-dev file \
             qt6-base-dev qt6-svg-dev qt6-qpa-plugins libgl-dev \
-            libgraphviz-dev graphviz fonts-noto-core
+            libgraphviz-dev graphviz fonts-dejavu-core
       - uses: actions/checkout@v4
       - name: Сборка
         run: |
@@ -63,41 +71,41 @@ jobs:
       - name: Тесты
         run: ctest --preset linux
       - name: Смоук-тест
-        run: ./build/linux/birch --screenshot screenshot-debian.png resources/examples/welcome.birch
+        run: ./build/linux/birch --screenshot screenshot-${{ matrix.tag }}.png resources/examples/welcome.birch
+      - name: Пакет .deb
+        run: |
+          cd build/linux && cpack -G DEB
+          mv birch_*_amd64.deb "$(basename birch_*_amd64.deb .deb)_${{ matrix.tag }}.deb"
       - uses: actions/upload-artifact@v4
         with:
-          name: screenshot-debian
-          path: screenshot-debian.png
-      - name: Пакеты .deb и .tar.gz
-        run: cd build/linux && cpack
-      - uses: actions/upload-artifact@v4
-        with:
-          name: package-deb
+          name: package-deb-${{ matrix.tag }}
           path: |
             build/linux/*.deb
-            build/linux/*.tar.gz
+            screenshot-${{ matrix.tag }}.png
 
-  # Пакет ставится в чистую систему через apt: проверка зависимостей .deb
+  # Пакет ставится в чистую систему того же дистрибутива: проверка зависимостей
   deb-install:
-    name: Установка .deb (${{ matrix.image }})
-    needs: debian
+    name: Установка .deb (${{ matrix.name }})
+    needs: deb
     runs-on: ubuntu-24.04
     container: ${{ matrix.image }}
     strategy:
       fail-fast: false
       matrix:
-        image: ["debian:trixie", "ubuntu:26.04"]
+        include:
+          - { name: "Debian 13",    image: "debian:trixie", tag: "debian13" }
+          - { name: "Ubuntu 26.04", image: "ubuntu:26.04",  tag: "ubuntu26.04" }
     env:
       DEBIAN_FRONTEND: noninteractive
       QT_QPA_PLATFORM: offscreen
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: package-deb
+          name: package-deb-${{ matrix.tag }}
       - name: apt install ./birch_*.deb
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends ./birch_*.deb fonts-noto-core
+          apt-get install -y --no-install-recommends ./build/linux/birch_*.deb fonts-dejavu-core
       - name: Смоук-тест установленного пакета
         run: |
           printf '(Старт) -> {Ок?} -> [Шаг] "Да" -> (Конец)\n' > test.birch
