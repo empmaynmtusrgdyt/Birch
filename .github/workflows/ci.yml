@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QT_VERSION: "6.8.3"          # LTS; для Windows и AppImage
+  GRAPHVIZ_WIN_VERSION: "16.1.0"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  macos:
+    name: macOS
+    runs-on: macos-15
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Зависимости (Homebrew)
+        run: brew install qt graphviz
+      - name: Сборка
+        run: |
+          cmake --preset macos
+          cmake --build --preset macos -j
+      - name: Тесты
+        run: ctest --preset macos
+      - name: Смоук-тест
+        run: ./build/macos/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos.png resources/examples/welcome.birch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-macos
+          path: screenshot-macos.png
+
+  # ---------------------------------------------------------------------------
+  debian:
+    name: Debian 13
+    runs-on: ubuntu-24.04
+    container: debian:trixie
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Зависимости (apt)
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential cmake pkg-config git ca-certificates \
+            qt6-base-dev qt6-svg-dev qt6-qpa-plugins libgl-dev \
+            libgraphviz-dev graphviz fonts-noto-core
+      - uses: actions/checkout@v4
+      - name: Сборка
+        run: |
+          cmake --preset linux
+          cmake --build --preset linux -j
+      - name: Тесты
+        run: ctest --preset linux
+      - name: Смоук-тест
+        run: ./build/linux/birch --screenshot screenshot-debian.png resources/examples/welcome.birch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-debian
+          path: screenshot-debian.png
+
+  # ---------------------------------------------------------------------------
+  arch:
+    name: Arch Linux
+    runs-on: ubuntu-24.04
+    container: archlinux:latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Зависимости (pacman)
+        run: pacman -Syu --noconfirm --needed base-devel git cmake qt6-base qt6-svg graphviz noto-fonts
+      - uses: actions/checkout@v4
+      - name: Сборка
+        run: |
+          cmake --preset linux
+          cmake --build --preset linux -j
+      - name: Тесты
+        run: ctest --preset linux
+      - name: Смоук-тест
+        run: ./build/linux/birch --screenshot screenshot-arch.png resources/examples/welcome.birch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-arch
+          path: screenshot-arch.png
+
+  # ---------------------------------------------------------------------------
+  windows:
+    name: Windows
+    runs-on: windows-2022
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - name: Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+      - name: Graphviz (официальная сборка MSVC)
+        shell: pwsh
+        run: |
+          $v = $env:GRAPHVIZ_WIN_VERSION
+          $url = "https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/$v/windows_10_cmake_Release_Graphviz-$v-win64.zip"
+          Invoke-WebRequest $url -OutFile "$env:RUNNER_TEMP\graphviz.zip"
+          Expand-Archive "$env:RUNNER_TEMP\graphviz.zip" -DestinationPath "$env:RUNNER_TEMP"
+          $root = "$env:RUNNER_TEMP\Graphviz-$v-win64"
+          "GRAPHVIZ_ROOT=$root" >> $env:GITHUB_ENV
+          "$root\bin" >> $env:GITHUB_PATH
+      - name: Сборка
+        run: |
+          cmake --preset windows -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+          cmake --build --preset windows
+      - name: Тесты
+        run: ctest --preset windows
+      - name: Смоук-тест
+        shell: pwsh
+        run: |
+          # Birch.exe — GUI-приложение: ждём его завершения явно
+          $p = Start-Process build\windows\Release\Birch.exe -Wait -PassThru `
+                 -ArgumentList "--screenshot", "screenshot-windows.png", "resources\examples\welcome.birch"
+          if ($p.ExitCode -ne 0) { throw "Birch.exe завершился с кодом $($p.ExitCode)" }
+          if (-not (Test-Path screenshot-windows.png)) { throw "нет снимка" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-windows
+          path: screenshot-windows.png
