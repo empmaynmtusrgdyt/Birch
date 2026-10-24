@@ -30,9 +30,9 @@ private slots:
     // --- корректный ввод ---------------------------------------------------
 
     void exampleFromSpec() {
-        const auto r = parse(QStringLiteral("[Старт] -> [Проверка_условия];\n"
-                                            "[Проверка_условия] -> [Успех] \"Да\";\n"
-                                            "[Проверка_условия] -> [Ошибка] \"Нет\";\n"));
+        const auto r = parse(QStringLiteral("[Старт] -> [Проверка условия];\n"
+                                            "[Проверка условия] -> [Успех] \"Да\";\n"
+                                            "[Проверка условия] -> [Ошибка] \"Нет\";\n"));
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(nodeLabels(r.diagram),
                  (QStringList{"Старт", "Проверка условия", "Успех", "Ошибка"}));
@@ -92,9 +92,17 @@ private slots:
     }
 
     void sameTextIsSameNode() {
-        const auto r = parse("[Проверка_условия] -> [A]\n[Проверка   условия] -> [B]");
+        const auto r = parse("[Проверка условия] -> [A]\n[Проверка   условия] -> [B]");
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(r.diagram.nodes.size(), 3);
+    }
+
+    // Подчёркивание — обычный символ, а не замена пробела
+    void underscoreIsLiteral() {
+        const auto r = parse("[snake_case] -> {is_valid?} \"x_y\" -> [snake case]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"snake_case", "is_valid?", "snake case"}));
+        QCOMPARE(r.diagram.edges[0].label, QStringLiteral("x_y"));
     }
 
     void newlineTerminatesWithoutSemicolon() {

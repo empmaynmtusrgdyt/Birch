@@ -649,6 +649,23 @@ void MainWindow::updateTitle() {
     setWindowModified(!filePath_.isEmpty() && editor_->document()->isModified());
 }
 
+namespace {
+// До версии 0.3.3 включительно «_» в тексте узла означал пробел, и стартовый пример был
+// записан через подчёркивания. Нетронутый старый пример из прошлого сеанса
+// заменяем новым, иначе в нём появятся «Ввод_данных» и «Показать_ошибку».
+bool isOldWelcomeExample(const QString& text) {
+    static const QString old = QStringLiteral(
+        "// Добро пожаловать в Birch!\n"
+        "// [Процесс]   {Условие?}   (Старт/Конец)   подпись стрелки — в кавычках после узла\n"
+        "\n"
+        "(Старт) -> [Ввод_данных] -> {Данные корректны?};\n"
+        "{Данные корректны?} -> [Сохранить] \"Да\" -> (Конец);\n"
+        "{Данные корректны?} -> [Показать_ошибку] \"Нет\"\n"
+        "    -> [Ввод_данных];");
+    return text.trimmed() == old;
+}
+}  // namespace
+
 void MainWindow::restoreSession() {
     QSettings s;
     restoreGeometry(s.value(keys::geometry).toByteArray());
@@ -678,7 +695,7 @@ void MainWindow::restoreSession() {
             return;
         }
     }
-    if (s.contains(keys::sessionText)) {
+    if (s.contains(keys::sessionText) && !isOldWelcomeExample(s.value(keys::sessionText).toString())) {
         editor_->setPlainText(s.value(keys::sessionText).toString());
     } else {
         editor_->setPlainText(readResourceText(QStringLiteral(":/examples/welcome.birch")));
@@ -847,7 +864,6 @@ void MainWindow::showSyntaxHelp() {
                    "<tr><td><code>[A] -&gt; [B] \"Да\"</code></td><td>подпись стрелки</td></tr>"
                    "<tr><td><code>;</code> или Enter</td><td>конец инструкции</td></tr>"
                    "<tr><td><code>// …</code> или <code># …</code></td><td>комментарий</td></tr>"
-                   "<tr><td><code>_</code></td><td>пробел в тексте узла; <code>\\_</code> — само подчёркивание</td></tr>"
                    "<tr><td><code>\\n</code></td><td>перенос строки в тексте</td></tr>"
                    "</table>"
                    "<p>Одинаковый текст — один и тот же узел. Если узел хоть раз записан как "

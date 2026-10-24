@@ -143,7 +143,7 @@ private:
     // Читает содержимое до закрывающего символа, обрабатывая '\'-экранирование.
     // Возвращает false, если строка кончилась раньше или встретилась ещё одна
     // открывающая скобка того же вида ([A -> [B] — почти наверняка опечатка).
-    bool readUntil(QChar close, bool underscoreToSpace, QString& out) {
+    bool readUntil(QChar close, QString& out) {
         const QChar open = src_[pos_];
         ++pos_;
         while (!atEnd()) {
@@ -157,7 +157,7 @@ private:
             }
             ++pos_;
             if (c == close) return true;
-            out += (underscoreToSpace && c == u'_') ? QChar(u' ') : c;
+            out += c;
         }
         return false;
     }
@@ -166,7 +166,7 @@ private:
         const int start = pos_;
         const QChar open = src_[start];
         QString raw;
-        if (!readUntil(close, /*underscoreToSpace=*/true, raw))
+        if (!readUntil(close, raw))
             return invalid(start, QStringLiteral("Не закрыта скобка «%1» — ожидалась «%2» до конца строки")
                                       .arg(open)
                                       .arg(close));
@@ -187,7 +187,7 @@ private:
     Token quoted(QChar close) {
         const int start = pos_;
         QString raw;
-        if (!readUntil(close, /*underscoreToSpace=*/false, raw))
+        if (!readUntil(close, raw))
             return invalid(start, QStringLiteral("Не закрыта кавычка — ожидалась «%1» до конца строки").arg(close));
         if (raw.size() > Parser::kMaxLabelLength)
             return invalid(start, QStringLiteral("Слишком длинная подпись (больше %1 символов)")
