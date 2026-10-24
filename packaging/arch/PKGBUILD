@@ -5,7 +5,7 @@
 # pkgver обновляется при каждом релизе; CI подставляет текущую версию сам.
 
 pkgname=birch
-pkgver=0.3.3
+pkgver=0.4.0
 pkgrel=1
 pkgdesc="Блок-схемы из текста (Qt 6 + Graphviz)"
 arch=('x86_64' 'aarch64')
