@@ -770,6 +770,8 @@ bool MainWindow::setThemeByName(const QString& name) {
     return true;
 }
 
+void MainWindow::setMonochrome(bool on) { monochromeAct_->setChecked(on); }
+
 QRect MainWindow::editorViewportRect() const {
     const QWidget* vp = editor_->viewport();
     return QRect(vp->mapTo(this, QPoint(0, 0)), vp->size());

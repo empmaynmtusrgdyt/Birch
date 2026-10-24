@@ -68,6 +68,10 @@ int main(int argc, char* argv[]) {
                                    QStringLiteral("name"));
     themeOption.setFlags(QCommandLineOption::HiddenFromHelp);
     cli.addOption(themeOption);
+    QCommandLineOption monochromeOption(QStringLiteral("monochrome"),
+                                        QStringLiteral("Чёрно-белая схема на этот запуск."));
+    monochromeOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    cli.addOption(monochromeOption);
     cli.process(app);
 
     birch::MainWindow window;
@@ -78,6 +82,7 @@ int main(int argc, char* argv[]) {
         std::fprintf(stderr, "unknown theme: %s\n", qPrintable(cli.value(themeOption)));
         return 3;
     }
+    if (cli.isSet(monochromeOption)) window.setMonochrome(true);
 
     const QString screenshot = cli.value(screenshotOption);
     if (!screenshot.isEmpty()) {

@@ -35,6 +35,8 @@ public:
     void setSessionSaving(bool enabled) { sessionSaving_ = enabled; }
     // Тема на этот запуск: "system", "light" или "dark" (смоук-тесты, --theme).
     bool setThemeByName(const QString& name);
+    // Чёрно-белая схема на этот запуск (снимки для README, --monochrome).
+    void setMonochrome(bool on);
     // Область текста редактора в координатах окна (смоук-тесты проверяют её цвет).
     QRect editorViewportRect() const;
 
