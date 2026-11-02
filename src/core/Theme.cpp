@@ -38,6 +38,7 @@ Theme Theme::light() {
     t.process = {QColor(0xE8F0FE), QColor(0x7BA7F2), QColor(0x1E293B)};   // голубой
     t.decision = {QColor(0xFEF3C7), QColor(0xF0B429), QColor(0x3D2C00)};  // янтарный
     t.terminal = {QColor(0xD8F5E6), QColor(0x34B37A), QColor(0x0B3B2A)};  // мятный
+    t.group = {QColor(0xF1F4F8), QColor(0xC9D1DD), QColor(0x526075)};     // приглушённый серо-голубой
     t.fontFamilies = defaultFonts();
     return t;
 }
@@ -55,6 +56,7 @@ Theme Theme::monochrome(bool dark) {
     t.process = node;
     t.decision = node;
     t.terminal = node;
+    t.group = node;
     t.fontFamilies = defaultFonts();
     return t;
 }
@@ -73,6 +75,7 @@ Theme Theme::dark() {
     t.process = {QColor(0x1F3355), QColor(0x5B8DEF), QColor(0xE6EEFF)};
     t.decision = {QColor(0x46350F), QColor(0xE0A82E), QColor(0xFFF3D6)};
     t.terminal = {QColor(0x123C2C), QColor(0x3FBF88), QColor(0xD6F7E8)};
+    t.group = {QColor(0x24262C), QColor(0x3E4350), QColor(0xA9B3C4)};
     t.fontFamilies = defaultFonts();
     return t;
 }

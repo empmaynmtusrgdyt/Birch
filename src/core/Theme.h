@@ -23,6 +23,7 @@ struct Theme {
     NodeStyle process;
     NodeStyle decision;
     NodeStyle terminal;
+    NodeStyle group;  // рамка: фон, обводка и заголовок
 
     // Первый установленный в системе шрифт из списка используется и для
     // измерения текста, и для отрисовки, поэтому текст всегда помещается в узел.

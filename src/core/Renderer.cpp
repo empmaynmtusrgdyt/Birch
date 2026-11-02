@@ -191,6 +191,21 @@ void applyGraphStyle(Agraph_t* g, const RenderOptions& opt, const QByteArray& fo
     agattr(g, AGEDGE, cstr("label"), cstr(""));
 }
 
+// Рамка — кластер Graphviz: он держит свои блоки вместе и рисует вокруг них
+// скруглённую рамку с заголовком в левом верхнем углу.
+void applyGroupStyle(Agraph_t* sg, const Group& group, const Theme& theme) {
+    setAttr(sg, "label", escapeLabel(group.name));
+    setAttr(sg, "labeljust", "l");
+    setAttr(sg, "labelloc", "t");
+    setAttr(sg, "style", "rounded,filled");
+    setAttr(sg, "fillcolor", color(theme.group.fill));
+    setAttr(sg, "color", color(theme.group.stroke));
+    setAttr(sg, "fontcolor", color(theme.group.text));
+    setAttr(sg, "fontsize", number(theme.edgeFontSize));
+    setAttr(sg, "penwidth", "1.2");
+    setAttr(sg, "margin", "14");  // pt: воздух между рамкой и блоками
+}
+
 void applyNodeStyle(Agnode_t* n, const Node& node, const Theme& theme) {
     const NodeStyle& s = theme.style(node.shape);
     setAttr(n, "label", escapeLabel(node.label));
@@ -303,13 +318,25 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
         }
         applyGraphStyle(g.get(), options, font);
 
+        // Рамки — кластеры cluster_0, cluster_1… Рамку без блоков не создаём:
+        // Graphviz нарисовал бы пустой прямоугольник.
+        QList<Agraph_t*> clusters(diagram.groups.size(), nullptr);
+        for (const Node& node : diagram.nodes) {
+            if (node.group < 0 || node.group >= clusters.size() || clusters[node.group]) continue;
+            const QByteArray name = "cluster_" + QByteArray::number(node.group);
+            clusters[node.group] = agsubg(g.get(), cstr(name.constData()), 1);
+            applyGroupStyle(clusters[node.group], diagram.groups[node.group], options.theme);
+        }
+
         // Имена узлов — n0, n1…: текст может быть любым, а имя в cgraph — ключ.
         QHash<QString, Agnode_t*> nodes;
         nodes.reserve(diagram.nodes.size());
         for (qsizetype i = 0; i < diagram.nodes.size(); ++i) {
             const Node& node = diagram.nodes[i];
             const QByteArray name = "n" + QByteArray::number(i);
-            Agnode_t* n = agnode(g.get(), cstr(name.constData()), 1);
+            // Узел, созданный в кластере, попадает и в основной граф.
+            Agraph_t* owner = node.group >= 0 && node.group < clusters.size() ? clusters[node.group] : g.get();
+            Agnode_t* n = agnode(owner, cstr(name.constData()), 1);
             applyNodeStyle(n, node, options.theme);
             nodes.insert(node.id, n);
         }

@@ -142,6 +142,20 @@ private slots:
         QVERIFY(r.svg.contains("a&lt;b"));
     }
 
+    void framesBecomeClusters() {
+        Renderer renderer;
+        const auto r = renderer.render(parseOk("=Авторизация=\n[Ввод] -> {Проверка}\n"
+                                               "=Загрузка=\n[Профиль] -> {Проверка}\n"
+                                               "=Пустая=\n==\n[Выход]"));
+        QVERIFY2(r.ok(), qPrintable(r.error));
+        const QString svg = QString::fromUtf8(r.svg);
+        QCOMPARE(svg.count(QStringLiteral("class=\"cluster\"")), 2);  // пустая рамка не рисуется
+        QVERIFY(svg.contains(QStringLiteral(">Авторизация<")));
+        QVERIFY(svg.contains(QStringLiteral(">Загрузка<")));
+        QVERIFY(!svg.contains(QStringLiteral(">Пустая<")));
+        QCOMPARE(svg.count(QStringLiteral(">Проверка<")), 2);  // одноимённые блоки не склеены
+    }
+
     void multilineLabel() {
         Renderer renderer;
         const auto r = renderer.render(parseOk("[Первая\\nВторая]"));
