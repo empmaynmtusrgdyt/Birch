@@ -41,18 +41,24 @@ QToolButton* toolButton(const QString& text, const QString& toolTip, QWidget* pa
 
 FindBar::FindBar(CodeEditor* editor, QWidget* parent) : QWidget(parent), editor_(editor) {
     find_ = new QLineEdit(this);
-    find_->setPlaceholderText(tr("Текст для поиска"));
+    // Подписи «Найти:» и «Заменить:» — внутри полей: панель должна помещаться
+    // и в узкую левую часть окна.
+    find_->setPlaceholderText(tr("Найти"));
+    find_->setAccessibleName(tr("Найти"));
     find_->setClearButtonEnabled(true);
-    find_->setMinimumWidth(160);
+    find_->setMinimumWidth(90);
     find_->installEventFilter(this);
 
     replace_ = new QLineEdit(this);
     replace_->setPlaceholderText(tr("Заменить на"));
+    replace_->setAccessibleName(tr("Заменить на"));
     replace_->setClearButtonEnabled(true);
+    replace_->setMinimumWidth(90);
     replace_->installEventFilter(this);
 
     status_ = new QLabel(this);
-    status_->setMinimumWidth(status_->fontMetrics().horizontalAdvance(tr("Ошибка в выражении")) + 8);
+    // Ширина под «99 из 99», чтобы поле не прыгало при наборе; длинный текст раздвинет.
+    status_->setMinimumWidth(status_->fontMetrics().horizontalAdvance(QStringLiteral("99 из 99")) + 6);
 
     previous_ = toolButton(QStringLiteral("↑"), tr("Предыдущее совпадение"), this);
     next_ = toolButton(QStringLiteral("↓"), tr("Следующее совпадение"), this);
@@ -75,24 +81,19 @@ FindBar::FindBar(CodeEditor* editor, QWidget* parent) : QWidget(parent), editor_
     buttons->addWidget(replaceAll_);
     buttons->addStretch(1);
 
-    auto* findLabel = new QLabel(tr("Найти:"), this);
-    replaceLabel_ = new QLabel(tr("Заменить:"), this);
-
     auto* grid = new QGridLayout(this);
-    grid->setContentsMargins(8, 6, 6, 6);
+    grid->setContentsMargins(6, 6, 4, 6);
     grid->setHorizontalSpacing(6);
     grid->setVerticalSpacing(4);
-    grid->addWidget(findLabel, 0, 0);
-    grid->addWidget(find_, 0, 1);
+    grid->addWidget(find_, 0, 0);
     auto* tools = new QHBoxLayout;
-    tools->setSpacing(2);
+    tools->setSpacing(0);
     tools->addWidget(status_);
     for (QToolButton* b : {previous_, next_, caseSensitive_, regex_, close_}) tools->addWidget(b);
-    grid->addLayout(tools, 0, 2);
-    grid->addWidget(replaceLabel_, 1, 0);
-    grid->addWidget(replace_, 1, 1);
-    grid->addWidget(replaceButtons_, 1, 2);
-    grid->setColumnStretch(1, 1);
+    grid->addLayout(tools, 0, 1);
+    grid->addWidget(replace_, 1, 0);
+    grid->addWidget(replaceButtons_, 1, 1);
+    grid->setColumnStretch(0, 1);
 
     connect(find_, &QLineEdit::textChanged, this, &FindBar::onSearchChanged);
     connect(caseSensitive_, &QToolButton::toggled, this, &FindBar::onSearchChanged);
@@ -132,7 +133,6 @@ void FindBar::open(bool withReplace) {
     const bool prefill = !selected.isEmpty() && !selected.contains(QChar::ParagraphSeparator);
 
     active_ = true;
-    replaceLabel_->setVisible(withReplace);
     replace_->setVisible(withReplace);
     replaceButtons_->setVisible(withReplace);
     show();
@@ -381,7 +381,7 @@ int FindBar::replaceAll() {
 QString FindBar::statusText() const {
     if (replacedCount_ >= 0) return tr("Заменено: %1").arg(replacedCount_);
     if (find_->text().isEmpty()) return {};
-    if (hasPatternError()) return tr("Ошибка в выражении");
+    if (hasPatternError()) return tr("Ошибка");  // подробности — в подсказке
     if (matches_.isEmpty()) return tr("Не найдено");
     if (current_ >= 0) return tr("%1 из %2").arg(current_ + 1).arg(matches_.size());
     return matchesText(static_cast<int>(matches_.size()));
@@ -389,7 +389,9 @@ QString FindBar::statusText() const {
 
 void FindBar::showStatus() {
     status_->setText(statusText());
-    status_->setToolTip(patternError_);
+    const QString error = hasPatternError() ? tr("Ошибка в регулярном выражении: %1").arg(patternError_) : QString();
+    status_->setToolTip(error);
+    find_->setToolTip(error);
     const bool canReplace = !matches_.isEmpty();
     replaceOne_->setEnabled(canReplace);
     replaceAll_->setEnabled(canReplace);

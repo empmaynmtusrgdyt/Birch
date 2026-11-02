@@ -84,7 +84,6 @@ private:
     QToolButton* caseSensitive_ = nullptr;
     QToolButton* regex_ = nullptr;
     QToolButton* close_ = nullptr;
-    QLabel* replaceLabel_ = nullptr;
     QWidget* replaceButtons_ = nullptr;
     QPushButton* replaceOne_ = nullptr;
     QPushButton* replaceAll_ = nullptr;
