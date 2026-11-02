@@ -36,6 +36,42 @@ namespace birch {
 
 namespace {
 
+// Разделитель панелей — тонкая линия в цвет темы (стандартная ручка в тёмной
+// теме слишком яркая). Рисуется сам, без таблицы стилей: таблица стилей на
+// разделителе мешает менять палитру вложенных виджетов (красное поле поиска).
+class LineSplitterHandle : public QSplitterHandle {
+public:
+    using QSplitterHandle::QSplitterHandle;
+    QColor color;
+
+protected:
+    void paintEvent(QPaintEvent*) override { QPainter(this).fillRect(rect(), color); }
+};
+
+class LineSplitter : public QSplitter {
+public:
+    using QSplitter::QSplitter;
+    void setLineColor(const QColor& color) {
+        color_ = color;
+        for (int i = 0; i < count(); ++i) {
+            if (auto* h = dynamic_cast<LineSplitterHandle*>(handle(i))) {
+                h->color = color;
+                h->update();
+            }
+        }
+    }
+
+protected:
+    QSplitterHandle* createHandle() override {
+        auto* h = new LineSplitterHandle(orientation(), this);
+        h->color = color_;
+        return h;
+    }
+
+private:
+    QColor color_;
+};
+
 constexpr int kDebounceMs = 300;
 constexpr qint64 kMaxFileBytes = 4 * 1024 * 1024;
 constexpr qreal kExportScale = 2.0;
@@ -354,7 +390,7 @@ void MainWindow::createCentralWidget() {
     rightLayout->addWidget(renderError_);
     rightLayout->addWidget(preview_, 1);
 
-    splitter_ = new QSplitter(Qt::Horizontal);
+    splitter_ = new LineSplitter(Qt::Horizontal);
     splitter_->setChildrenCollapsible(false);
     splitter_->setHandleWidth(1);
     splitter_->addWidget(left);
@@ -830,9 +866,7 @@ void MainWindow::applyTheme() {
     const QColor bg = dark ? QColor(0x4A1F1F) : QColor(0xFDECEC);
     const QColor fg = dark ? QColor(0xFFD7D7) : QColor(0x8A1C1C);
     renderError_->setStyleSheet(QStringLiteral("background:%1; color:%2;").arg(bg.name(), fg.name()));
-    // Тонкая линия-разделитель в цвет темы (стандартная ручка в тёмной теме слишком яркая).
-    const QColor line = dark ? QColor(0x34363C) : QColor(0xDADDE3);
-    splitter_->setStyleSheet(QStringLiteral("QSplitter::handle { background: %1; }").arg(line.name()));
+    static_cast<LineSplitter*>(splitter_)->setLineColor(dark ? QColor(0x34363C) : QColor(0xDADDE3));
 
     showProblems(diagnostics_);  // перекрасить значки
     renderNow();                 // схема в новых цветах
