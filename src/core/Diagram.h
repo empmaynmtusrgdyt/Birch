@@ -14,10 +14,16 @@ enum class NodeShape {
     Terminal,  // (Текст)   «таблетка» (начало/конец)
 };
 
+// Рамка: несколько блоков, обведённых рамкой с заголовком (=Название= в тексте).
+struct Group {
+    QString name;
+};
+
 struct Node {
-    QString id;     // уникальный ключ (текст внутри скобок)
-    QString label;  // отображаемый текст ("_" -> пробел)
+    QString id;     // уникальный ключ: у общего блока — его текст, у блока рамки — рамка и текст
+    QString label;  // отображаемый текст
     NodeShape shape = NodeShape::Process;
+    int group = -1;  // индекс в Diagram::groups; -1 — общий блок, вне рамок
 };
 
 struct Edge {
@@ -27,7 +33,8 @@ struct Edge {
 };
 
 struct Diagram {
-    QList<Node> nodes;  // в порядке первого появления
+    QList<Group> groups;  // в порядке первого заголовка; рамка без блоков не рисуется
+    QList<Node> nodes;    // в порядке первого появления
     QList<Edge> edges;
 
     bool isEmpty() const { return nodes.isEmpty(); }

@@ -149,6 +149,183 @@ private slots:
         QCOMPARE(r.diagram.edges.size(), 6);
     }
 
+    // --- рамки -----------------------------------------------------------------
+
+    void framesAreOptional() {
+        const auto r = parse("[A] -> [B]\n[B] -> [A]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QVERIFY(r.diagram.groups.isEmpty());
+        for (const auto& n : r.diagram.nodes) QCOMPARE(n.group, -1);
+    }
+
+    void sameTextInTwoFramesIsTwoNodes() {
+        const auto r = parse("=Авторизация=\n[Ввод] -> {Проверка}\n"
+                             "=Загрузка=\n[Профиль] -> {Проверка}");
+        QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
+        QCOMPARE(r.diagram.groups.size(), 2);
+        QCOMPARE(r.diagram.groups[0].name, QStringLiteral("Авторизация"));
+        QCOMPARE(r.diagram.groups[1].name, QStringLiteral("Загрузка"));
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"Ввод", "Проверка", "Профиль", "Проверка"}));
+        QCOMPARE(r.diagram.nodes[1].group, 0);
+        QCOMPARE(r.diagram.nodes[3].group, 1);
+        QVERIFY(r.diagram.nodes[1].id != r.diagram.nodes[3].id);
+        QCOMPARE(r.diagram.edges[1].to, r.diagram.nodes[3].id);
+    }
+
+    void closingReturnsToGlobal() {
+        const auto r = parse("=Рамка=\n[A]\n==\n[B]\n= =\n[C]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(r.diagram.nodes[0].group, 0);
+        QCOMPARE(r.diagram.nodes[1].group, -1);
+        QCOMPARE(r.diagram.nodes[2].group, -1);
+        QCOMPARE(r.diagram.nodes[1].id, QStringLiteral("B"));  // у общего блока ключ — текст, как раньше
+    }
+
+    void globalQualifierFromTwoFrames() {
+        const auto r = parse("=А=\n{Ошибка?} -> == (Выход)\n=Б=\n{Ошибка?} -> ==(Выход)");
+        QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"Ошибка?", "Выход", "Ошибка?"}));
+        QCOMPARE(r.diagram.nodes[1].group, -1);  // создан ссылкой, вне рамок его нет
+        QCOMPARE(r.diagram.nodes[1].shape, NodeShape::Terminal);
+        QCOMPARE(r.diagram.edges[0].to, r.diagram.edges[1].to);
+    }
+
+    void globalNodeDoesNotMergeFrameNodes() {
+        // Дописанный общий блок с тем же текстом не трогает блоки рамок.
+        const auto r = parse("=А=\n[X] -> {Проверка}\n=Б=\n[Y] -> {Проверка}\n==\n[Z] -> {Проверка}");
+        QVERIFY(errorCount(r) == 0);
+        QCOMPARE(r.diagram.nodes.size(), 6);
+    }
+
+    void qualifiedNodeFromAnotherFrame() {
+        const auto r = parse("=А=\n[Ввод] -> =Б= [Профиль] \"Вход\"\n=Б=\n[Профиль] -> [Готово]\n"
+                             "==\n[Старт] -> =А= [Ввод]");
+        QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"Ввод", "Профиль", "Готово", "Старт"}));
+        QCOMPARE(r.diagram.nodes[1].group, 1);  // стрелка в рамку написана раньше самой рамки
+        QCOMPARE(r.diagram.edges[0].label, QStringLiteral("Вход"));
+        QCOMPARE(r.diagram.edges[2].to, r.diagram.nodes[0].id);
+    }
+
+    void identicalFramesConnected() {
+        const auto r = parse("=Попытка 1=\n[Ввод] -> {Проверка}\n{Проверка} -> =Попытка 2= [Ввод] \"Ещё раз\"\n"
+                             "=Попытка 2=\n[Ввод] -> {Проверка}");
+        QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
+        QCOMPARE(r.diagram.nodes.size(), 4);
+        QCOMPARE(r.diagram.edges.size(), 3);
+        const Edge& again = r.diagram.edges[1];
+        int toIndex = -1;
+        for (int i = 0; i < r.diagram.nodes.size(); ++i)
+            if (r.diagram.nodes[i].id == again.to) toIndex = i;
+        QCOMPARE(r.diagram.nodes[toIndex].group, 1);
+        QCOMPARE(r.diagram.nodes[toIndex].label, QStringLiteral("Ввод"));
+    }
+
+    void qualifierAppliesToNextNodeOnly() {
+        const auto r = parse("=А=\n[X]\n=Б=\n[Y] -> =А= [X] -> [Z]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"X", "Y", "Z"}));
+        QCOMPARE(r.diagram.nodes[2].group, 1);  // Z — блок рамки, где написана строка
+    }
+
+    void ownFrameQualifierChangesNothing() {
+        const auto r = parse("=А=\n[X] -> =А= [X]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(r.diagram.nodes.size(), 1);
+    }
+
+    void unknownFrameQualifier() {
+        // Попытка открыть рамку и сразу написать стрелку в одну строку.
+        const auto r = parse("=Попытка 1= [Ввод] -> {Проверка}\n[A]");
+        QCOMPARE(errorCount(r), 1);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("не найдена")));
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("на отдельной строке")));
+        QCOMPARE(r.diagnostics[0].line, 1);
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"A"}));  // сломанная строка не применилась
+    }
+
+    void hintForgottenGlobalQualifier() {
+        const auto r = parse("==\n(Выход)\n=А=\n[Ошибка] -> (Выход)");
+        QCOMPARE(errorCount(r), 0);
+        QCOMPARE(r.diagnostics.size(), 1);
+        QCOMPARE(r.diagnostics[0].severity, Diagnostic::Severity::Warning);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("== (Выход)")));
+        QCOMPARE(r.diagnostics[0].line, 4);
+        // Если блок рамки упомянут не раз — он нужен сам по себе, подсказки нет.
+        QVERIFY(parse("(Выход)\n=А=\n[Ошибка] -> (Выход)\n(Выход) -> [Ошибка]").diagnostics.isEmpty());
+    }
+
+    void shapeStaysInsideFrame() {
+        const auto r = parse("=А=\n{Проверка}\n=Б=\n[Проверка] -> [X]");
+        QCOMPARE(errorCount(r), 0);
+        QCOMPARE(r.diagram.nodes[0].shape, NodeShape::Decision);
+        QCOMPARE(r.diagram.nodes[1].shape, NodeShape::Process);
+    }
+
+    void frameNameSpacing() {
+        const auto r = parse("=Обработка  ошибок=\n[A]\n= Обработка ошибок =\n[B]\n=обработка ошибок=\n[C]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(r.diagram.groups.size(), 2);  // двойной пробел схлопнут; регистр важен
+        QCOMPARE(r.diagram.groups[0].name, QStringLiteral("Обработка ошибок"));
+        QCOMPARE(r.diagram.nodes[0].group, r.diagram.nodes[1].group);  // повторный заголовок продолжает рамку
+        QVERIFY(r.diagram.nodes[2].group != r.diagram.nodes[0].group);
+    }
+
+    void frameNameEscapes() {
+        const auto r = parse("=a\\=b\\nc=\n[X]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(r.diagram.groups[0].name, QStringLiteral("a=b\nc"));
+    }
+
+    void headerWithComment() {
+        const auto r = parse("=А= // начало\n[X]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(r.diagram.nodes[0].group, 0);
+    }
+
+    void headerFollowedByArrowIsError() {
+        const auto r = parse("=А= -> [X]\n== \"Да\"\n[Y]");
+        QCOMPARE(errorCount(r), 2);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("только блок")));
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"Y"}));
+    }
+
+    void headerNotOnOwnLine() {
+        const auto r = parse("[A]; =Б=\n[B]");
+        QCOMPARE(errorCount(r), 1);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("отдельной строке")));
+        QCOMPARE(r.diagram.nodes[1].group, -1);  // рамка не открылась
+    }
+
+    void tripleEqualsIsError() {
+        const auto r = parse("===\n[A]\n=А==\n[B]");
+        QCOMPARE(errorCount(r), 2);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("===")));
+        QCOMPARE(r.diagram.nodes.size(), 2);
+    }
+
+    void unclosedHeader() {
+        const auto r = parse("=Авторизация\n[A]");
+        QCOMPARE(errorCount(r), 1);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("Не закрыт заголовок рамки")));
+        QCOMPARE(r.diagnostics[0].line, 1);
+        QCOMPARE(r.diagram.nodes[0].group, -1);
+    }
+
+    void emptyFrameIsKeptButEmpty() {
+        const auto r = parse("=Пустая=\n=Полная=\n[A]");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(r.diagram.groups.size(), 2);
+        QCOMPARE(r.diagram.nodes[0].group, 1);
+    }
+
+    void equalsInsideTextIsPlain() {
+        const auto r = parse("[a = b] -> [x == y] \"=\"");
+        QVERIFY(r.diagnostics.isEmpty());
+        QCOMPARE(nodeLabels(r.diagram), (QStringList{"a = b", "x == y"}));
+        QCOMPARE(r.diagram.edges[0].label, QStringLiteral("="));
+    }
+
     // --- ошибки -------------------------------------------------------------
 
     void errorPositions_data() {

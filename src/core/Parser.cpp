@@ -20,7 +20,8 @@ namespace {
 // Лексер
 // ---------------------------------------------------------------------------
 
-enum class TokKind { Node, String, Arrow, Semicolon, Newline, End, Invalid };
+// Frame — «=Название=» или «==»: заголовок рамки или указание рамки перед блоком.
+enum class TokKind { Node, String, Frame, Arrow, Semicolon, Newline, End, Invalid };
 
 struct Token {
     TokKind kind = TokKind::End;
@@ -89,7 +90,7 @@ private:
 
     static bool isSpecial(QChar c) {
         return c.isSpace() || c == u'[' || c == u'{' || c == u'(' || c == u'"' || c == u'«' ||
-               c == u'“' || c == u';' || c == u'#' || c == u'-' || c == kUnicodeArrow;
+               c == u'“' || c == u';' || c == u'#' || c == u'-' || c == u'=' || c == kUnicodeArrow;
     }
 
     Token next() {
@@ -121,6 +122,7 @@ private:
             case u'"': return quoted(u'"');
             case u'«': return quoted(u'»');
             case u'“': return quoted(u'”');
+            case u'=': return frameMark();
             case u';': ++pos_; return make(TokKind::Semicolon, start, 1);
             case kUnicodeArrow: ++pos_; return make(TokKind::Arrow, start, 1);
             default: break;
@@ -184,6 +186,28 @@ private:
         return t;
     }
 
+    // «=Название=» или «==» (пустое название — общая часть схемы, вне рамок).
+    Token frameMark() {
+        const int start = pos_;
+        QString raw;
+        if (!readUntil(u'=', raw))
+            return invalid(start, QStringLiteral("Не закрыт заголовок рамки — ожидался «=» в конце, "
+                                                 "например =Авторизация="));
+        if (at(pos_) == u'=') {  // «===», «=А==»: непонятно, где кончается название
+            while (at(pos_) == u'=') ++pos_;
+            return invalid(start, QStringLiteral("Непонятная запись «%1». Рамка открывается так: "
+                                                 "=Название=, а закрывается так: ==")
+                                      .arg(src_.mid(start, pos_ - start).left(40)));
+        }
+        const QString name = normalizeText(raw);
+        if (name.size() > Parser::kMaxLabelLength)
+            return invalid(start, QStringLiteral("Слишком длинное название рамки (больше %1 символов)")
+                                      .arg(Parser::kMaxLabelLength));
+        Token t = make(TokKind::Frame, start, pos_ - start);
+        t.text = name;
+        return t;
+    }
+
     Token quoted(QChar close) {
         const int start = pos_;
         QString raw;
@@ -214,6 +238,8 @@ QString describe(const Token& t) {
     switch (t.kind) {
     case TokKind::Node: return QStringLiteral("узел «%1»").arg(t.text.left(40));
     case TokKind::String: return QStringLiteral("подпись «%1»").arg(t.text.left(40));
+    case TokKind::Frame:
+        return t.text.isEmpty() ? QStringLiteral("«==»") : QStringLiteral("рамка «=%1=»").arg(t.text.left(40));
     case TokKind::Arrow: return QStringLiteral("«->»");
     case TokKind::Semicolon: return QStringLiteral("«;»");
     case TokKind::Newline: return QStringLiteral("конец строки");
@@ -233,6 +259,7 @@ public:
         : toks_(std::move(tokens)), result_(result) {}
 
     void run() {
+        declareGroups();
         while (!stopped_ && cur().kind != TokKind::End) {
             if (isTerminator(cur().kind)) {
                 ++i_;
@@ -240,16 +267,22 @@ public:
             }
             parseStatement();
         }
+        if (!stopped_) hintMissingQualifiers();
     }
 
 private:
+    // Блок в инструкции: токен и рамка, которой он принадлежит (-1 — общий блок).
+    struct PendingNode {
+        const Token* token = nullptr;
+        int group = -1;
+    };
     struct PendingEdge {
         int from = 0;  // индексы в Pending::nodes
         int to = 0;
         QString label;
     };
     struct Pending {
-        std::vector<const Token*> nodes;
+        std::vector<PendingNode> nodes;
         std::vector<PendingEdge> edges;
     };
 
@@ -273,18 +306,91 @@ private:
         while (!isTerminator(cur().kind)) ++i_;
     }
 
-    void parseStatement() {
-        if (cur().kind != TokKind::Node) {
-            error(cur(), QStringLiteral("Инструкция должна начинаться с узла, например [Шаг], а найдено %1")
-                             .arg(describe(cur())));
+    // --- рамки ------------------------------------------------------------------
+
+    // Заголовок — «=Название=» или «==», одни на своей строке (комментарий уже убран лексером).
+    bool isHeader(size_t j) const {
+        return toks_[j].kind == TokKind::Frame && (j == 0 || toks_[j - 1].kind == TokKind::Newline) &&
+               isTerminator(at(j + 1).kind);
+    }
+
+    // Рамки объявляются заранее, по всем заголовкам файла: так стрелку в рамку
+    // можно написать раньше самой рамки.
+    void declareGroups() {
+        for (size_t j = 0; j < toks_.size(); ++j) {
+            if (!isHeader(j) || toks_[j].text.isEmpty() || groupIndex_.contains(toks_[j].text)) continue;
+            groupIndex_.insert(toks_[j].text, static_cast<int>(result_.diagram.groups.size()));
+            result_.diagram.groups.append({toks_[j].text});
+        }
+    }
+
+    static QString frameMark(const QString& name) {
+        return name.isEmpty() ? QStringLiteral("==") : QStringLiteral("=%1=").arg(name);
+    }
+
+    static QString bracketed(const QString& text, NodeShape shape) {
+        switch (shape) {
+        case NodeShape::Decision: return QStringLiteral("{%1}").arg(text);
+        case NodeShape::Terminal: return QStringLiteral("(%1)").arg(text);
+        case NodeShape::Process: break;
+        }
+        return QStringLiteral("[%1]").arg(text);
+    }
+
+    // Блок с необязательным указанием места перед ним: «=Рамка= [Блок]», «== [Блок]».
+    // what — что ожидалось, для сообщения об ошибке.
+    bool takeNode(Pending& st, const QString& what) {
+        int group = currentGroup_;
+        if (cur().kind == TokKind::Frame) {
+            const Token& mark = cur();
             ++i_;
-            synchronize();
+            if (cur().kind != TokKind::Node) {
+                error(mark, QStringLiteral("После «%1» в той же строке может идти только блок, например %1 [Шаг]. "
+                                           "Чтобы открыть рамку, напишите %1 на отдельной строке")
+                                .arg(frameMark(mark.text)));
+                return false;
+            }
+            if (mark.text.isEmpty()) {
+                group = -1;
+            } else if (auto it = groupIndex_.constFind(mark.text); it != groupIndex_.constEnd()) {
+                group = *it;
+            } else {
+                error(mark, QStringLiteral("Рамка «%1» не найдена. Рамка открывается на отдельной строке: =%1=")
+                                .arg(mark.text.left(40)));
+                return false;
+            }
+        }
+        if (cur().kind != TokKind::Node) {
+            error(cur(), QStringLiteral("%1, а найдено %2").arg(what, describe(cur())));
+            return false;
+        }
+        st.nodes.push_back({&cur(), group});
+        ++i_;
+        return true;
+    }
+
+    // --- инструкции ---------------------------------------------------------------
+
+    void parseStatement() {
+        if (cur().kind == TokKind::Frame && isTerminator(at(i_ + 1).kind)) {
+            if (isHeader(i_)) {
+                currentGroup_ = cur().text.isEmpty() ? -1 : groupIndex_.value(cur().text, -1);
+            } else {
+                error(cur(), QStringLiteral("Заголовок рамки пишется на отдельной строке: %1")
+                                 .arg(frameMark(cur().text)));
+            }
+            ++i_;
             return;
         }
 
         Pending st;
-        st.nodes.push_back(&cur());
-        ++i_;
+        if (cur().kind != TokKind::Node && cur().kind != TokKind::Frame) {
+            error(cur(), QStringLiteral("Инструкция должна начинаться с узла, например [Шаг], а найдено %1")
+                             .arg(describe(cur())));
+            ++i_;
+            return synchronize();
+        }
+        if (!takeNode(st, QStringLiteral("Ожидался узел, например [Шаг]"))) return synchronize();
 
         for (;;) {
             // Перенос строки перед '->' продолжает инструкцию.
@@ -301,12 +407,7 @@ private:
             }
 
             while (cur().kind == TokKind::Newline) ++i_;
-            if (cur().kind != TokKind::Node) {
-                error(cur(), QStringLiteral("После «->» ожидался узел, а найдено %1").arg(describe(cur())));
-                return synchronize();
-            }
-            st.nodes.push_back(&cur());
-            ++i_;
+            if (!takeNode(st, QStringLiteral("После «->» ожидался узел"))) return synchronize();
 
             PendingEdge e;
             e.from = static_cast<int>(st.nodes.size()) - 2;
@@ -325,14 +426,22 @@ private:
         commit(st);
     }
 
+    // Блок определяется рамкой и текстом: у общего блока ключ — сам текст (как
+    // было до рамок), у блока рамки — номер рамки и текст.
+    static QString nodeKey(int group, const QString& text) {
+        return group < 0 ? text : QString::number(group) + QChar(0x1F) + text;
+    }
+
     // Инструкция применяется целиком или не применяется вовсе.
     void commit(const Pending& st) {
         Diagram& dia = result_.diagram;
         std::vector<int> indices;
         indices.reserve(st.nodes.size());
 
-        for (const Token* t : st.nodes) {
-            auto it = index_.constFind(t->text);
+        for (const PendingNode& pn : st.nodes) {
+            const Token* t = pn.token;
+            const QString key = nodeKey(pn.group, t->text);
+            auto it = index_.constFind(key);
             if (it == index_.constEnd()) {
                 if (dia.nodes.size() >= Parser::kMaxNodes) {
                     error(*t, QStringLiteral("Слишком много узлов (максимум %1)").arg(Parser::kMaxNodes));
@@ -340,13 +449,15 @@ private:
                     return;
                 }
                 const int idx = static_cast<int>(dia.nodes.size());
-                dia.nodes.append({t->text, t->text, t->shape});
-                index_.insert(t->text, idx);
+                dia.nodes.append({key, t->text, t->shape, pn.group});
+                index_.insert(key, idx);
+                mentions_.append({t, 1});
                 indices.push_back(idx);
                 continue;
             }
 
             Node& n = dia.nodes[*it];
+            ++mentions_[*it].count;
             if (t->shape != NodeShape::Process && t->shape != n.shape) {
                 if (n.shape == NodeShape::Process)
                     n.shape = t->shape;  // [] уточняется до {} или ()
@@ -359,7 +470,7 @@ private:
 
         for (const PendingEdge& pe : st.edges) {
             if (dia.edges.size() >= Parser::kMaxEdges) {
-                error(*st.nodes[static_cast<size_t>(pe.to)],
+                error(*st.nodes[static_cast<size_t>(pe.to)].token,
                       QStringLiteral("Слишком много связей (максимум %1)").arg(Parser::kMaxEdges));
                 stopped_ = true;
                 return;
@@ -369,9 +480,33 @@ private:
         }
     }
 
+    // Блок рамки, упомянутый один раз, с текстом общего блока — скорее всего,
+    // забыто «==» перед ним, и вместо стрелки к общему блоку вышел новый блок.
+    void hintMissingQualifiers() {
+        const Diagram& dia = result_.diagram;
+        for (int i = 0; i < dia.nodes.size(); ++i) {
+            const Node& n = dia.nodes[i];
+            if (n.group < 0 || mentions_[i].count != 1) continue;
+            const auto global = index_.constFind(nodeKey(-1, n.label));
+            if (global == index_.constEnd()) continue;
+            const QString target = bracketed(n.label, dia.nodes[*global].shape);
+            warning(*mentions_[i].first,
+                    QStringLiteral("Блок «%1» есть среди общих блоков. Чтобы провести стрелку к нему, напишите == %2")
+                        .arg(n.label.left(40), target.left(60)));
+        }
+    }
+
+    struct Mentions {
+        const Token* first = nullptr;
+        int count = 0;
+    };
+
     const std::vector<Token> toks_;
     ParseResult& result_;
-    QHash<QString, int> index_;
+    QHash<QString, int> index_;       // ключ блока -> индекс в diagram.nodes
+    QList<Mentions> mentions_;        // по индексам diagram.nodes
+    QHash<QString, int> groupIndex_;  // название рамки -> индекс в diagram.groups
+    int currentGroup_ = -1;
     size_t i_ = 0;
     bool stopped_ = false;
 };
