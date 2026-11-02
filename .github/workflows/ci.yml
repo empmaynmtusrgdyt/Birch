@@ -263,6 +263,16 @@ jobs:
           cmake --build --preset windows
       - name: Тесты
         run: ctest --preset windows
+      - name: Подробности упавших тестов
+        if: failure()
+        shell: pwsh
+        run: |
+          # ctest на Windows иногда не показывает вывод упавшего теста — запускаем напрямую
+          Get-ChildItem build\windows\Release\tst_*.exe | ForEach-Object {
+            & $_.FullName -o "$($_.BaseName).txt,txt"
+            "== $($_.Name): код $LASTEXITCODE"
+            if (Test-Path "$($_.BaseName).txt") { Get-Content "$($_.BaseName).txt" | Select-String -NotMatch "^PASS" }
+          }
       - name: Смоук-тест
         shell: pwsh
         run: |
