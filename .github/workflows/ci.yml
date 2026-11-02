@@ -59,6 +59,12 @@ jobs:
         run: |
           /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --find "Данные" --screenshot find-macos.png resources/examples/welcome.birch
           grep -q "^find_bar_fits=1" find-macos.png.txt || { echo "::error::Панель поиска не помещается"; exit 1; }
+      - name: Снимки примера с рамками
+        run: |
+          app=/tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
+          $app --theme light --screenshot frames-light.png resources/examples/frames.birch
+          $app --theme dark --screenshot frames-dark.png resources/examples/frames.birch
+          $app --theme light --monochrome --screenshot frames-mono.png resources/examples/frames.birch
           hdiutil detach /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
@@ -68,6 +74,7 @@ jobs:
             screenshot-macos-dmg.png
             theme-*.png
             find-*.png
+            frames-*.png
 
   # ---------------------------------------------------------------------------
   # .deb собирается отдельно под каждый дистрибутив: имена пакетов библиотек
@@ -225,6 +232,13 @@ jobs:
           app=$(ls build/appimage/Birch*.AppImage)
           APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$app" --find "Данные" --screenshot find-appimage.png resources/examples/welcome.birch
           grep -q "^find_bar_fits=1" find-appimage.png.txt || { echo "::error::Панель поиска не помещается"; exit 1; }
+      - name: Снимки примера с рамками (X11 через Xvfb)
+        run: |
+          app=$(ls build/appimage/Birch*.AppImage)
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          xvfb-run -a "$app" --theme light --screenshot frames-light.png resources/examples/frames.birch
+          xvfb-run -a "$app" --theme dark --screenshot frames-dark.png resources/examples/frames.birch
+          xvfb-run -a "$app" --theme light --monochrome --screenshot frames-mono.png resources/examples/frames.birch
       - uses: actions/upload-artifact@v4
         with:
           name: package-appimage
@@ -233,6 +247,7 @@ jobs:
             screenshot-appimage.png
             theme-*.png
             find-*.png
+            frames-*.png
 
   # ---------------------------------------------------------------------------
   # Server 2022 — основа Windows 10: стиль windowsvista, Birch заменяет его на Fusion
@@ -327,12 +342,27 @@ jobs:
                  -ArgumentList "--find", "Данные", "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
           if ($p.ExitCode -ne 0) { throw "Birch.exe --find завершился с кодом $($p.ExitCode)" }
           if (-not (Select-String -Path "$shot.txt" -Pattern "^find_bar_fits=1" -Quiet)) { throw "Панель поиска не помещается" }
+      - name: Снимки примера с рамками
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          function Shot([string] $name, [string[]] $options) {
+            $shot = Join-Path $PWD $name
+            $argList = $options + @("--screenshot", "`"$shot`"", "`"$PWD\resources\examples\frames.birch`"")
+            $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru -ArgumentList $argList
+            if ($p.ExitCode -ne 0) { throw "Birch.exe ($name) завершился с кодом $($p.ExitCode)" }
+          }
+          Shot "frames-light.png" @("--theme", "light")
+          Shot "frames-dark.png" @("--theme", "dark")
+          Shot "frames-mono.png" @("--theme", "light", "--monochrome")
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows
           path: |
             theme-*.png
             find-*.png
+            frames-*.png
       - uses: actions/upload-artifact@v4
         with:
           name: package-windows
@@ -374,12 +404,27 @@ jobs:
                  -ArgumentList "--find", "Данные", "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
           if ($p.ExitCode -ne 0) { throw "Birch.exe --find завершился с кодом $($p.ExitCode)" }
           if (-not (Select-String -Path "$shot.txt" -Pattern "^find_bar_fits=1" -Quiet)) { throw "Панель поиска не помещается" }
+      - name: Снимки примера с рамками
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          function Shot([string] $name, [string[]] $options) {
+            $shot = Join-Path $PWD $name
+            $argList = $options + @("--screenshot", "`"$shot`"", "`"$PWD\resources\examples\frames.birch`"")
+            $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru -ArgumentList $argList
+            if ($p.ExitCode -ne 0) { throw "Birch.exe ($name) завершился с кодом $($p.ExitCode)" }
+          }
+          Shot "frames-light.png" @("--theme", "light")
+          Shot "frames-dark.png" @("--theme", "dark")
+          Shot "frames-mono.png" @("--theme", "light", "--monochrome")
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows-11
           path: |
             theme-*.png
             find-*.png
+            frames-*.png
 
   # ---------------------------------------------------------------------------
   # Тег v* -> черновик релиза. Публикуется вручную после проверки описания.
