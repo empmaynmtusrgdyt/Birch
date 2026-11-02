@@ -33,6 +33,18 @@ jobs:
           cmake --build --preset macos -j
       - name: Тесты
         run: ctest --preset macos
+      - name: Экспорт в Mermaid проверяется официальным mermaid-cli
+        run: |
+          # Тест сохраняет экспорт примеров в mermaid/*.mmd; mermaid-cli должен нарисовать каждый без ошибок
+          BIRCH_MERMAID_DIR=mermaid ./build/macos/tests/tst_mermaid > /dev/null
+          for f in mermaid/*.mmd; do
+            echo "== $f"
+            npx -y @mermaid-js/mermaid-cli@11.17.0 -i "$f" -o "${f%.mmd}.svg"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mermaid
+          path: mermaid/
       - name: Смоук-тест
         run: ./build/macos/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos.png resources/examples/welcome.birch
       - name: Пакет .dmg (с проверкой самодостаточности бандла)
