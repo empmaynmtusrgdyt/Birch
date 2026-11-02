@@ -194,7 +194,12 @@ void MainWindow::createActions() {
     openAct_ = make(tr("Открыть…"), &MainWindow::openDialog, {QKeySequence::Open});
     saveAct_ = make(tr("Сохранить"), &MainWindow::save, {QKeySequence::Save});
     saveAsAct_ = make(tr("Сохранить как…"), &MainWindow::saveAs, {QKeySequence::SaveAs});
-    exampleAct_ = make(tr("Открыть пример"), &MainWindow::loadExample);
+    exampleAct_ = new QAction(tr("Открыть пример"), this);
+    connect(exampleAct_, &QAction::triggered, this,
+            [this] { loadExample(QStringLiteral(":/examples/welcome.birch")); });
+    framesExampleAct_ = new QAction(tr("Открыть пример с рамками"), this);
+    connect(framesExampleAct_, &QAction::triggered, this,
+            [this] { loadExample(QStringLiteral(":/examples/frames.birch")); });
     quitAct_ = make(tr("Выход"), &QWidget::close, {QKeySequence::Quit});
     quitAct_->setMenuRole(QAction::QuitRole);
 
@@ -331,7 +336,7 @@ void MainWindow::createMenus() {
     QMenu* file = menuBar()->addMenu(tr("Файл"));
     file->addActions({newAct_, openAct_, saveAct_, saveAsAct_});
     file->addSeparator();
-    file->addAction(exampleAct_);
+    file->addActions({exampleAct_, framesExampleAct_});
     file->addSeparator();
     file->addActions({exportPngAct_, exportSvgAct_, copyImageAct_});
     file->addSeparator();
@@ -737,9 +742,9 @@ void MainWindow::setCurrentFile(const QString& path) {
     updateTitle();
 }
 
-void MainWindow::loadExample() {
+void MainWindow::loadExample(const QString& resource) {
     if (!maybeSave()) return;
-    editor_->setPlainText(readResourceText(QStringLiteral(":/examples/welcome.birch")));
+    editor_->setPlainText(readResourceText(resource));
     setCurrentFile({});
     preview_->fitToView();
     renderNow();
@@ -979,8 +984,12 @@ void MainWindow::showSyntaxHelp() {
                    "<tr><td><code>;</code> или Enter</td><td>конец инструкции</td></tr>"
                    "<tr><td><code>// …</code> или <code># …</code></td><td>комментарий</td></tr>"
                    "<tr><td><code>\\n</code></td><td>перенос строки в тексте</td></tr>"
+                   "<tr><td><code>=Рамка=</code></td><td>на отдельной строке: открыть рамку; <code>==</code> — закрыть</td></tr>"
+                   "<tr><td><code>=Рамка= [A]</code></td><td>блок из рамки «Рамка»; <code>== [A]</code> — общий блок</td></tr>"
                    "</table>"
-                   "<p>Одинаковый текст — один и тот же узел. Если узел хоть раз записан как "
+                   "<p>Одинаковый текст — один и тот же узел, но в каждой рамке свои блоки: "
+                   "«[Шаг]» в двух рамках — два разных блока. Пример — «Файл → Открыть пример с рамками».</p>"
+                   "<p>Если узел хоть раз записан как "
                    "<code>{…}</code> или <code>(…)</code>, он останется этой фигурой.</p>"));
     box.exec();
 }

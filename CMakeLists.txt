@@ -138,6 +138,7 @@ qt_add_resources(Birch "birch_resources"
         resources/icons/zoom-in.svg
         resources/icons/zoom-out.svg
         resources/examples/welcome.birch
+        resources/examples/frames.birch
 )
 
 target_link_libraries(Birch PRIVATE birch_core birch_editor Qt6::Widgets Qt6::Svg Qt6::SvgWidgets)

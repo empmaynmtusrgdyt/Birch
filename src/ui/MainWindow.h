@@ -88,7 +88,7 @@ private:
     bool writeFile(const QString& path);
     bool maybeSave();
     void setCurrentFile(const QString& path);
-    void loadExample();
+    void loadExample(const QString& resource);
 
     // Оформление
     void setThemeMode(ThemeMode mode);
@@ -120,6 +120,7 @@ private:
     QAction* saveAct_ = nullptr;
     QAction* saveAsAct_ = nullptr;
     QAction* exampleAct_ = nullptr;
+    QAction* framesExampleAct_ = nullptr;
     QAction* quitAct_ = nullptr;
     QAction* undoAct_ = nullptr;
     QAction* redoAct_ = nullptr;
