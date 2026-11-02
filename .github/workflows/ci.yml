@@ -55,6 +55,9 @@ jobs:
           .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
           # Fusion — запасной стиль на Windows и Linux
           .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch -style fusion
+      - name: Снимок панели поиска
+        run: |
+          /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --find "Данные" --screenshot find-macos.png resources/examples/welcome.birch
           hdiutil detach /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
@@ -63,6 +66,7 @@ jobs:
             build/macos/Birch-*.dmg
             screenshot-macos-dmg.png
             theme-*.png
+            find-*.png
 
   # ---------------------------------------------------------------------------
   # .deb собирается отдельно под каждый дистрибутив: имена пакетов библиотек
@@ -215,6 +219,10 @@ jobs:
         run: |
           app=$(ls build/appimage/Birch*.AppImage)
           APPIMAGE_EXTRACT_AND_RUN=1 .github/scripts/check-theme.sh xvfb-run -a "$app"
+      - name: Снимок панели поиска (X11 через Xvfb)
+        run: |
+          app=$(ls build/appimage/Birch*.AppImage)
+          APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$app" --find "Данные" --screenshot find-appimage.png resources/examples/welcome.birch
       - uses: actions/upload-artifact@v4
         with:
           name: package-appimage
@@ -222,6 +230,7 @@ jobs:
             build/appimage/Birch*.AppImage
             screenshot-appimage.png
             theme-*.png
+            find-*.png
 
   # ---------------------------------------------------------------------------
   # Server 2022 — основа Windows 10: стиль windowsvista, Birch заменяет его на Fusion
@@ -296,10 +305,21 @@ jobs:
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
+      - name: Снимок панели поиска
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          $shot = Join-Path $PWD "find-windows.png"
+          $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                 -ArgumentList "--find", "Данные", "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
+          if ($p.ExitCode -ne 0) { throw "Birch.exe --find завершился с кодом $($p.ExitCode)" }
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows
-          path: theme-*.png
+          path: |
+            theme-*.png
+            find-*.png
       - uses: actions/upload-artifact@v4
         with:
           name: package-windows
@@ -331,10 +351,21 @@ jobs:
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
+      - name: Снимок панели поиска
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          $shot = Join-Path $PWD "find-windows.png"
+          $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                 -ArgumentList "--find", "Данные", "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
+          if ($p.ExitCode -ne 0) { throw "Birch.exe --find завершился с кодом $($p.ExitCode)" }
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows-11
-          path: theme-*.png
+          path: |
+            theme-*.png
+            find-*.png
 
   # ---------------------------------------------------------------------------
   # Тег v* -> черновик релиза. Публикуется вручную после проверки описания.
