@@ -24,6 +24,7 @@ private:
     QTextCharFormat arrow_;
     QTextCharFormat punctuation_;
     QTextCharFormat comment_;
+    QTextCharFormat frame_;  // =Рамка= и ==
 };
 
 }  // namespace birch

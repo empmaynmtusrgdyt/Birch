@@ -40,6 +40,7 @@ void SyntaxHighlighter::setDarkMode(bool dark) {
         arrow_ = makeFormat(QColor(0xA3AEC2), true);
         punctuation_ = makeFormat(QColor(0x8792A6));
         comment_ = makeFormat(QColor(0x6B7385), false, true);
+        frame_ = makeFormat(QColor(0xE58FB6), true);
     } else {
         process_ = makeFormat(QColor(0x2459D6));
         decision_ = makeFormat(QColor(0xA75F00));
@@ -48,6 +49,7 @@ void SyntaxHighlighter::setDarkMode(bool dark) {
         arrow_ = makeFormat(QColor(0x55627A), true);
         punctuation_ = makeFormat(QColor(0x8792A6));
         comment_ = makeFormat(QColor(0x9AA3B2), false, true);
+        frame_ = makeFormat(QColor(0xB0306A), true);
     }
     rehighlight();
 }
@@ -77,6 +79,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
         case u'"': f = &string_; close = u'"'; break;
         case u'«': f = &string_; close = u'»'; break;
         case u'“': f = &string_; close = u'”'; break;
+        case u'=': f = &frame_; close = u'='; break;  // =Рамка= или ==
         default: break;
         }
         if (f) {
