@@ -880,6 +880,10 @@ void MainWindow::openReplace(const QString& pattern) {
     findBar_->setPattern(pattern);
 }
 
+bool MainWindow::isFindBarOpen() const { return findBar_->isActive(); }
+
+bool MainWindow::findBarFits() const { return findBar_->minimumSizeHint().width() <= findBar_->width(); }
+
 QRect MainWindow::editorViewportRect() const {
     const QWidget* vp = editor_->viewport();
     return QRect(vp->mapTo(this, QPoint(0, 0)), vp->size());

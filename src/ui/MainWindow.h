@@ -40,6 +40,9 @@ public:
     void setMonochrome(bool on);
     // Открыть панель замены с этим текстом в поле поиска (снимки панели, --find).
     void openReplace(const QString& pattern);
+    bool isFindBarOpen() const;
+    // Ширины панели поиска хватает на все её поля и кнопки (смоук-тесты).
+    bool findBarFits() const;
     // Область текста редактора в координатах окна (смоук-тесты проверяют её цвет).
     QRect editorViewportRect() const;
 

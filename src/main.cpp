@@ -118,6 +118,9 @@ int main(int argc, char* argv[]) {
                                                     .arg(bg.lightness())
                                                     .arg(QApplication::style()->name())
                                                     .toUtf8());
+                                     // Панель поиска помещается в своё место, ничего не наезжает.
+                                     if (window.isFindBarOpen())
+                                         info.write(QByteArray("find_bar_fits=") + (window.findBarFits() ? "1" : "0") + '\n');
                                  }
                                  QCoreApplication::exit(saved ? 0 : 1);
                              });

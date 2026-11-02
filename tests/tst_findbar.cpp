@@ -270,16 +270,6 @@ private slots:
         QCOMPARE(f.editor.toPlainText(), QStringLiteral("[Этап 1\nготов] -> [Шаг 2]"));
     }
 
-    void fitsNarrowEditor() {
-        // Левая часть окна на Windows по умолчанию ~380 пикселей: панель с
-        // заменой и счётчиком должна в неё помещаться.
-        Fixture f("[A] -> [B]");
-        f.bar.openReplace();
-        f.bar.setPattern("[A]");
-        QVERIFY2(f.bar.minimumSizeHint().width() <= 360,
-                 qPrintable(QString::number(f.bar.minimumSizeHint().width())));
-    }
-
     void searchHighlightsKeepDiagnostics() {
         // Подсветка поиска и подчёркивание ошибок живут вместе.
         Fixture f("[A] -> [B");
