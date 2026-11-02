@@ -72,6 +72,10 @@ int main(int argc, char* argv[]) {
                                         QStringLiteral("Чёрно-белая схема на этот запуск."));
     monochromeOption.setFlags(QCommandLineOption::HiddenFromHelp);
     cli.addOption(monochromeOption);
+    QCommandLineOption findOption(QStringLiteral("find"), QStringLiteral("Открыть панель замены с этим текстом."),
+                                  QStringLiteral("text"));
+    findOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    cli.addOption(findOption);
     cli.process(app);
 
     birch::MainWindow window;
@@ -126,5 +130,6 @@ int main(int argc, char* argv[]) {
 
     if (!cli.positionalArguments().isEmpty()) window.openFile(cli.positionalArguments().constFirst());
     window.show();
+    if (cli.isSet(findOption)) window.openReplace(cli.value(findOption));
     return QApplication::exec();
 }

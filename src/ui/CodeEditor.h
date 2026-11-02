@@ -18,6 +18,10 @@ public:
     void clearDiagnostics() { setDiagnostics({}); }
     void jumpTo(const Diagnostic& diagnostic);
 
+    // Подсветка совпадений поиска: все совпадения и текущее (current, -1 — нет).
+    // Каждое совпадение — пара «начало, длина» в позициях документа.
+    void setSearchMatches(const QList<std::pair<int, int>>& matches, int current);
+
     // Для LineNumberArea
     int lineNumberAreaWidth() const;
     void paintLineNumberArea(QPaintEvent* event);
@@ -32,6 +36,10 @@ private:
     bool isDark() const;
     QColor errorColor() const;
     QColor warningColor() const;
+    QColor searchMatchColor() const;
+    QColor currentSearchMatchColor() const;
+    void applySearchPalette();
+    QTextEdit::ExtraSelection rangeSelection(int start, int end) const;
     void applyEditorFont();
     void updateLineNumberAreaWidth();
     void updateLineNumberArea(const QRect& rect, int dy);
@@ -42,6 +50,10 @@ private:
     QList<Diagnostic> diagnostics_;
     QSet<int> errorLines_;    // номера блоков (с 0)
     QSet<int> warningLines_;
+    QList<std::pair<int, int>> searchMatches_;
+    int currentSearchMatch_ = -1;
+    bool searchPaletteSet_ = false;
+    bool applyingPalette_ = false;
 };
 
 }  // namespace birch

@@ -122,6 +122,42 @@ void CodeEditor::setDiagnostics(const QList<Diagnostic>& diagnostics) {
     lineNumberArea_->update();
 }
 
+void CodeEditor::setSearchMatches(const QList<std::pair<int, int>>& matches, int current) {
+    searchMatches_ = matches;
+    currentSearchMatch_ = current;
+    if (searchPaletteSet_ != !matches.isEmpty()) applySearchPalette();
+    updateExtraSelections();
+}
+
+QColor CodeEditor::searchMatchColor() const { return isDark() ? QColor(0x6B5A1E) : QColor(0xFFE58F); }
+QColor CodeEditor::currentSearchMatchColor() const { return isDark() ? QColor(0xB0791C) : QColor(0xFFB648); }
+
+void CodeEditor::applySearchPalette() {
+    // Текущее совпадение выделено курсором. Пока фокус в поле поиска, выделение
+    // неактивного редактора серое и перекрывает подсветку — красим его в цвет
+    // текущего совпадения. Без поиска — снова обычная палитра окна.
+    applyingPalette_ = true;
+    searchPaletteSet_ = !searchMatches_.isEmpty();
+    if (searchPaletteSet_) {
+        QPalette p = palette();
+        p.setColor(QPalette::Inactive, QPalette::Highlight, currentSearchMatchColor());
+        p.setColor(QPalette::Inactive, QPalette::HighlightedText,
+                   isDark() ? QColor(0xFFFFFF) : p.color(QPalette::Active, QPalette::Text));
+        setPalette(p);
+    } else {
+        setPalette(QPalette());
+    }
+    applyingPalette_ = false;
+}
+
+QTextEdit::ExtraSelection CodeEditor::rangeSelection(int start, int end) const {
+    QTextEdit::ExtraSelection sel;
+    sel.cursor = QTextCursor(document());
+    sel.cursor.setPosition(start);
+    sel.cursor.setPosition(end, QTextCursor::KeepAnchor);
+    return sel;
+}
+
 void CodeEditor::updateExtraSelections() {
     QList<QTextEdit::ExtraSelection> selections;
 
@@ -136,6 +172,22 @@ void CodeEditor::updateExtraSelections() {
     }
 
     const int docEnd = qMax(0, document()->characterCount() - 1);
+
+    // Совпадения поиска — под подчёркиванием ошибок, чтобы оно оставалось видно.
+    // Текущее совпадение обычно ещё и выделено курсором; яркий фон отличает его,
+    // когда фокус в поле поиска и выделение редактора не видно.
+    const bool dark = isDark();
+    const QColor matchColor = searchMatchColor();
+    const QColor currentColor = currentSearchMatchColor();
+    for (int i = 0; i < searchMatches_.size(); ++i) {
+        const auto [start, length] = searchMatches_[i];
+        if (start + length > docEnd) continue;  // устарело: текст уже изменился
+        QTextEdit::ExtraSelection sel = rangeSelection(start, start + length);
+        sel.format.setBackground(i == currentSearchMatch_ ? currentColor : matchColor);
+        if (dark) sel.format.setForeground(QColor(0xFFFFFF));
+        selections.append(sel);
+    }
+
     for (const auto& d : diagnostics_) {
         // Ошибка «в конце текста» указывает за последний символ — подчёркиваем последний.
         int start = qMin(d.offset, docEnd);
@@ -143,12 +195,9 @@ void CodeEditor::updateExtraSelections() {
         if (start == end && start > 0) --start;
         if (start == end) continue;
 
-        QTextEdit::ExtraSelection sel;
+        QTextEdit::ExtraSelection sel = rangeSelection(start, end);
         sel.format.setUnderlineStyle(QTextCharFormat::WaveUnderline);
         sel.format.setUnderlineColor(d.isError() ? errorColor() : warningColor());
-        sel.cursor = QTextCursor(document());
-        sel.cursor.setPosition(start);
-        sel.cursor.setPosition(end, QTextCursor::KeepAnchor);
         selections.append(sel);
     }
     setExtraSelections(selections);
@@ -215,6 +264,8 @@ void CodeEditor::keyPressEvent(QKeyEvent* event) {
 void CodeEditor::changeEvent(QEvent* event) {
     QPlainTextEdit::changeEvent(event);
     if (event->type() == QEvent::PaletteChange) {
+        if (applyingPalette_) return;
+        if (searchPaletteSet_) applySearchPalette();  // цвета под новую тему
         updateExtraSelections();
     } else if (event->type() == QEvent::ApplicationFontChange) {
         applyEditorFont();

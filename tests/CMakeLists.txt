@@ -2,7 +2,7 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 
 function(birch_add_test name)
     qt_add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} PRIVATE birch_core Qt6::Test)
+    target_link_libraries(${name} PRIVATE birch_core ${ARGN} Qt6::Test)
     target_compile_definitions(${name} PRIVATE
         BIRCH_EXAMPLES_DIR="${PROJECT_SOURCE_DIR}/resources/examples")
     birch_set_warnings(${name})
@@ -15,3 +15,4 @@ endfunction()
 
 birch_add_test(tst_parser)
 birch_add_test(tst_renderer)
+birch_add_test(tst_findbar birch_editor)

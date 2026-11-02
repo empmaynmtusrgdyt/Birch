@@ -94,14 +94,25 @@ endif()
 birch_set_warnings(birch_core)
 
 # ---------------------------------------------------------------------------
+# birch_editor: редактор текста и панель поиска — отдельно от окна,
+# чтобы их можно было тестировать
+# ---------------------------------------------------------------------------
+add_library(birch_editor STATIC
+    src/ui/CodeEditor.h
+    src/ui/CodeEditor.cpp
+    src/ui/FindBar.h
+    src/ui/FindBar.cpp
+)
+target_link_libraries(birch_editor PUBLIC birch_core Qt6::Widgets)
+birch_set_warnings(birch_editor)
+
+# ---------------------------------------------------------------------------
 # Приложение
 # ---------------------------------------------------------------------------
 qt_add_executable(Birch WIN32 MACOSX_BUNDLE
     src/main.cpp
     src/app/RenderController.h
     src/app/RenderController.cpp
-    src/ui/CodeEditor.h
-    src/ui/CodeEditor.cpp
     src/ui/MainWindow.h
     src/ui/MainWindow.cpp
     src/ui/PreviewView.h
@@ -115,6 +126,9 @@ qt_add_resources(Birch "birch_resources"
     BASE resources
     FILES
         resources/icons/app.svg
+        resources/icons/chevron-down.svg
+        resources/icons/chevron-up.svg
+        resources/icons/close.svg
         resources/icons/copy.svg
         resources/icons/direction.svg
         resources/icons/download.svg
@@ -126,7 +140,7 @@ qt_add_resources(Birch "birch_resources"
         resources/examples/welcome.birch
 )
 
-target_link_libraries(Birch PRIVATE birch_core Qt6::Widgets Qt6::Svg Qt6::SvgWidgets)
+target_link_libraries(Birch PRIVATE birch_core birch_editor Qt6::Widgets Qt6::Svg Qt6::SvgWidgets)
 target_compile_definitions(Birch PRIVATE BIRCH_VERSION="${PROJECT_VERSION}")
 birch_set_warnings(Birch)
 

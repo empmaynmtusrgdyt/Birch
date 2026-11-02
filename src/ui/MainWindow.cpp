@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QSaveFile>
 #include <QSettings>
+#include <QShortcut>
 #include <QSplitter>
 #include <QStandardPaths>
 #include <QStatusBar>
@@ -29,6 +30,7 @@
 
 #include "app/RenderController.h"
 #include "ui/CodeEditor.h"
+#include "ui/FindBar.h"
 #include "ui/PreviewView.h"
 #include "ui/SyntaxHighlighter.h"
 
@@ -196,6 +198,48 @@ void MainWindow::createActions() {
     quitAct_ = make(tr("Выход"), &QWidget::close, {QKeySequence::Quit});
     quitAct_->setMenuRole(QAction::QuitRole);
 
+    // Правка: действия над редактором. Когда фокус в поле поиска, его собственные
+    // Ctrl+Z, Ctrl+C и т. п. срабатывают раньше — так и должно быть.
+    const auto editorAction = [this](const QString& text, void (QPlainTextEdit::*slot)(),
+                                     QKeySequence::StandardKey key) {
+        auto* a = new QAction(text, this);
+        a->setShortcuts(key);
+        connect(a, &QAction::triggered, this, [this, slot] { (editor_->*slot)(); });
+        return a;
+    };
+    undoAct_ = editorAction(tr("Отменить"), &QPlainTextEdit::undo, QKeySequence::Undo);
+    redoAct_ = editorAction(tr("Повторить"), &QPlainTextEdit::redo, QKeySequence::Redo);
+    cutAct_ = editorAction(tr("Вырезать"), &QPlainTextEdit::cut, QKeySequence::Cut);
+    copyAct_ = editorAction(tr("Копировать"), &QPlainTextEdit::copy, QKeySequence::Copy);
+    pasteAct_ = editorAction(tr("Вставить"), &QPlainTextEdit::paste, QKeySequence::Paste);
+    selectAllAct_ = editorAction(tr("Выбрать все"), &QPlainTextEdit::selectAll, QKeySequence::SelectAll);
+    undoAct_->setEnabled(false);
+    redoAct_->setEnabled(false);
+    cutAct_->setEnabled(false);
+    copyAct_->setEnabled(false);
+
+    findAct_ = new QAction(tr("Найти…"), this);
+    findAct_->setShortcuts(QKeySequence::Find);
+    replaceAct_ = new QAction(tr("Заменить…"), this);
+    // Стандартной клавиши замены на macOS нет, а в KDE это Ctrl+R — уже «Рендерить».
+#if defined(Q_OS_MACOS)
+    replaceAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_F));  // ⌥⌘F
+#else
+    replaceAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_H));
+#endif
+    // Стандартные клавиши перехода в Linux зависят от оболочки (KDE — F3, GNOME —
+    // Ctrl+G), поэтому задаём обе явно.
+    findNextAct_ = new QAction(tr("Найти далее"), this);
+    findPreviousAct_ = new QAction(tr("Найти назад"), this);
+#if defined(Q_OS_MACOS)
+    findNextAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_G));                    // ⌘G
+    findPreviousAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_G));    // ⇧⌘G
+#else
+    findNextAct_->setShortcuts({QKeySequence(Qt::Key_F3), QKeySequence(Qt::CTRL | Qt::Key_G)});
+    findPreviousAct_->setShortcuts(
+        {QKeySequence(Qt::SHIFT | Qt::Key_F3), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_G)});
+#endif
+
     renderAct_ = make(tr("Рендерить"), &MainWindow::renderNow,
                       {QKeySequence(Qt::CTRL | Qt::Key_Return), QKeySequence(Qt::CTRL | Qt::Key_R)});
     renderAct_->setToolTip(tr("Перерисовать схему (%1)").arg(renderAct_->shortcut().toString(QKeySequence::NativeText)));
@@ -293,6 +337,13 @@ void MainWindow::createMenus() {
     file->addSeparator();
     file->addAction(quitAct_);
 
+    QMenu* edit = menuBar()->addMenu(tr("Правка"));
+    edit->addActions({undoAct_, redoAct_});
+    edit->addSeparator();
+    edit->addActions({cutAct_, copyAct_, pasteAct_, selectAllAct_});
+    edit->addSeparator();
+    edit->addActions({findAct_, replaceAct_, findNextAct_, findPreviousAct_});
+
     QMenu* view = menuBar()->addMenu(tr("Вид"));
     view->addActions({renderAct_, autoRenderAct_});
     view->addSeparator();
@@ -350,6 +401,21 @@ void MainWindow::createCentralWidget() {
     highlighter_ = new SyntaxHighlighter(editor_->document());
     connect(editor_, &QPlainTextEdit::textChanged, this, &MainWindow::onTextChanged);
     connect(editor_->document(), &QTextDocument::modificationChanged, this, [this] { updateTitle(); });
+    connect(editor_, &QPlainTextEdit::undoAvailable, undoAct_, &QAction::setEnabled);
+    connect(editor_, &QPlainTextEdit::redoAvailable, redoAct_, &QAction::setEnabled);
+    connect(editor_, &QPlainTextEdit::copyAvailable, cutAct_, &QAction::setEnabled);
+    connect(editor_, &QPlainTextEdit::copyAvailable, copyAct_, &QAction::setEnabled);
+
+    findBar_ = new FindBar(editor_);
+    connect(findAct_, &QAction::triggered, findBar_, &FindBar::openFind);
+    connect(replaceAct_, &QAction::triggered, findBar_, &FindBar::openReplace);
+    connect(findNextAct_, &QAction::triggered, findBar_, &FindBar::findNext);
+    connect(findPreviousAct_, &QAction::triggered, findBar_, &FindBar::findPrevious);
+    // Esc в редакторе тоже закрывает панель поиска.
+    auto* closeFind = new QShortcut(QKeySequence(Qt::Key_Escape), editor_, nullptr, nullptr, Qt::WidgetShortcut);
+    connect(closeFind, &QShortcut::activated, this, [this] {
+        if (findBar_->isActive()) findBar_->close();
+    });
 
     problems_ = new QListWidget;
     problems_->setFrameShape(QFrame::NoFrame);
@@ -366,6 +432,7 @@ void MainWindow::createCentralWidget() {
     leftLayout->setContentsMargins(0, 0, 0, 0);
     leftLayout->setSpacing(0);
     leftLayout->addWidget(editor_, 1);
+    leftLayout->addWidget(findBar_);
     leftLayout->addWidget(problems_);
 
     // Справа: баннер ошибки рендеринга + холст
@@ -808,6 +875,11 @@ bool MainWindow::setThemeByName(const QString& name) {
 
 void MainWindow::setMonochrome(bool on) { monochromeAct_->setChecked(on); }
 
+void MainWindow::openReplace(const QString& pattern) {
+    findBar_->openReplace();
+    findBar_->setPattern(pattern);
+}
+
 QRect MainWindow::editorViewportRect() const {
     const QWidget* vp = editor_->viewport();
     return QRect(vp->mapTo(this, QPoint(0, 0)), vp->size());
@@ -862,6 +934,8 @@ void MainWindow::applyTheme() {
     zoomInAct_->setIcon(icon(QStringLiteral("zoom-in")));
     zoomOutAct_->setIcon(icon(QStringLiteral("zoom-out")));
     zoomFitAct_->setIcon(icon(QStringLiteral("fit")));
+    findBar_->setIcons(icon(QStringLiteral("chevron-up")), icon(QStringLiteral("chevron-down")),
+                       icon(QStringLiteral("close")));
 
     const QColor bg = dark ? QColor(0x4A1F1F) : QColor(0xFDECEC);
     const QColor fg = dark ? QColor(0xFFD7D7) : QColor(0x8A1C1C);

@@ -18,6 +18,7 @@ class QToolButton;
 namespace birch {
 
 class CodeEditor;
+class FindBar;
 class PreviewView;
 class RenderController;
 class SyntaxHighlighter;
@@ -37,6 +38,8 @@ public:
     bool setThemeByName(const QString& name);
     // Чёрно-белая схема на этот запуск (снимки для README, --monochrome).
     void setMonochrome(bool on);
+    // Открыть панель замены с этим текстом в поле поиска (снимки панели, --find).
+    void openReplace(const QString& pattern);
     // Область текста редактора в координатах окна (смоук-тесты проверяют её цвет).
     QRect editorViewportRect() const;
 
@@ -101,6 +104,7 @@ private:
     QSplitter* splitter_ = nullptr;
     CodeEditor* editor_ = nullptr;
     SyntaxHighlighter* highlighter_ = nullptr;
+    FindBar* findBar_ = nullptr;
     QListWidget* problems_ = nullptr;
     PreviewView* preview_ = nullptr;
     QLabel* renderError_ = nullptr;
@@ -114,6 +118,16 @@ private:
     QAction* saveAsAct_ = nullptr;
     QAction* exampleAct_ = nullptr;
     QAction* quitAct_ = nullptr;
+    QAction* undoAct_ = nullptr;
+    QAction* redoAct_ = nullptr;
+    QAction* cutAct_ = nullptr;
+    QAction* copyAct_ = nullptr;
+    QAction* pasteAct_ = nullptr;
+    QAction* selectAllAct_ = nullptr;
+    QAction* findAct_ = nullptr;
+    QAction* replaceAct_ = nullptr;
+    QAction* findNextAct_ = nullptr;
+    QAction* findPreviousAct_ = nullptr;
     QAction* renderAct_ = nullptr;
     QAction* autoRenderAct_ = nullptr;
     QAction* exportPngAct_ = nullptr;
