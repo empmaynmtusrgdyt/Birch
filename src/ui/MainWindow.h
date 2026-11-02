@@ -79,6 +79,9 @@ private:
     void exportPng();
     void exportSvg();
     void copyImage();
+    QString mermaidForExport();
+    void exportMermaid();
+    void copyMermaid();
 
     // Файлы
     void newDocument();
@@ -137,6 +140,8 @@ private:
     QAction* exportPngAct_ = nullptr;
     QAction* exportSvgAct_ = nullptr;
     QAction* copyImageAct_ = nullptr;
+    QAction* exportMermaidAct_ = nullptr;
+    QAction* copyMermaidAct_ = nullptr;
     QAction* horizontalAct_ = nullptr;
     QAction* monochromeAct_ = nullptr;
     QAction* transparentAct_ = nullptr;

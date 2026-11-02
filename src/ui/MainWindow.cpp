@@ -29,6 +29,7 @@
 #include <QVBoxLayout>
 
 #include "app/RenderController.h"
+#include "core/MermaidExporter.h"
 #include "ui/CodeEditor.h"
 #include "ui/FindBar.h"
 #include "ui/PreviewView.h"
@@ -260,6 +261,9 @@ void MainWindow::createActions() {
     exportPngAct_->setToolTip(tr("Сохранить картинку в файл .png (%1)")
                                   .arg(exportPngAct_->shortcut().toString(QKeySequence::NativeText)));
     exportSvgAct_ = make(tr("Экспорт SVG…"), &MainWindow::exportSvg);
+    exportMermaidAct_ = make(tr("Экспорт Mermaid…"), &MainWindow::exportMermaid);
+    copyMermaidAct_ = make(tr("Копировать как Mermaid"), &MainWindow::copyMermaid);
+    copyMermaidAct_->setToolTip(tr("Текст схемы для README на GitHub, Notion, Obsidian — там он отображается как схема"));
     copyImageAct_ = make(tr("Копировать в буфер"), &MainWindow::copyImage,
                          {QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C)});
     copyImageAct_->setToolTip(tr("Скопировать PNG — можно сразу вставить в Telegram, Slack, Word (%1)")
@@ -339,6 +343,8 @@ void MainWindow::createMenus() {
     file->addActions({exampleAct_, framesExampleAct_});
     file->addSeparator();
     file->addActions({exportPngAct_, exportSvgAct_, copyImageAct_});
+    file->addSeparator();
+    file->addActions({exportMermaidAct_, copyMermaidAct_});
     file->addSeparator();
     file->addAction(quitAct_);
 
@@ -654,6 +660,52 @@ void MainWindow::copyImage() {
     QGuiApplication::clipboard()->setMimeData(mime);
 
     statusBar()->showMessage(tr("Картинка скопирована — вставьте её в Telegram, Slack, Word…"), 5000);
+}
+
+// Mermaid — текст схемы для сайтов, которые рисуют его сами (GitHub, Notion…).
+// Цвета и тема не переносятся, направление — как в окне.
+QString MainWindow::mermaidForExport() {
+    const ParseResult parsed = parser_.parse(editor_->toPlainText());
+    if (parsed.diagram.isEmpty()) {
+        statusBar()->showMessage(tr("Нечего экспортировать — схема пуста"), 4000);
+        return {};
+    }
+    if (parsed.hasErrors())
+        statusBar()->showMessage(tr("В тексте есть ошибки — в Mermaid попали только корректные строки"), 6000);
+    MermaidOptions opt;
+    opt.leftToRight = horizontalAct_->isChecked();
+    return toMermaid(parsed.diagram, opt);
+}
+
+void MainWindow::exportMermaid() {
+    const QString text = mermaidForExport();
+    if (text.isEmpty()) return;
+
+    QSettings settings;
+    const QString dir = settings.value(keys::lastDir, defaultDirectory()).toString();
+    const QString base = filePath_.isEmpty() ? QStringLiteral("flowchart") : QFileInfo(filePath_).completeBaseName();
+    QString path = QFileDialog::getSaveFileName(this, tr("Экспорт Mermaid"), QDir(dir).filePath(base + ".mmd"),
+                                                tr("Схема Mermaid (*.mmd)"));
+    if (path.isEmpty()) return;
+    if (!path.endsWith(QStringLiteral(".mmd"), Qt::CaseInsensitive)) path += QStringLiteral(".mmd");
+
+    QSaveFile f(path);
+    const QByteArray bytes = text.toUtf8();
+    if (!f.open(QIODevice::WriteOnly) || f.write(bytes) != bytes.size() || !f.commit()) {
+        QMessageBox::warning(this, tr("Не удалось сохранить"),
+                             tr("Не удалось записать файл:\n%1\n\n%2").arg(path, f.errorString()));
+        return;
+    }
+    settings.setValue(keys::lastDir, QFileInfo(path).absolutePath());
+    statusBar()->showMessage(tr("Сохранено: %1").arg(QFileInfo(path).fileName()), 5000);
+}
+
+void MainWindow::copyMermaid() {
+    const QString text = mermaidForExport();
+    if (text.isEmpty()) return;
+    // Сразу блоком ```mermaid: вставленный в Markdown, он отображается как схема.
+    QGuiApplication::clipboard()->setText(QStringLiteral("```mermaid\n") + text + QStringLiteral("```\n"));
+    statusBar()->showMessage(tr("Mermaid скопирован — вставьте его в README на GitHub, в Notion или Obsidian"), 5000);
 }
 
 // =============================================================================
