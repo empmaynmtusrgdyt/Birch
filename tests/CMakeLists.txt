@@ -15,4 +15,5 @@ endfunction()
 
 birch_add_test(tst_parser)
 birch_add_test(tst_renderer)
+birch_add_test(tst_mermaid)
 birch_add_test(tst_findbar birch_editor)

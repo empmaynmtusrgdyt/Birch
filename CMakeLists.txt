@@ -69,6 +69,8 @@ endfunction()
 # ---------------------------------------------------------------------------
 add_library(birch_core STATIC
     src/core/Diagram.h
+    src/core/MermaidExporter.h
+    src/core/MermaidExporter.cpp
     src/core/Parser.h
     src/core/Parser.cpp
     src/core/Renderer.h
