@@ -4,7 +4,8 @@ function(birch_add_test name)
     qt_add_executable(${name} ${name}.cpp)
     target_link_libraries(${name} PRIVATE birch_core ${ARGN} Qt6::Test)
     target_compile_definitions(${name} PRIVATE
-        BIRCH_EXAMPLES_DIR="${PROJECT_SOURCE_DIR}/resources/examples")
+        BIRCH_EXAMPLES_DIR="${PROJECT_SOURCE_DIR}/resources/examples"
+        BIRCH_README="${PROJECT_SOURCE_DIR}/README.md")
     birch_set_warnings(${name})
     # Консольное приложение, без бандла
     set_target_properties(${name} PROPERTIES MACOSX_BUNDLE OFF)

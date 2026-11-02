@@ -149,6 +149,20 @@ private slots:
         QCOMPARE(r.diagram.edges.size(), 6);
     }
 
+    void welcomeMatchesReadme() {
+        // Стартовый текст программы — тот же пример, что в начале README.
+        QFile readme(QStringLiteral(BIRCH_README));
+        QFile welcome(QStringLiteral(BIRCH_EXAMPLES_DIR "/welcome.birch"));
+        QVERIFY(readme.open(QIODevice::ReadOnly | QIODevice::Text));
+        QVERIFY(welcome.open(QIODevice::ReadOnly | QIODevice::Text));
+        const QString text = QString::fromUtf8(readme.readAll());
+        const qsizetype start = text.indexOf(QStringLiteral("```text\n"));
+        QVERIFY(start >= 0);
+        const qsizetype from = start + 8;
+        const QString example = text.mid(from, text.indexOf(QStringLiteral("```"), from) - from);
+        QCOMPARE(QString::fromUtf8(welcome.readAll()), example);
+    }
+
     // --- рамки -----------------------------------------------------------------
 
     void framesAreOptional() {
