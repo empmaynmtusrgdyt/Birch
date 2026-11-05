@@ -74,9 +74,9 @@ jobs:
       - name: Снимки примера с рамками
         run: |
           app=/tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
-          $app --theme light --screenshot frames-light.png resources/examples/frames.birch
-          $app --theme dark --screenshot frames-dark.png resources/examples/frames.birch
-          $app --theme light --monochrome --screenshot frames-mono.png resources/examples/frames.birch
+          $app --screenshot-theme light --screenshot frames-light.png resources/examples/frames.birch
+          $app --screenshot-theme dark --screenshot frames-dark.png resources/examples/frames.birch
+          $app --screenshot-theme light --screenshot-monochrome --screenshot frames-mono.png resources/examples/frames.birch
           hdiutil detach /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
@@ -248,9 +248,9 @@ jobs:
         run: |
           app=$(ls build/appimage/Birch*.AppImage)
           export APPIMAGE_EXTRACT_AND_RUN=1
-          xvfb-run -a "$app" --theme light --screenshot frames-light.png resources/examples/frames.birch
-          xvfb-run -a "$app" --theme dark --screenshot frames-dark.png resources/examples/frames.birch
-          xvfb-run -a "$app" --theme light --monochrome --screenshot frames-mono.png resources/examples/frames.birch
+          xvfb-run -a "$app" --screenshot-theme light --screenshot frames-light.png resources/examples/frames.birch
+          xvfb-run -a "$app" --screenshot-theme dark --screenshot frames-dark.png resources/examples/frames.birch
+          xvfb-run -a "$app" --screenshot-theme light --screenshot-monochrome --screenshot frames-mono.png resources/examples/frames.birch
       - uses: actions/upload-artifact@v4
         with:
           name: package-appimage
@@ -365,9 +365,9 @@ jobs:
             $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru -ArgumentList $argList
             if ($p.ExitCode -ne 0) { throw "Birch.exe ($name) завершился с кодом $($p.ExitCode)" }
           }
-          Shot "frames-light.png" @("--theme", "light")
-          Shot "frames-dark.png" @("--theme", "dark")
-          Shot "frames-mono.png" @("--theme", "light", "--monochrome")
+          Shot "frames-light.png" @("--screenshot-theme", "light")
+          Shot "frames-dark.png" @("--screenshot-theme", "dark")
+          Shot "frames-mono.png" @("--screenshot-theme", "light", "--screenshot-monochrome")
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows
@@ -427,9 +427,9 @@ jobs:
             $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru -ArgumentList $argList
             if ($p.ExitCode -ne 0) { throw "Birch.exe ($name) завершился с кодом $($p.ExitCode)" }
           }
-          Shot "frames-light.png" @("--theme", "light")
-          Shot "frames-dark.png" @("--theme", "dark")
-          Shot "frames-mono.png" @("--theme", "light", "--monochrome")
+          Shot "frames-light.png" @("--screenshot-theme", "light")
+          Shot "frames-dark.png" @("--screenshot-theme", "dark")
+          Shot "frames-mono.png" @("--screenshot-theme", "light", "--screenshot-monochrome")
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows-11

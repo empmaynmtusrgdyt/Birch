@@ -68,6 +68,8 @@ endfunction()
 # чтобы его можно было тестировать отдельно)
 # ---------------------------------------------------------------------------
 add_library(birch_core STATIC
+    src/core/CommandLine.h
+    src/core/CommandLine.cpp
     src/core/Diagram.h
     src/core/MermaidExporter.h
     src/core/MermaidExporter.cpp
@@ -92,6 +94,9 @@ if(Graphviz_PLUGINS_FOUND AND BIRCH_LINK_GRAPHVIZ_PLUGINS)
     target_compile_definitions(birch_core PRIVATE BIRCH_GRAPHVIZ_BUILTIN_PLUGINS=1)
 else()
     set(BIRCH_GRAPHVIZ_BUILTIN FALSE)
+endif()
+if(WIN32)
+    target_link_libraries(birch_core PRIVATE shell32)  # CommandLineToArgvW
 endif()
 birch_set_warnings(birch_core)
 

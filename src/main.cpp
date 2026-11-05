@@ -1,13 +1,14 @@
 #include <QApplication>
-#include <QCommandLineParser>
 #include <QFileOpenEvent>
 #include <QIcon>
+#include <QLoggingCategory>
 #include <QStyle>
 #include <QFile>
 #include <QTimer>
 
 #include <cstdio>
 
+#include "core/CommandLine.h"
 #include "ui/MainWindow.h"
 
 namespace {
@@ -35,6 +36,46 @@ private:
 }  // namespace
 
 int main(int argc, char* argv[]) {
+    namespace cli = birch::cli;
+
+    // Ключи разбираются до создания приложения: --help и --version работают
+    // мгновенно и без экрана, а -o рисует схему без окна.
+    const QStringList rawArgs = cli::rawArguments(argc, argv);
+    const QString program = cli::programName(rawArgs.value(0));
+    const cli::Arguments args = cli::parse(cli::withoutQtOptions(rawArgs));
+
+    switch (args.mode) {
+    case cli::Mode::Help:
+        cli::attachParentConsole();
+        cli::printOut(cli::helpText(program));
+        return cli::kExitOk;
+    case cli::Mode::Version:
+        cli::attachParentConsole();
+        cli::printOut(cli::versionText(QStringLiteral(BIRCH_VERSION)));
+        return cli::kExitOk;
+    case cli::Mode::Error:
+        cli::attachParentConsole();
+        cli::printErr(cli::usageErrorText(program, args.error));
+        return cli::kExitUsage;
+    case cli::Mode::Render: {
+        cli::attachParentConsole();
+        // Окно не нужно, но шрифты измеряет Qt. На macOS и Linux — без экрана
+        // (работает и по SSH, и в CI); на Windows у offscreen нет системных шрифтов.
+#if !defined(Q_OS_WIN)
+        if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM")) qputenv("QT_QPA_PLATFORM", "offscreen");
+#endif
+        // Служебные сообщения Qt о шрифтах в режиме без экрана — не для пользователя.
+        QLoggingCategory::setFilterRules(QStringLiteral("qt.qpa.*.warning=false"));
+        QGuiApplication app(argc, argv);
+        QString errors;
+        const int code = cli::render(args, program, errors);
+        cli::printErr(errors);
+        return code;
+    }
+    case cli::Mode::Gui:
+        break;
+    }
+
     QApplication app(argc, argv);
 #if defined(Q_OS_WIN)
     // Стиль windowsvista (Windows 10) не умеет тёмную тему: при её выборе редактор
@@ -53,42 +94,19 @@ int main(int argc, char* argv[]) {
     QGuiApplication::setDesktopFileName(QStringLiteral("birch"));  // связь окна с birch.desktop
 #endif
 
-    QCommandLineParser cli;
-    cli.setApplicationDescription(QStringLiteral("Блок-схемы из текста"));
-    cli.addHelpOption();
-    cli.addVersionOption();
-    cli.addPositionalArgument(QStringLiteral("file"), QStringLiteral("Файл .birch для открытия"));
-    // Смоук-тест для CI: дождаться первой отрисовки, сохранить снимок окна и выйти.
-    QCommandLineOption screenshotOption(QStringLiteral("screenshot"),
-                                        QStringLiteral("Сохранить снимок окна после отрисовки и выйти."),
-                                        QStringLiteral("file.png"));
-    screenshotOption.setFlags(QCommandLineOption::HiddenFromHelp);
-    cli.addOption(screenshotOption);
-    QCommandLineOption themeOption(QStringLiteral("theme"), QStringLiteral("Тема на этот запуск: system, light, dark."),
-                                   QStringLiteral("name"));
-    themeOption.setFlags(QCommandLineOption::HiddenFromHelp);
-    cli.addOption(themeOption);
-    QCommandLineOption monochromeOption(QStringLiteral("monochrome"),
-                                        QStringLiteral("Чёрно-белая схема на этот запуск."));
-    monochromeOption.setFlags(QCommandLineOption::HiddenFromHelp);
-    cli.addOption(monochromeOption);
-    QCommandLineOption findOption(QStringLiteral("find"), QStringLiteral("Открыть панель замены с этим текстом."),
-                                  QStringLiteral("text"));
-    findOption.setFlags(QCommandLineOption::HiddenFromHelp);
-    cli.addOption(findOption);
-    cli.process(app);
-
     birch::MainWindow window;
     FileOpenFilter fileOpenFilter(&window);
     app.installEventFilter(&fileOpenFilter);
 
-    if (cli.isSet(themeOption) && !window.setThemeByName(cli.value(themeOption))) {
-        std::fprintf(stderr, "unknown theme: %s\n", qPrintable(cli.value(themeOption)));
-        return 3;
+    // Служебные ключи для снимков окна в CI.
+    if (!args.screenshotTheme.isEmpty() && !window.setThemeByName(args.screenshotTheme)) {
+        cli::printErr(cli::usageErrorText(program, QStringLiteral("неверное значение «%1» для ключа «--screenshot-theme»")
+                                                       .arg(args.screenshotTheme)));
+        return cli::kExitUsage;
     }
-    if (cli.isSet(monochromeOption)) window.setMonochrome(true);
+    if (args.screenshotMonochrome) window.setMonochrome(true);
 
-    const QString screenshot = cli.value(screenshotOption);
+    const QString screenshot = args.screenshot;
     if (!screenshot.isEmpty()) {
         window.setSessionSaving(false);
         QObject::connect(&window, &birch::MainWindow::previewRendered, &app,
@@ -131,8 +149,8 @@ int main(int argc, char* argv[]) {
         });
     }
 
-    if (!cli.positionalArguments().isEmpty()) window.openFile(cli.positionalArguments().constFirst());
+    if (!args.input.isEmpty()) window.openFile(args.input);
     window.show();
-    if (cli.isSet(findOption)) window.openReplace(cli.value(findOption));
+    if (!args.find.isEmpty()) window.openReplace(args.find);
     return QApplication::exec();
 }
