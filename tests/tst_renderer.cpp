@@ -130,6 +130,13 @@ private slots:
         const auto r = renderer.render(parseOk("[A] -> [B]"), opt);
         QVERIFY(r.ok());
         QCOMPARE(r.image.pixelColor(0, 0).alpha(), 0);
+        QVERIFY(!r.svg.contains(Theme::light().background.name().toUtf8()));
+
+        // Без прозрачности фон темы есть и в SVG, а не только в растре.
+        opt.transparentBackground = false;
+        const auto filled = renderer.render(parseOk("[A] -> [B]"), opt);
+        QVERIFY(filled.svg.contains(Theme::light().background.name().toUtf8()));
+        QCOMPARE(filled.image.pixelColor(0, 0), Theme::light().background);
     }
 
     void specialCharactersAreEscaped() {

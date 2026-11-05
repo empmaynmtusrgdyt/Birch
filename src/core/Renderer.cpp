@@ -159,7 +159,9 @@ void applyGraphStyle(Agraph_t* g, const RenderOptions& opt, const QByteArray& fo
     const Theme& t = opt.theme;
 
     agattr(g, AGRAPH, cstr("rankdir"), cstr(opt.direction == LayoutDirection::LeftToRight ? "LR" : "TB"));
-    agattr(g, AGRAPH, cstr("bgcolor"), cstr("transparent"));  // фон заливаем сами
+    // Фон — в самом SVG, чтобы экспорт SVG тоже учитывал «Прозрачный фон».
+    const QByteArray background = opt.transparentBackground ? QByteArray("transparent") : color(t.background);
+    agattr(g, AGRAPH, cstr("bgcolor"), cstr(background.constData()));
     agattr(g, AGRAPH, cstr("pad"), cstr("0.3"));
     agattr(g, AGRAPH, cstr("nodesep"), cstr("0.45"));
     agattr(g, AGRAPH, cstr("ranksep"), cstr("0.5"));

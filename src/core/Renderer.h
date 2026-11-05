@@ -23,7 +23,7 @@ struct RenderOptions {
 };
 
 struct RenderResult {
-    QByteArray svg;  // SVG от Graphviz (прозрачный фон)
+    QByteArray svg;  // SVG от Graphviz; фон — цвет темы или прозрачный
     QImage image;    // растр; для пустой схемы — null
     QSizeF size;     // логический размер схемы в pt
     QString error;
