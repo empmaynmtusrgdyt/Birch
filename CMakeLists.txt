@@ -77,6 +77,8 @@ add_library(birch_core STATIC
     src/core/Parser.cpp
     src/core/Renderer.h
     src/core/Renderer.cpp
+    src/core/ShellCommand.h
+    src/core/ShellCommand.cpp
     src/core/Theme.h
     src/core/Theme.cpp
 )
@@ -122,6 +124,8 @@ qt_add_executable(Birch WIN32 MACOSX_BUNDLE
     src/app/RenderController.cpp
     src/ui/MainWindow.h
     src/ui/MainWindow.cpp
+    src/ui/InstallCommand.h
+    src/ui/InstallCommand.cpp
     src/ui/PreviewView.h
     src/ui/PreviewView.cpp
     src/ui/SyntaxHighlighter.h

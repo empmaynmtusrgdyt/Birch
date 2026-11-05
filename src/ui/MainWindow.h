@@ -153,6 +153,7 @@ private:
     QActionGroup* exportThemeGroup_ = nullptr;
     QAction* syntaxAct_ = nullptr;
     QAction* aboutAct_ = nullptr;
+    QAction* installCommandAct_ = nullptr;  // только macOS и AppImage
 
     // Состояние
     Parser parser_;

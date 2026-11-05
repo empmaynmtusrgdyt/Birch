@@ -8,11 +8,20 @@
 #include <QTimer>
 
 #include <cstdio>
+#include <cstring>
+
+#if defined(Q_OS_MACOS)
+#include <mach-o/dyld.h>
+#include <unistd.h>
+
+#include <climits>
+#include <cstdlib>
+#include <string>
+#endif
 #if defined(Q_OS_LINUX)
 #include <langinfo.h>
 
 #include <clocale>
-#include <cstring>
 #endif
 
 #include "core/CommandLine.h"
@@ -40,10 +49,29 @@ private:
     birch::MainWindow* window_;
 };
 
+#if defined(Q_OS_MACOS)
+// Запуск по ссылке (/usr/local/bin/birch → Birch.app/Contents/MacOS/Birch): Qt
+// ищет свои плагины и бандл по пути запуска, то есть рядом со ссылкой, и не
+// находит их. Перезапускаемся по настоящему пути; argv[0] остаётся «birch».
+void execRealPathIfLinked(char* argv[]) {
+    uint32_t size = 0;
+    _NSGetExecutablePath(nullptr, &size);
+    std::string path(size, '\0');
+    if (_NSGetExecutablePath(path.data(), &size) != 0) return;
+    path.resize(std::strlen(path.c_str()));
+    char real[PATH_MAX];
+    if (realpath(path.c_str(), real) == nullptr || path == real) return;
+    execv(real, argv);  // если не вышло — продолжаем как есть
+}
+#endif
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
     namespace cli = birch::cli;
+#if defined(Q_OS_MACOS)
+    execRealPathIfLinked(argv);
+#endif
 
     // Ключи разбираются до создания приложения: --help и --version работают
     // мгновенно и без экрана, а -o рисует схему без окна.

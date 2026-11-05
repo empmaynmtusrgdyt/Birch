@@ -7,6 +7,7 @@
 #include <QtTest>
 
 #include "core/CommandLine.h"
+#include "core/ShellCommand.h"
 #include "core/Theme.h"
 
 using namespace birch;
@@ -265,6 +266,58 @@ private slots:
         QCOMPARE(render(parseArgs({example("welcome.birch"), "-o", dir.filePath("нет/папки/a.png")}), "birch", errors),
                  int(kExitIoError));
         QVERIFY(errors.startsWith(QStringLiteral("birch: не удалось записать «")));
+    }
+    // --- команда birch в терминале (macOS и AppImage) ---------------------------
+
+    void shellCommandLink() {
+#if defined(Q_OS_WIN)
+        QSKIP("на Windows команду ставит установщик, ссылки не нужны");
+#else
+        using namespace birch::shell;
+        QTemporaryDir dir;
+        const QString target = dir.filePath("Birch");
+        const QString other = dir.filePath("other");
+        for (const QString& path : {target, other}) {
+            QFile f(path);
+            QVERIFY(f.open(QIODevice::WriteOnly));
+        }
+        // Папки ещё нет — createLink создаёт её сам.
+        const QString link = dir.filePath("local/bin/birch");
+        QCOMPARE(linkState(link, target), LinkState::Missing);
+
+        QString error;
+        QVERIFY2(createLink(link, target, &error), qPrintable(error));
+        QCOMPARE(linkState(link, target), LinkState::Ours);
+        QVERIFY(QFileInfo(link).isSymLink());
+        QVERIFY2(createLink(link, target, &error), qPrintable(error));  // повторно — без ошибки
+        QCOMPARE(linkState(link, target), LinkState::Ours);
+
+        // Ссылка на другую программу и битая ссылка — «чужое», но заменяется.
+        QVERIFY(createLink(link, other, &error));
+        QCOMPARE(linkState(link, target), LinkState::Other);
+        QVERIFY(QFile::remove(other));
+        QCOMPARE(linkState(link, target), LinkState::Other);
+        QVERIFY2(createLink(link, target, &error), qPrintable(error));
+        QCOMPARE(linkState(link, target), LinkState::Ours);
+
+        // Обычный файл на месте ссылки тоже заменяется.
+        QVERIFY(QFile::remove(link));
+        {
+            QFile f(link);
+            QVERIFY(f.open(QIODevice::WriteOnly));
+        }
+        QCOMPARE(linkState(link, target), LinkState::Other);
+        QVERIFY2(createLink(link, target, &error), qPrintable(error));
+        QCOMPARE(linkState(link, target), LinkState::Ours);
+#endif
+    }
+
+    void shellCommandPath() {
+        using birch::shell::directoryInPath;
+        QVERIFY(directoryInPath("/home/u/.local/bin", "/usr/bin:/home/u/.local/bin:/bin"));
+        QVERIFY(directoryInPath("/home/u/.local/bin", "/home/u/.local/bin/"));
+        QVERIFY(!directoryInPath("/home/u/.local/bin", "/usr/bin:/bin"));
+        QVERIFY(!directoryInPath("/home/u/.local/bin", ""));
     }
 };
 

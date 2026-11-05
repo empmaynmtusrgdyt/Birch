@@ -32,6 +32,7 @@
 #include "core/MermaidExporter.h"
 #include "ui/CodeEditor.h"
 #include "ui/FindBar.h"
+#include "ui/InstallCommand.h"
 #include "ui/PreviewView.h"
 #include "ui/SyntaxHighlighter.h"
 
@@ -334,6 +335,13 @@ void MainWindow::createActions() {
     syntaxAct_ = make(tr("Синтаксис…"), &MainWindow::showSyntaxHelp, {QKeySequence::HelpContents});
     aboutAct_ = make(tr("О программе Birch"), &MainWindow::showAbout);
     aboutAct_->setMenuRole(QAction::AboutRole);
+
+    if (canInstallShellCommand()) {
+        installCommandAct_ = new QAction(tr("Установить команду birch…"), this);
+        // На macOS — в меню программы, рядом с «О программе»
+        installCommandAct_->setMenuRole(QAction::ApplicationSpecificRole);
+        connect(installCommandAct_, &QAction::triggered, this, [this] { installShellCommand(this); });
+    }
 }
 
 void MainWindow::createMenus() {
@@ -373,6 +381,7 @@ void MainWindow::createMenus() {
 
     QMenu* help = menuBar()->addMenu(tr("Справка"));
     help->addActions({syntaxAct_, aboutAct_});
+    if (installCommandAct_) help->addAction(installCommandAct_);
 }
 
 void MainWindow::createToolBar() {
