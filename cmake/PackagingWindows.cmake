@@ -8,6 +8,10 @@
 option(BIRCH_DEPLOY_QT "При установке копировать Qt и другие библиотеки рядом с Birch.exe" ON)
 
 install(TARGETS Birch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+# Командная строка: birch.com в отдельной папке cmd — в PATH попадает только
+# она, а не DLL из bin. birch-path.ps1 добавляет её в PATH (установщик или вручную).
+install(TARGETS birch_console RUNTIME DESTINATION cmd)
+install(FILES packaging/windows/birch-path.ps1 DESTINATION .)
 install(FILES LICENSE DESTINATION . RENAME LICENSE.txt)
 install(FILES LICENSE-EXCEPTION DESTINATION . RENAME LICENSE-EXCEPTION.txt)
 
@@ -56,8 +60,11 @@ set(CPACK_NSIS_MUI_FINISHPAGE_RUN "Birch.exe")
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")  # страница лицензии в установщике
 
-# Файлы .birch открываются в Birch двойным щелчком
+# Файлы .birch открываются в Birch двойным щелчком; папка cmd — в PATH для всех
+# пользователей, чтобы команда birch сразу работала в cmd и PowerShell.
 set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS [=[
+  nsExec::ExecToLog 'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\birch-path.ps1" -Scope Machine'
+  Pop $0
   WriteRegStr HKCR ".birch" "" "Birch.Flowchart"
   WriteRegStr HKCR "Birch.Flowchart" "" "Birch Flowchart"
   WriteRegStr HKCR "Birch.Flowchart\DefaultIcon" "" "$INSTDIR\bin\Birch.exe,0"
@@ -65,6 +72,8 @@ set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS [=[
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 ]=])
 set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS [=[
+  nsExec::ExecToLog 'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\birch-path.ps1" -Remove -Scope Machine'
+  Pop $0
   DeleteRegKey HKCR "Birch.Flowchart"
   DeleteRegKey HKCR ".birch"
   System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'

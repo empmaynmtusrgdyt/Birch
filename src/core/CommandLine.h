@@ -77,6 +77,10 @@ int render(const Arguments& args, const QString& program, QString& errors);
 // из которой его запустили, чтобы вывод был виден. На других системах ничего не делает.
 void attachParentConsole();
 
+// Окно открыто: если Birch запущен через birch.com (Windows), тот перестаёт
+// ждать и освобождает консоль. На других системах ничего не делает.
+void releaseConsoleLauncher();
+
 // Печать в stdout/stderr в UTF-8.
 void printOut(const QString& text);
 void printErr(const QString& text);

@@ -175,6 +175,16 @@ elseif(WIN32)
     configure_file(packaging/windows/birch.rc.in "${CMAKE_CURRENT_BINARY_DIR}/birch.rc" @ONLY)
     target_sources(Birch PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/birch.rc")
     set_target_properties(Birch PROPERTIES OUTPUT_NAME "Birch")
+
+    # birch.com — консольная обёртка для командной строки (см. src/launcher).
+    # Без Qt и со встроенной средой выполнения MSVC: лежит отдельно от DLL.
+    add_executable(birch_console src/launcher/birch-com.cpp)
+    set_target_properties(birch_console PROPERTIES
+        OUTPUT_NAME "birch"
+        SUFFIX ".com"
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    birch_set_warnings(birch_console)
+    add_dependencies(Birch birch_console)
 else()
     # Linux: имя бинарника в нижнем регистре; если плагины Graphviz встроены, они
     # лежат вне стандартных путей (/usr/lib/.../graphviz) — сохраняем путь в RPATH.

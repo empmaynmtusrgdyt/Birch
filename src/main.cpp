@@ -166,6 +166,7 @@ int main(int argc, char* argv[]) {
 
     if (!args.input.isEmpty()) window.openFile(args.input);
     window.show();
+    cli::releaseConsoleLauncher();
     if (!args.find.isEmpty()) window.openReplace(args.find);
     return QApplication::exec();
 }

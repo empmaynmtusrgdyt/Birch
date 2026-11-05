@@ -3,6 +3,7 @@
 # перенаправляется в файлы (так же его получают скрипты).
 #
 # Использование: check-cli.ps1 C:\BirchTest\bin\Birch.exe
+#                check-cli.ps1 C:\BirchTest\cmd\birch.com
 param([Parameter(Mandatory)] [string] $Birch)
 $ErrorActionPreference = "Stop"
 
@@ -32,7 +33,8 @@ function Expect([int] $code, [int] $expected, [string] $what) {
 # --- справка и версия ---------------------------------------------------------
 Expect (Run @("--help")) 0 "--help"
 $help = Out
-if (-not $help.StartsWith("Использование: Birch ")) { Fail "--help: $($help.Split("`n")[0])" }
+# Имя — как вызвали: Birch.exe напрямую или birch через birch.com
+if (-not ($help -cmatch '^Использование: [Bb]irch ')) { Fail "--help: $($help.Split("`n")[0])" }
 Expect (Run @("-h")) 0 "-h"
 if ((Out) -ne $help) { Fail "-h и --help выводят разное" }
 
@@ -78,3 +80,4 @@ Expect (Run @("$work\нет такого.birch", "-o", "$work\x.png")) 2 "нет
 
 if ($failed) { exit 1 }
 Write-Host "Командная строка: все проверки пройдены"
+exit 0

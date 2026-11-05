@@ -196,7 +196,10 @@ Arguments parse(const QStringList& args) {
 
 QString programName(const QString& argv0) {
     const QString name = QFileInfo(argv0).fileName();
-    if (name.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive)) return name.chopped(4);
+    // Birch.exe напрямую или birch.com — консольная обёртка на Windows
+    if (name.endsWith(QStringLiteral(".exe"), Qt::CaseInsensitive)
+        || name.endsWith(QStringLiteral(".com"), Qt::CaseInsensitive))
+        return name.chopped(4);
     return name.isEmpty() ? QStringLiteral("birch") : name;
 }
 
@@ -336,6 +339,21 @@ void attachParentConsole() {
         if (!err) freopen_s(&f, "CONOUT$", "w", stderr);
     }
     SetConsoleOutputCP(CP_UTF8);
+#endif
+}
+
+void releaseConsoleLauncher() {
+#if defined(Q_OS_WIN)
+    // birch.com передаёт наследуемое событие через переменную среды.
+    const QByteArray value = qgetenv("BIRCH_WINDOW_EVENT");
+    if (value.isEmpty()) return;
+    qunsetenv("BIRCH_WINDOW_EVENT");
+    bool ok = false;
+    const qulonglong handle = value.toULongLong(&ok);
+    if (!ok) return;
+    const HANDLE event = reinterpret_cast<HANDLE>(static_cast<uintptr_t>(handle));
+    SetEvent(event);
+    CloseHandle(event);
 #endif
 }
 

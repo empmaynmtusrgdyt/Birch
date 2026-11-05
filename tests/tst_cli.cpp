@@ -137,6 +137,8 @@ private slots:
         QCOMPARE(programName("/usr/local/bin/birch"), QStringLiteral("birch"));
         QCOMPARE(programName("/Applications/Birch.app/Contents/MacOS/Birch"), QStringLiteral("Birch"));
         QCOMPARE(programName("C:/Program Files/Birch/bin/Birch.exe"), QStringLiteral("Birch"));
+        QCOMPARE(programName("C:/Program Files/Birch/cmd/birch.com"), QStringLiteral("birch"));
+        QCOMPARE(programName("birch"), QStringLiteral("birch"));  // набрано в cmd через birch.com
         QCOMPARE(programName(""), QStringLiteral("birch"));
     }
 

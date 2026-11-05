@@ -368,6 +368,9 @@ jobs:
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-cli.ps1 C:\BirchTest\bin\Birch.exe
+      - name: Команда birch в консоли (birch.com и PATH)
+        shell: pwsh
+        run: .github\scripts\check-console.ps1 C:\BirchTest
       - name: Снимки примера с рамками
         shell: pwsh
         run: |
@@ -436,6 +439,9 @@ jobs:
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-cli.ps1 C:\BirchTest\bin\Birch.exe
+      - name: Команда birch в консоли (birch.com и PATH)
+        shell: pwsh
+        run: .github\scripts\check-console.ps1 C:\BirchTest
       - name: Снимки примера с рамками
         shell: pwsh
         run: |
@@ -450,6 +456,16 @@ jobs:
           Shot "frames-light.png" @("--screenshot-theme", "light")
           Shot "frames-dark.png" @("--screenshot-theme", "dark")
           Shot "frames-mono.png" @("--screenshot-theme", "light", "--screenshot-monochrome")
+      - name: Удаление убирает birch из PATH
+        shell: pwsh
+        run: |
+          # _?= — удалять на месте и дождаться (иначе деинсталлятор копирует себя во временную папку)
+          $p = Start-Process C:\BirchTest\Uninstall.exe -ArgumentList "/S", "_?=C:\BirchTest" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "деинсталлятор завершился с кодом $($p.ExitCode)" }
+          $path = [Environment]::GetEnvironmentVariable("Path", "Machine")
+          if (($path -split ";") -contains "C:\BirchTest\cmd") { throw "после удаления C:\BirchTest\cmd осталась в PATH" }
+          if (Test-Path "C:\BirchTest\bin\Birch.exe") { throw "Birch.exe не удалён" }
+          "PATH после удаления чист"
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows-11
