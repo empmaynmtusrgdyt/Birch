@@ -33,6 +33,14 @@ if(BIRCH_DEPLOY_QT)
     foreach(_p IN LISTS CMAKE_PREFIX_PATH)
         list(APPEND _birch_lib_dirs "${_p}/lib")
     endforeach()
+    # macdeployqt кладёт только платформу cocoa, а рендеру из командной строки
+    # нужна offscreen — без экрана (по SSH, в CI). Qt она найдёт по rpath Birch.
+    # (В Homebrew плагин — ссылка, копируем сам файл.)
+    file(REAL_PATH "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_PLUGINS}/platforms/libqoffscreen.dylib"
+         _birch_offscreen)
+    install(FILES "${_birch_offscreen}"
+            DESTINATION Birch.app/Contents/PlugIns/platforms)
+
     install(CODE "set(_birch_prune_script \"${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/prune-bundle.cmake\")
                   set(BIRCH_LIB_DIRS \"${_birch_lib_dirs}\")")
 

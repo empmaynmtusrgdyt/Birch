@@ -2,11 +2,18 @@
 #include <QFileOpenEvent>
 #include <QIcon>
 #include <QLoggingCategory>
+
 #include <QStyle>
 #include <QFile>
 #include <QTimer>
 
 #include <cstdio>
+#if defined(Q_OS_LINUX)
+#include <langinfo.h>
+
+#include <clocale>
+#include <cstring>
+#endif
 
 #include "core/CommandLine.h"
 #include "ui/MainWindow.h"
@@ -63,6 +70,14 @@ int main(int argc, char* argv[]) {
         // (работает и по SSH, и в CI); на Windows у offscreen нет системных шрифтов.
 #if !defined(Q_OS_WIN)
         if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM")) qputenv("QT_QPA_PLATFORM", "offscreen");
+#endif
+#if defined(Q_OS_LINUX)
+        // В контейнерах и cron часто локаль «C» (ASCII): Qt ругается на неё в stderr
+        // и неверно читает русские имена файлов. Для рендера берём C.UTF-8.
+        if (std::setlocale(LC_ALL, "") == nullptr
+            || std::strcmp(nl_langinfo(CODESET), "UTF-8") != 0) {
+            qputenv("LC_ALL", "C.UTF-8");
+        }
 #endif
         // Служебные сообщения Qt о шрифтах в режиме без экрана — не для пользователя.
         QLoggingCategory::setFilterRules(QStringLiteral("qt.qpa.*.warning=false"));
