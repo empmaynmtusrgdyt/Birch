@@ -156,23 +156,20 @@ docs/%.svg: docs/%.birch
 	birch $< -o $@
 ```
 
-Как вызвать команду на каждой системе:
+Как получить команду `birch`:
 
-- **Linux** (`.deb`, Arch) — команда `birch` доступна сразу после установки. AppImage запускается так же: `./Birch-*.AppImage схема.birch -o схема.png`.
-- **macOS** — программа лежит внутри бандла. Короткая команда `birch` делается ссылкой:
+| Система | Что сделать |
+|---|---|
+| Windows (установщик) | ничего: команда работает сразу в новом окне cmd или PowerShell |
+| Debian, Ubuntu, Arch | ничего: команда есть сразу после установки пакета |
+| macOS | один раз: меню **Birch → Установить команду birch…** (спросит пароль администратора) |
+| AppImage | один раз: меню **Справка → Установить команду birch…** |
 
-  ```bash
-  sudo ln -s /Applications/Birch.app/Contents/MacOS/Birch /usr/local/bin/birch
-  ```
+Подробности:
 
-- **Windows** — `Birch.exe` оконное приложение, поэтому PowerShell не ждёт его завершения. Чтобы дождаться и получить код выхода:
-
-  ```powershell
-  $p = Start-Process Birch.exe -ArgumentList 'схема.birch','-o','схема.png' -Wait -PassThru -NoNewWindow
-  $p.ExitCode
-  ```
-
-  В `cmd` — `start /wait Birch.exe схема.birch -o схема.png`, код выхода — в `%ERRORLEVEL%`.
+- **Windows.** Установщик кладёт рядом с программой маленький консольный `birch.com` и добавляет его папку `C:\Program Files\Birch\cmd` в PATH; при удалении Birch она убирается из PATH. Консоль ждёт, пока схема нарисуется, и получает код выхода (`$LASTEXITCODE` в PowerShell, `%ERRORLEVEL%` в cmd). `birch схема.birch` без `-o` открывает окно и сразу возвращает консоль. В версии без установки (`.zip`) добавьте команду сами: `powershell -ExecutionPolicy Bypass -File birch-path.ps1` в папке программы.
+- **macOS.** Пункт меню создаёт ссылку `/usr/local/bin/birch` на программу внутри `Birch.app`. Перед этим Birch должен лежать в «Программах» и хотя бы раз открыться через «Открыть». Вручную то же самое: `sudo ln -sf /Applications/Birch.app/Contents/MacOS/Birch /usr/local/bin/birch`.
+- **AppImage.** Пункт меню создаёт ссылку `~/.local/bin/birch` на файл AppImage, пароль не нужен. Если переместите файл, выберите пункт ещё раз. Если папки `~/.local/bin` нет в PATH, программа подскажет, что добавить в `~/.bashrc`.
 
 ## Сборка из исходников
 
