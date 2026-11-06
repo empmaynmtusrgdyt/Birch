@@ -18,6 +18,9 @@ concurrency:
 env:
   QT_VERSION: "6.8.3"          # LTS; для Windows и AppImage
   GRAPHVIZ_WIN_VERSION: "16.1.0"
+  # Qt для пакета Windows 8.1: архив qt6windows7 той же версии, что QT_VERSION.
+  # Контрольная сумма закреплена: подменённый на GitHub архив не попадёт в пакет.
+  QT6WINDOWS7_SHA256: "2c825940e2a2dc83ced63a1553f9967efcfd1f71f8441e2fc30eb3a7e6473d86"
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -499,10 +502,94 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Тег v* -> черновик релиза. Публикуется вручную после проверки описания.
+  # Windows 8.1: та же сборка, но библиотеки Qt заменены версиями с исправлениями
+  # qt6windows7 (Qt 6 официально работает только на Windows 10+). Машин с Windows 8.1
+  # в GitHub нет: здесь проверяются таблицы импорта пакета и работа на Windows 10.
+  windows8:
+    name: Windows 8.1 (пакет)
+    runs-on: windows-2022
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - name: Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+      - name: Graphviz (официальная сборка MSVC)
+        shell: pwsh
+        run: |
+          $v = $env:GRAPHVIZ_WIN_VERSION
+          $url = "https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/$v/windows_10_cmake_Release_Graphviz-$v-win64.zip"
+          Invoke-WebRequest $url -OutFile "$env:RUNNER_TEMP\graphviz.zip"
+          Expand-Archive "$env:RUNNER_TEMP\graphviz.zip" -DestinationPath "$env:RUNNER_TEMP"
+          $root = "$env:RUNNER_TEMP\Graphviz-$v-win64"
+          "GRAPHVIZ_ROOT=$root" >> $env:GITHUB_ENV
+          "$root\bin" >> $env:GITHUB_PATH
+      - name: Qt для Windows 8.1 (qt6windows7)
+        shell: pwsh
+        run: |
+          $url = "https://github.com/crystalidea/qt6windows7/releases/download/v$env:QT_VERSION/qt6_x64_to_run_on_windows7.7z"
+          $archive = "$env:RUNNER_TEMP\qt6windows7.7z"
+          Invoke-WebRequest $url -OutFile $archive
+          $hash = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($hash -ne $env:QT6WINDOWS7_SHA256) { throw "контрольная сумма архива qt6windows7 не совпадает: $hash" }
+          7z x $archive -o"$env:RUNNER_TEMP\qt6windows7" -y | Out-Null
+          "QT6WINDOWS7_DIR=$env:RUNNER_TEMP\qt6windows7" >> $env:GITHUB_ENV
+      - name: Сборка и пакеты
+        run: |
+          cmake --preset windows -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" -DBIRCH_BUILD_TESTS=OFF `
+                -DBIRCH_QT_WINDOWS8_DIR="$env:QT6WINDOWS7_DIR"
+          cmake --build --preset windows
+          cd build\windows
+          cpack -C Release
+      - name: Пакет не требует ничего новее Windows 8.1
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem build\windows\Birch-*-windows8-x64.zip | Select-Object -First 1
+          Expand-Archive $zip.FullName -DestinationPath "$env:RUNNER_TEMP\pkg8"
+          $root = (Get-ChildItem "$env:RUNNER_TEMP\pkg8" -Directory | Select-Object -First 1).FullName
+          python .github\scripts\check-win81.py $root --qt-version $env:QT_VERSION
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Тихая установка и смоук-тест на Windows 10
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem build\windows\Birch-*-windows8-x64.exe | Select-Object -First 1
+          $p = Start-Process $installer.FullName -ArgumentList "/S", "/D=C:\BirchTest" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "установщик завершился с кодом $($p.ExitCode)" }
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM
+          $shot = Join-Path $PWD "screenshot-windows8-package.png"
+          $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                 -ArgumentList "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
+          if ($p.ExitCode -ne 0) { throw "Birch.exe завершился с кодом $($p.ExitCode)" }
+          if (-not (Test-Path $shot)) { throw "нет снимка" }
+      - name: Тема применяется ко всему окну
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
+      - name: Командная строка и команда birch в консоли
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
+          .github\scripts\check-console.ps1 C:\BirchTest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-windows8
+          path: |
+            build/windows/Birch-*-windows8-x64.exe
+            build/windows/Birch-*-windows8-x64.zip
+            screenshot-windows8-package.png
+
   release:
     name: Черновик релиза
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [macos, deb-install, arch, appimage, windows, windows-11]
+    needs: [macos, deb-install, arch, appimage, windows, windows-11, windows8]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -515,7 +602,8 @@ jobs:
         run: |
           mkdir release
           find artifacts -type f \( -name '*.dmg' -o -name '*.deb' -o -name '*.pkg.tar.zst' \
-               -o -name '*.AppImage' -o -name 'Birch-*-windows-x64.exe' -o -name 'Birch-*-windows-x64.zip' \) \
+               -o -name '*.AppImage' -o -name 'Birch-*-windows-x64.exe' -o -name 'Birch-*-windows-x64.zip' \
+               -o -name 'Birch-*-windows8-x64.exe' -o -name 'Birch-*-windows8-x64.zip' \) \
                -exec cp {} release/ \;
           ls -la release
           cd release && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt

@@ -11,6 +11,12 @@
 
 option(BIRCH_DEPLOY_QT "При установке копировать Qt и другие библиотеки рядом с Birch.exe" ON)
 
+# Пакет для Windows 8.1: папка с распакованным архивом qt6windows7 той же версии
+# Qt. Его библиотеки заменяют официальные (packaging/windows/replace-qt.cmake),
+# а универсальная среда выполнения C (UCRT) кладётся в пакет — в Windows 8.1
+# её нет без обновления KB2999226.
+set(BIRCH_QT_WINDOWS8_DIR "" CACHE PATH "Qt с исправлениями qt6windows7 — собрать пакет для Windows 8.1")
+
 install(TARGETS Birch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 # Командная строка: birch.com в отдельной папке cmd — в PATH попадает только
 # она, а не DLL из bin. birch-path.ps1 добавляет её в PATH (установщик или вручную).
@@ -38,7 +44,21 @@ if(BIRCH_DEPLOY_QT)
     endforeach()
 
     set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${CMAKE_INSTALL_BINDIR})
+    if(BIRCH_QT_WINDOWS8_DIR)
+        set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+    endif()
     include(InstallRequiredSystemLibraries)
+
+    if(BIRCH_QT_WINDOWS8_DIR)
+        file(TO_CMAKE_PATH "${BIRCH_QT_WINDOWS8_DIR}" _birch_qt8_dir)  # «\» в пути — не escape-последовательности
+        if(NOT EXISTS "${_birch_qt8_dir}/Qt6Core.dll")
+            message(FATAL_ERROR "В BIRCH_QT_WINDOWS8_DIR нет Qt6Core.dll: ${BIRCH_QT_WINDOWS8_DIR}")
+        endif()
+        # После windeployqt: install(SCRIPT) выше выполняется раньше
+        install(CODE "set(BIRCH_QT_WINDOWS8_DIR \"${_birch_qt8_dir}\")
+                      set(BIRCH_PACKAGE_ROOT \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+                      include(\"${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/replace-qt.cmake\")")
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------
@@ -50,7 +70,11 @@ find_program(BIRCH_MAKENSIS makensis PATHS "$ENV{${_birch_pf86}}/NSIS" "$ENV{Pro
 if(BIRCH_MAKENSIS)
     list(APPEND CPACK_GENERATOR "NSIS")
 endif()
-set(CPACK_PACKAGE_FILE_NAME "Birch-${PROJECT_VERSION}-windows-x64")
+if(BIRCH_QT_WINDOWS8_DIR)
+    set(CPACK_PACKAGE_FILE_NAME "Birch-${PROJECT_VERSION}-windows8-x64")
+else()
+    set(CPACK_PACKAGE_FILE_NAME "Birch-${PROJECT_VERSION}-windows-x64")
+endif()
 
 set(CPACK_PACKAGE_EXECUTABLES "Birch" "Birch")  # ярлык в меню «Пуск»
 set(CPACK_CREATE_DESKTOP_LINKS "Birch")
