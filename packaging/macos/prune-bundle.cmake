@@ -3,8 +3,10 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 # Убирает из Birch.app то, что macdeployqt (особенно Qt из Homebrew) копирует лишнего:
-#  - плагины, которые приложению не нужны и тянут QtQuick/QtPdf/QtQml;
-#  - фреймворки Qt, на которые после этого никто не ссылается;
+#  - плагины, которые приложению не нужны и тянут QtQuick/QtPdf/QtQml, и плагины
+#    форматов картинок, кроме SVG;
+#  - фреймворки Qt и библиотеки, на которые после этого никто не ссылается
+#    (например, OpenSSL от сетевого модуля);
 #  - абсолютные rpath (пути машины сборки): без них бандл гарантированно
 #    не подхватит библиотеки из /opt/homebrew, даже на машине разработчика.
 #  В конце проверяет, что бандл самодостаточен: все зависимости лежат внутри,
@@ -14,8 +16,18 @@
 set(_contents "${BIRCH_APP}/Contents")
 
 file(REMOVE_RECURSE
-    "${_contents}/PlugIns/platforminputcontexts"   # виртуальная клавиатура (QtQuick)
-    "${_contents}/PlugIns/imageformats/libqpdf.dylib")
+    "${_contents}/PlugIns/platforminputcontexts")  # виртуальная клавиатура (QtQuick)
+
+# Из форматов картинок Birch нужен только SVG (значки и предпросмотр); PNG встроен
+# в QtGui. Остальные плагины тянут libjpeg, libtiff, libwebp, JasPer, MNG и т. п.
+file(GLOB _birch_imageformats "${_contents}/PlugIns/imageformats/*.dylib")
+foreach(_plugin IN LISTS _birch_imageformats)
+    get_filename_component(_name "${_plugin}" NAME)
+    if(NOT _name STREQUAL "libqsvg.dylib")
+        message(STATUS "Удаляю ненужный плагин imageformats/${_name}")
+        file(REMOVE "${_plugin}")
+    endif()
+endforeach()
 
 # Все Mach-O файлы бандла: исполняемый файл, плагины, dylib и бинарники фреймворков.
 function(_birch_macho_files out)
@@ -31,7 +43,8 @@ function(_birch_macho_files out)
     set(${out} ${_all} PARENT_SCOPE)
 endfunction()
 
-# Повторяем, пока что-то удаляется: удаление одного фреймворка может «освободить» другой.
+# Удаляем фреймворки Qt и библиотеки, на которые никто не ссылается. Повторяем, пока
+# что-то удаляется: удаление одной библиотеки может «освободить» другую.
 set(_changed TRUE)
 while(_changed)
     set(_changed FALSE)
@@ -40,20 +53,28 @@ while(_changed)
     set(_refs "")
     foreach(_bin IN LISTS _files)
         execute_process(COMMAND otool -L "${_bin}" OUTPUT_VARIABLE _out ERROR_QUIET)
-        # Первая строка — сам файл, первая зависимость у фреймворка — его собственный id.
-        string(REGEX MATCHALL "Qt[A-Za-z0-9]+\\.framework" _found "${_out}")
         get_filename_component(_self "${_bin}" NAME)
+        # Первая строка — сам файл, первая зависимость у библиотеки — её собственный id.
+        string(REGEX MATCHALL "Qt[A-Za-z0-9]+\\.framework" _found "${_out}")
         list(REMOVE_ITEM _found "${_self}.framework")
         list(APPEND _refs ${_found})
+        string(REGEX MATCHALL "/(lib[^/ ]+\\.dylib) \\(" _found "${_out}")
+        foreach(_m IN LISTS _found)
+            string(REGEX REPLACE "/(lib[^/ ]+\\.dylib) \\(" "\\1" _lib "${_m}")
+            if(NOT _lib STREQUAL _self)
+                list(APPEND _refs "${_lib}")
+            endif()
+        endforeach()
     endforeach()
     list(REMOVE_DUPLICATES _refs)
 
-    file(GLOB _frameworks LIST_DIRECTORIES true "${_contents}/Frameworks/Qt*.framework")
-    foreach(_fw IN LISTS _frameworks)
-        get_filename_component(_name "${_fw}" NAME)
+    file(GLOB _unused LIST_DIRECTORIES true "${_contents}/Frameworks/Qt*.framework"
+                                            "${_contents}/Frameworks/lib*.dylib")
+    foreach(_item IN LISTS _unused)
+        get_filename_component(_name "${_item}" NAME)
         if(NOT _name IN_LIST _refs)
             message(STATUS "Удаляю неиспользуемый ${_name}")
-            file(REMOVE_RECURSE "${_fw}")
+            file(REMOVE_RECURSE "${_item}")
             set(_changed TRUE)
         endif()
     endforeach()
