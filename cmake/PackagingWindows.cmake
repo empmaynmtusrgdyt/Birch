@@ -27,10 +27,18 @@ install(FILES THIRD-PARTY-NOTICES.txt DESTINATION .)
 install(DIRECTORY licenses DESTINATION .)  # Qt (LGPL) и Graphviz (EPL) входят в пакет
 
 if(BIRCH_DEPLOY_QT)
+    # Только нужное: Birch рисует виджетами без OpenGL и не работает с сетью, а из
+    # форматов картинок ему нужен SVG (PNG встроен в QtGui). Без этих ключей
+    # windeployqt кладёт программный OpenGL (Mesa, ~20 МБ), компилятор шейдеров
+    # D3D, Qt6Network с плагинами TLS и сетевого статуса и плагины GIF/ICO/JPEG.
     qt_generate_deploy_app_script(
         TARGET Birch
         OUTPUT_SCRIPT _birch_deploy_script
-        NO_TRANSLATIONS)
+        NO_TRANSLATIONS
+        DEPLOY_TOOL_OPTIONS
+            --no-opengl-sw --no-system-d3d-compiler --no-system-dxc-compiler
+            --skip-plugin-types generic,networkinformation,tls
+            --exclude-plugins qgif,qico,qjpeg)
     install(SCRIPT ${_birch_deploy_script})
 
     get_filename_component(_birch_gv_libdir "${Graphviz_gvc_LIBRARY}" DIRECTORY)
