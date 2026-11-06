@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 # Проверяет командную строку Birch на настоящей сборке: справку и версию,
 # коды выхода, рендер в PNG, SVG и Mermaid, чтение со стандартного ввода.
 # Запускается без экрана и без QT_QPA_PLATFORM — так, как на сервере или в CI.

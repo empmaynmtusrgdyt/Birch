@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 # Собирает переносимый Birch-<версия>-x86_64.AppImage: Qt, Graphviz и его
 # плагины лежат внутри, поэтому файл запускается и там, где системный Qt
 # старше 6.5 (Ubuntu 24.04, Debian 12).

@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 # Проверяет, что тёмная и светлая темы применяются ко всему окну Birch на
 # Windows: запускает Birch.exe с --screenshot-theme и --screenshot и сверяет яркость фона
 # редактора на снимке (Birch пишет её в <снимок>.txt).

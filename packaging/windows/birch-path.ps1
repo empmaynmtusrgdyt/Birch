@@ -1,4 +1,8 @@
-﻿# Добавляет папку cmd с birch.com в PATH или убирает её оттуда.
+﻿# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# Добавляет папку cmd с birch.com в PATH или убирает её оттуда.
 #
 #   birch-path.ps1                    добавить для текущего пользователя
 #   birch-path.ps1 -Scope Machine     добавить для всех (нужны права администратора)

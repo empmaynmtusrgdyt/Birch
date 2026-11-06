@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 # Убирает из Birch.app то, что macdeployqt (особенно Qt из Homebrew) копирует лишнего:
 #  - плагины, которые приложению не нужны и тянут QtQuick/QtPdf/QtQml;
 #  - фреймворки Qt, на которые после этого никто не ссылается;
