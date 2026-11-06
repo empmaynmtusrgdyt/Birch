@@ -397,6 +397,10 @@ jobs:
       - name: Команда birch в консоли (birch.com и PATH)
         shell: pwsh
         run: .github\scripts\check-console.ps1 C:\BirchTest
+      - name: Кириллица в окне консоли
+        shell: pwsh
+        timeout-minutes: 5
+        run: .github\scripts\check-console-text.ps1 C:\BirchTest
       - name: Снимки примера с рамками
         shell: pwsh
         run: |
@@ -468,6 +472,10 @@ jobs:
       - name: Команда birch в консоли (birch.com и PATH)
         shell: pwsh
         run: .github\scripts\check-console.ps1 C:\BirchTest
+      - name: Кириллица в окне консоли
+        shell: pwsh
+        timeout-minutes: 5
+        run: .github\scripts\check-console-text.ps1 C:\BirchTest
       - name: Снимки примера с рамками
         shell: pwsh
         run: |
@@ -594,6 +602,12 @@ jobs:
           Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-console.ps1 C:\BirchTest
+      - name: Кириллица в окне консоли
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
+          .github\scripts\check-console-text.ps1 C:\BirchTest
       - uses: actions/upload-artifact@v4
         with:
           name: package-windows8
