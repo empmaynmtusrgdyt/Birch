@@ -18,6 +18,22 @@ Qt подключается динамически — отдельными би
 поэтому его можно заменить своей сборкой Qt той же версии.
 
 
+Qt в пакете для Windows 8.1
+---------------------------
+В пакете Birch-…-windows8-x64 библиотеки Qt Core, Gui, Widgets, Network и
+плагины platforms, styles и imageformats заменены версиями той же версии Qt
+с исправлениями проекта qt6windows7, которые позволяют Qt 6 работать на
+Windows 7, 8 и 8.1. Это изменённый Qt, он распространяется по той же
+лицензии GNU LGPL версии 3.
+Исправления и описание изменений: https://github.com/crystalidea/qt6windows7
+Исходный код Qt: https://download.qt.io/official_releases/qt/
+Остальные модули Qt (Svg, SvgWidgets и их плагины) — из официальной сборки.
+
+В тот же пакет входит универсальная среда выполнения C (UCRT, файлы
+ucrtbase.dll и api-ms-win-*.dll) из Windows SDK — Microsoft разрешает
+распространять её вместе с программами.
+
+
 Graphviz
 --------
 Авторы: AT&T Labs Research и другие участники проекта Graphviz.

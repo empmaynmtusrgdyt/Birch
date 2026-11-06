@@ -553,8 +553,16 @@ jobs:
           $root = (Get-ChildItem "$env:RUNNER_TEMP\pkg8" -Directory | Select-Object -First 1).FullName
           python .github\scripts\check-win81.py $root --qt-version $env:QT_VERSION
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          "PKG8=$root" >> $env:GITHUB_ENV
+      - name: Запуск в разных режимах (при зависании — стеки потоков)
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          .github\scripts\diagnose-hang.ps1 "$env:PKG8\bin\Birch.exe"
       - name: Тихая установка и смоук-тест на Windows 10
         shell: pwsh
+        timeout-minutes: 10
         run: |
           $installer = Get-ChildItem build\windows\Birch-*-windows8-x64.exe | Select-Object -First 1
           $p = Start-Process $installer.FullName -ArgumentList "/S", "/D=C:\BirchTest" -Wait -PassThru

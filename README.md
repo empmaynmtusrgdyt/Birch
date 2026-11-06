@@ -38,6 +38,7 @@
 | macOS 15+ (Apple Silicon) | `Birch-<версия>-macos-arm64.dmg` | открыть и перетащить Birch в «Программы» |
 | Windows 10/11 (x64) | `Birch-<версия>-windows-x64.exe` | запустить установщик |
 | Windows, без установки | `Birch-<версия>-windows-x64.zip` | распаковать, запустить `bin\Birch.exe` |
+| Windows 8.1 (x64) | `Birch-<версия>-windows8-x64.exe` или `.zip` | как для Windows 10/11 |
 | Debian 13 | `birch_<версия>_amd64_debian13.deb` | `sudo apt install ./birch_*_debian13.deb` |
 | Ubuntu 26.04 | `birch_<версия>_amd64_ubuntu26.04.deb` | `sudo apt install ./birch_*_ubuntu26.04.deb` |
 | Arch Linux, Manjaro | `birch-<версия>-1-x86_64.pkg.tar.zst` | `sudo pacman -U birch-*.pkg.tar.zst` |
@@ -47,6 +48,7 @@
 
 - **macOS.** Приложение подписано ad-hoc, а не сертификатом Apple Developer ID, поэтому при первом запуске macOS его заблокирует. Откройте его через контекстное меню → **«Открыть»** или выполните `xattr -dr com.apple.quarantine /Applications/Birch.app`.
 - **Windows.** Установщик не подписан сертификатом, поэтому SmartScreen может показать «Windows защитила ваш компьютер»: нажмите **«Подробнее» → «Выполнить в любом случае»**. Установщик создаёт ярлыки в «Пуске» и на рабочем столе и связывает файлы `.birch` с Birch.
+- **Windows 8.1.** Qt 6 официально работает только на Windows 10 и новее, поэтому для Windows 8.1 есть отдельный пакет `windows8`: в нём библиотеки Qt заменены версиями с исправлениями проекта [qt6windows7](https://github.com/crystalidea/qt6windows7), а среда выполнения C (UCRT) лежит рядом с программой. В остальном он такой же, как обычный. На Windows 10/11 ставьте обычный пакет.
 - **Arch.** Пакет можно собрать и самостоятельно: скачайте [`packaging/arch/PKGBUILD`](packaging/arch/PKGBUILD) и выполните `makepkg -si`.
 - **AppImage.** Qt и Graphviz находятся внутри файла, поэтому он работает и там, где системный Qt старше 6.5. Если файл не запускается с ошибкой про FUSE, установите `libfuse2t64` (Ubuntu 24.04) или `libfuse2` (22.04), либо запустите его с ключом `--appimage-extract-and-run`.
 
@@ -238,6 +240,7 @@ ctest --preset windows
 
 - **macOS.** `macdeployqt` копирует Qt и все библиотеки, включая Graphviz, внутрь `Birch.app`. Затем `packaging/macos/prune-bundle.cmake` удаляет лишнее, докопирует то, что `macdeployqt` пропустил, и **проверяет, что бандл самодостаточен**: если какой-то библиотеки не хватает, упаковка завершится ошибкой. В конце — ad-hoc подпись.
 - **Windows.** `windeployqt` копирует Qt; из Graphviz берутся только 10 нужных DLL (около 1,4 МБ) вместо ~60 из официальной сборки; среда выполнения MSVC кладётся рядом с программой.
+- **Windows 8.1.** То же, но с `-DBIRCH_QT_WINDOWS8_DIR=<папка>` (распакованный архив [qt6windows7](https://github.com/crystalidea/qt6windows7/releases) той же версии Qt): `packaging/windows/replace-qt.cmake` заменяет им библиотеки Qt, а UCRT кладётся в пакет. В CI `.github/scripts/check-win81.py` разбирает таблицы импорта всех `.exe` и `.dll` пакета и проверяет, что ничего не требует функций новее Windows 8.1 и что подменённый Qt совместим со сборкой. Машин с Windows 8.1 в CI нет, поэтому запуск на самой Windows 8.1 проверяется вручную.
 - **Linux.** Стандартная раскладка `/usr`: бинарник `birch`, `.desktop`-файл, иконка, MIME-тип для `.birch`.
 
 ## Непрерывная интеграция и релизы
@@ -247,6 +250,7 @@ ctest --preset windows
 - `.deb` ставится через `apt` в чистые Debian 13 и Ubuntu 26.04;
 - пакет Arch собирается `makepkg` и ставится через `pacman`;
 - установщик Windows запускается в тихом режиме, затем установленный `Birch.exe` стартует с чистым `PATH`;
+- пакет для Windows 8.1 проверяется по таблицам импорта (ничего новее Windows 8.1) и так же ставится и запускается на Windows 10;
 - приложение из `.dmg` запускается прямо из смонтированного образа;
 - AppImage запускается в Xvfb.
 
