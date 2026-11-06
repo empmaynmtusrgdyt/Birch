@@ -19,6 +19,9 @@ from pathlib import Path
 # (шаблон имени файла, заголовок раздела в THIRD-PARTY-NOTICES.txt)
 COMPONENTS = [
     (r"birch\.(exe|com)", None),  # сам Birch — LICENSE
+    # Деинсталлятор, который создаёт NSIS: лицензия NSIS (zlib/libpng) разрешает
+    # распространять созданные им установщики без ограничений
+    (r"uninstall\.exe", None),
     (r"qt6[a-z0-9]*\.dll", "Qt 6"),
     (r"q[a-z0-9_]+\.dll", "Qt 6"),  # плагины Qt в plugins\*
     (r"(gvc|cgraph|cdt|pathplan|xdot|gvplugin_[a-z_]+)\.dll", "Graphviz"),
