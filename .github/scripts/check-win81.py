@@ -12,7 +12,7 @@
     так ловится несовместимость подменённого Qt со сборкой Birch;
   * ни одна функция не появилась только в Windows 10 — такой импорт не даёт
     программе даже запуститься («точка входа не найдена»);
-  * версия подсистемы в заголовке не новее Windows 8.1 (6.3);
+  * версия подсистемы в заголовке .exe и .com не новее Windows 8.1 (6.3);
   * с --qt-version: библиотеки Qt ровно этой версии (подменённые и
     оставшиеся должны совпадать, иначе программа упадёт).
 
@@ -199,7 +199,10 @@ def main() -> int:
             continue
         if not pe.is64:
             problems.append(f"{rel}: 32-битный файл в 64-битном пакете")
-        if pe.subsystem_version > MAX_SUBSYSTEM:
+        # Версию подсистемы Windows проверяет только у программ. У библиотек её
+        # не смотрит: например, UCRT из Windows SDK помечена 10.0, но Microsoft
+        # поддерживает её поставку вместе с программой для Windows 7–8.1.
+        if path.suffix.lower() in (".exe", ".com") and pe.subsystem_version > MAX_SUBSYSTEM:
             problems.append(f"{rel}: версия подсистемы {pe.subsystem_version[0]}."
                             f"{pe.subsystem_version[1]} новее Windows 8.1")
         is_qt = path.name.lower().startswith("qt6") or path.parent.name.lower() in QT_PLUGIN_DIRS
