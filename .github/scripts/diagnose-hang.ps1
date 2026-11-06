@@ -9,6 +9,8 @@
 # Использование: diagnose-hang.ps1 C:\путь\к\Birch.exe
 param([Parameter(Mandatory)] [string] $Birch)
 $ErrorActionPreference = "Stop"
+# Только плагины из пакета, как у пользователя
+Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $example = "$root\resources\examples\welcome.birch"
@@ -43,7 +45,6 @@ function Try-Run([string] $name, [string[]] $arguments, [string] $platform) {
 
 Try-Run "version" @("--version") ""
 Try-Run "render-cli" @($example, "-o", "$work\cli.png") ""
-Try-Run "window-offscreen" @("--screenshot", "$work\offscreen.png", $example) "offscreen"
 Try-Run "window" @("--screenshot", "$work\window.png", $example) ""
 
 if ($hung) { exit 1 }

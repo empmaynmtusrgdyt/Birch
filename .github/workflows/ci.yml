@@ -559,6 +559,8 @@ jobs:
         timeout-minutes: 15
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          # Плагины официального Qt из install-qt-action не должны попасть в программу с Qt для Windows 8.1
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
           .github\scripts\diagnose-hang.ps1 "$env:PKG8\bin\Birch.exe"
       - name: Тихая установка и смоук-тест на Windows 10
         shell: pwsh
@@ -568,6 +570,8 @@ jobs:
           $p = Start-Process $installer.FullName -ArgumentList "/S", "/D=C:\BirchTest" -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "установщик завершился с кодом $($p.ExitCode)" }
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          # Плагины официального Qt из install-qt-action не должны попасть в программу с Qt для Windows 8.1
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
           Remove-Item Env:QT_QPA_PLATFORM
           $shot = Join-Path $PWD "screenshot-windows8-package.png"
           $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
@@ -578,12 +582,16 @@ jobs:
         shell: pwsh
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          # Плагины официального Qt из install-qt-action не должны попасть в программу с Qt для Windows 8.1
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
       - name: Командная строка и команда birch в консоли
         shell: pwsh
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
+          # Плагины официального Qt из install-qt-action не должны попасть в программу с Qt для Windows 8.1
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-console.ps1 C:\BirchTest
       - uses: actions/upload-artifact@v4
