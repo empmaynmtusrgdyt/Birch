@@ -100,7 +100,9 @@ jobs:
           $app --screenshot-theme light --screenshot frames-light.png resources/examples/frames.birch
           $app --screenshot-theme dark --screenshot frames-dark.png resources/examples/frames.birch
           $app --screenshot-theme light --screenshot-monochrome --screenshot frames-mono.png resources/examples/frames.birch
-          hdiutil detach /tmp/birch-dmg
+          # Образ иногда ещё занят системой (например, Spotlight) — повторяем, потом принудительно
+          for i in 1 2 3; do hdiutil detach /tmp/birch-dmg && exit 0; sleep 5; done
+          hdiutil detach -force /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
           name: package-macos
