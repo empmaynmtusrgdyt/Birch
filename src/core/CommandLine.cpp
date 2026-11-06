@@ -10,13 +10,16 @@
 #include <QRegularExpression>
 #include <QSaveFile>
 
+#include <algorithm>
 #include <cstdio>
+#include <string>
 
 #include "core/MermaidExporter.h"
 #include "core/Parser.h"
 #include "core/Renderer.h"
 
 #if defined(Q_OS_WIN)
+#include <io.h>
 #include <windows.h>
 #include <shellapi.h>
 #endif
@@ -49,6 +52,27 @@ QString dashed(const QString& name) {
 }
 
 void write(FILE* stream, const QString& text) {
+#if defined(Q_OS_WIN)
+    // В консоль — текстом UTF-16 через WriteConsoleW: так кириллица видна на любой
+    // Windows и при любой кодовой странице. Консоль Windows 8.1 плохо понимает
+    // UTF-8 даже с SetConsoleOutputCP(CP_UTF8) и показывает вместо кириллицы мусор.
+    std::fflush(stream);
+    const intptr_t os = _get_osfhandle(_fileno(stream));
+    const HANDLE console = reinterpret_cast<HANDLE>(os);
+    DWORD mode = 0;
+    if (os != -1 && GetConsoleMode(console, &mode)) {
+        const std::wstring wide = text.toStdWString();
+        size_t pos = 0;
+        while (pos < wide.size()) {
+            const DWORD chunk = static_cast<DWORD>(std::min<size_t>(wide.size() - pos, 8192));
+            DWORD written = 0;
+            if (!WriteConsoleW(console, wide.data() + pos, chunk, &written, nullptr) || written == 0) break;
+            pos += written;
+        }
+        return;
+    }
+#endif
+    // В файлы и каналы — UTF-8
     const QByteArray bytes = text.toUtf8();
     std::fwrite(bytes.constData(), 1, static_cast<size_t>(bytes.size()), stream);
     std::fflush(stream);
@@ -341,7 +365,6 @@ void attachParentConsole() {
         if (!out) freopen_s(&f, "CONOUT$", "w", stdout);
         if (!err) freopen_s(&f, "CONOUT$", "w", stderr);
     }
-    SetConsoleOutputCP(CP_UTF8);
 #endif
 }
 

@@ -85,7 +85,7 @@ void attachParentConsole();
 // ждать и освобождает консоль. На других системах ничего не делает.
 void releaseConsoleLauncher();
 
-// Печать в stdout/stderr в UTF-8.
+// Печать в stdout/stderr: в консоль Windows — UTF-16 (WriteConsoleW), иначе UTF-8.
 void printOut(const QString& text);
 void printErr(const QString& text);
 

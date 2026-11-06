@@ -51,7 +51,7 @@ bool isConsole(HANDLE h) {
 }
 
 // Файл или канал передаём Birch.exe как есть. Консоль — нет: Birch.exe сам
-// подключится к ней (AttachConsole) и включит UTF-8.
+// подключится к ней (AttachConsole) и будет писать в неё через WriteConsoleW.
 HANDLE passThrough(DWORD id) {
     const HANDLE h = GetStdHandle(id);
     if (h == nullptr || h == INVALID_HANDLE_VALUE || isConsole(h)) return nullptr;
@@ -114,16 +114,12 @@ int wmain() {
     }
     CloseHandle(pi.hThread);
 
-    // Birch.exe переключает консоль на UTF-8 — после него возвращаем как было.
-    const UINT outputCodePage = GetConsoleOutputCP();
-
     const HANDLE waitFor[] = {pi.hProcess, windowOpened};
     const DWORD count = windowOpened != nullptr ? 2 : 1;
     const DWORD which = WaitForMultipleObjects(count, waitFor, FALSE, INFINITE);
 
     DWORD code = 0;
     if (which == WAIT_OBJECT_0) GetExitCodeProcess(pi.hProcess, &code);
-    if (outputCodePage != 0) SetConsoleOutputCP(outputCodePage);
     CloseHandle(pi.hProcess);
     if (windowOpened != nullptr) CloseHandle(windowOpened);
     return static_cast<int>(code);
