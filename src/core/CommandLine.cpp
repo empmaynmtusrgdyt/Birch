@@ -56,20 +56,28 @@ void write(FILE* stream, const QString& text) {
     // В консоль — текстом UTF-16 через WriteConsoleW: так кириллица видна на любой
     // Windows и при любой кодовой странице. Консоль Windows 8.1 плохо понимает
     // UTF-8 даже с SetConsoleOutputCP(CP_UTF8) и показывает вместо кириллицы мусор.
+    //
+    // Консоль узнаём по типу файла, а не через GetConsoleMode: тому нужен доступ
+    // на чтение, а CONOUT$ после freopen открыт только на запись — проверка не
+    // проходила, и текст уходил в UTF-8. Тип «символьное устройство» бывает и у NUL,
+    // поэтому если WriteConsoleW не сработал, пишем как в файл.
     std::fflush(stream);
     const intptr_t os = _get_osfhandle(_fileno(stream));
     const HANDLE console = reinterpret_cast<HANDLE>(os);
-    DWORD mode = 0;
-    if (os != -1 && GetConsoleMode(console, &mode)) {
+    if (os != -1 && GetFileType(console) == FILE_TYPE_CHAR) {
         const std::wstring wide = text.toStdWString();
         size_t pos = 0;
+        bool ok = true;
         while (pos < wide.size()) {
             const DWORD chunk = static_cast<DWORD>(std::min<size_t>(wide.size() - pos, 8192));
             DWORD written = 0;
-            if (!WriteConsoleW(console, wide.data() + pos, chunk, &written, nullptr) || written == 0) break;
+            if (!WriteConsoleW(console, wide.data() + pos, chunk, &written, nullptr) || written == 0) {
+                ok = false;
+                break;
+            }
             pos += written;
         }
-        return;
+        if (ok || pos > 0) return;  // если часть уже в консоли — не повторяем её
     }
 #endif
     // В файлы и каналы — UTF-8
