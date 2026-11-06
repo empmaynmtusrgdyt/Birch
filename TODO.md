@@ -475,8 +475,7 @@ birch: ключ «--theme» работает только вместе с -o
 ```
 birch (Birch) 0.6.0
 Copyright (C) 2026 авторы Birch.
-Лицензия GPLv3: GNU GPL версии 3 <https://gnu.org/licenses/gpl.html>
-с дополнительным разрешением для Graphviz (см. LICENSE-EXCEPTION).
+Лицензия MPL 2.0: Mozilla Public License 2.0 <https://mozilla.org/MPL/2.0/>
 Это свободное ПО: вы можете изменять и распространять его.
 НИКАКИХ ГАРАНТИЙ не предоставляется в пределах, допускаемых законом.
 

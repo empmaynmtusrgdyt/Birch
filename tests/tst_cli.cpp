@@ -162,7 +162,8 @@ private slots:
         const QStringList lines = versionText("1.2.3").split(u'\n');
         QCOMPARE(lines[0], QStringLiteral("birch (Birch) 1.2.3"));  // эту строку разбирают скрипты
         QCOMPARE(lines[1], QStringLiteral("Copyright (C) 2026 Marth Scoobert."));
-        QVERIFY(lines.join(u'\n').contains(QStringLiteral("GPLv3")));
+        QVERIFY(lines.join(u'\n').contains(QStringLiteral("Mozilla Public License 2.0")));
+        QVERIFY(!lines.join(u'\n').contains(QStringLiteral("GPL")));
         QVERIFY(lines.join(u'\n').contains(QStringLiteral("Qt %1").arg(QString::fromLatin1(qVersion()))));
         QVERIFY(lines.join(u'\n').contains(QStringLiteral("Graphviz ")));
         for (const QString& line : lines) QVERIFY2(line.size() <= 80, qPrintable(line));

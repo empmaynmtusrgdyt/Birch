@@ -345,6 +345,11 @@ jobs:
           $p = Start-Process $installer.FullName -ArgumentList "/S", "/D=C:\BirchTest" -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "установщик завершился с кодом $($p.ExitCode)" }
           if (-not (Test-Path "Registry::HKEY_CLASSES_ROOT\.birch")) { throw "нет связи с файлами .birch" }
+          foreach ($f in "LICENSE.txt", "THIRD-PARTY-NOTICES.txt", "licenses\LGPL-3.0.txt", "licenses\EPL-2.0.txt") {
+            if (-not (Test-Path "C:\BirchTest\$f")) { throw "в пакете нет $f" }
+          }
+          if (Select-String -Path C:\BirchTest\LICENSE.txt -Pattern "Mozilla Public License Version 2.0" -Quiet) { "Лицензия: MPL 2.0" }
+          else { throw "LICENSE.txt — не MPL 2.0" }
 
           # Без Qt и Graphviz из окружения сборки: все DLL должны быть в пакете.
           # Настоящая платформа windows, а не offscreen — её windeployqt и кладёт.

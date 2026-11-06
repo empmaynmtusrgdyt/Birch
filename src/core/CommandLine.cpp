@@ -244,8 +244,7 @@ QString versionText(const QString& version) {
     return QStringLiteral(
                "birch (Birch) %1\n"
                "Copyright (C) 2026 Marth Scoobert.\n"
-               "Лицензия GPLv3: GNU GPL версии 3 <https://gnu.org/licenses/gpl.html>\n"
-               "с дополнительным разрешением для Graphviz (см. LICENSE-EXCEPTION).\n"
+               "Лицензия MPL 2.0: Mozilla Public License 2.0 <https://mozilla.org/MPL/2.0/>\n"
                "Это свободное ПО: вы можете изменять и распространять его.\n"
                "НИКАКИХ ГАРАНТИЙ не предоставляется в пределах, допускаемых законом.\n"
                "\n"

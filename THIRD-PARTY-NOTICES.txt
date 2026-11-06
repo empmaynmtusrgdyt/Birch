@@ -1,0 +1,34 @@
+Сторонние компоненты Birch
+==========================
+
+Birch распространяется по Mozilla Public License 2.0 (файл LICENSE).
+
+В готовые пакеты Birch для macOS, Windows и AppImage входят библиотеки
+других проектов. Они распространяются по своим лицензиям, тексты которых
+лежат в папке licenses.
+
+
+Qt 6
+----
+Авторы: The Qt Company Ltd. и другие участники проекта Qt.
+Лицензия: GNU Lesser General Public License версии 3 — licenses/LGPL-3.0.txt.
+  LGPL дополняет GNU General Public License версии 3 — licenses/GPL-3.0.txt.
+Исходный код: https://download.qt.io/official_releases/qt/
+Qt подключается динамически — отдельными библиотеками рядом с программой,
+поэтому его можно заменить своей сборкой Qt той же версии.
+
+
+Graphviz
+--------
+Авторы: AT&T Labs Research и другие участники проекта Graphviz.
+Лицензия: Eclipse Public License 2.0 — licenses/EPL-2.0.txt.
+Исходный код: https://gitlab.com/graphviz/graphviz
+Используются библиотеки gvc, cgraph, cdt, pathplan и xdot и плагины
+dot_layout и core; плагины могут быть встроены в программу.
+
+
+Прочие библиотеки
+-----------------
+Вместе с Qt и Graphviz в пакеты входят библиотеки, от которых они зависят
+(например, Expat и zlib в пакете для Windows). Каждая из них
+распространяется по своей лицензии; Birch их не изменяет.

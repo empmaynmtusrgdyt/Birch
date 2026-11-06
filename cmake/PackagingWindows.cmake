@@ -13,7 +13,8 @@ install(TARGETS Birch RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(TARGETS birch_console RUNTIME DESTINATION cmd)
 install(FILES packaging/windows/birch-path.ps1 DESTINATION .)
 install(FILES LICENSE DESTINATION . RENAME LICENSE.txt)
-install(FILES LICENSE-EXCEPTION DESTINATION . RENAME LICENSE-EXCEPTION.txt)
+install(FILES THIRD-PARTY-NOTICES.txt DESTINATION .)
+install(DIRECTORY licenses DESTINATION .)  # Qt (LGPL) и Graphviz (EPL) входят в пакет
 
 if(BIRCH_DEPLOY_QT)
     qt_generate_deploy_app_script(

@@ -162,9 +162,12 @@ birch_set_warnings(Birch)
 if(APPLE)
     # Бандл: иконка, Info.plist (в т.ч. тип файлов .birch)
     set(BIRCH_ICNS "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/app.icns")
-    set(BIRCH_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE-EXCEPTION")
+    # Лицензия Birch и лицензии Qt и Graphviz, которые входят в бандл
+    set(BIRCH_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}/THIRD-PARTY-NOTICES.txt")
+    file(GLOB BIRCH_THIRD_PARTY_LICENSES "${CMAKE_CURRENT_SOURCE_DIR}/licenses/*.txt")
     set_source_files_properties("${BIRCH_ICNS}" ${BIRCH_LICENSE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    target_sources(Birch PRIVATE "${BIRCH_ICNS}" ${BIRCH_LICENSE})
+    set_source_files_properties(${BIRCH_THIRD_PARTY_LICENSES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/licenses)
+    target_sources(Birch PRIVATE "${BIRCH_ICNS}" ${BIRCH_LICENSE} ${BIRCH_THIRD_PARTY_LICENSES})
     set_target_properties(Birch PROPERTIES
         OUTPUT_NAME                        "Birch"
         MACOSX_BUNDLE_INFO_PLIST           "${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/Info.plist.in"

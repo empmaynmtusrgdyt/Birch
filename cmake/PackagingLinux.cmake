@@ -15,7 +15,9 @@ install(FILES resources/icons/app.svg
 install(FILES packaging/linux/birch-mime.xml
         DESTINATION ${CMAKE_INSTALL_DATADIR}/mime/packages
         RENAME birch.xml)
-install(FILES LICENSE LICENSE-EXCEPTION DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/birch)
+# Лицензия Birch и лицензии библиотек, которые входят в AppImage
+install(FILES LICENSE THIRD-PARTY-NOTICES.txt DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/birch)
+install(DIRECTORY licenses DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/birch)
 
 set(BIRCH_MAINTAINER "Birch Maintainers <birch@users.noreply.github.com>"
     CACHE STRING "Контакт для пакета .deb")
