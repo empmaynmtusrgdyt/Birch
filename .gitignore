@@ -6,3 +6,6 @@ compile_commands.json
 .vscode/
 .idea/
 .cache/
+
+# Кэш Python от скриптов проверки
+__pycache__/
