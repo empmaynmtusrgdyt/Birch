@@ -55,11 +55,14 @@ export VERSION="$(sed -n 's/^ *VERSION \([0-9.]*\)$/\1/p' "$root/CMakeLists.txt"
 export APPIMAGE_EXTRACT_AND_RUN=1
 
 cd "$build"
+# Сначала только раскладываем библиотеки и плагины Qt…
 "$tools/linuxdeploy-x86_64.AppImage" \
     --appdir "$appdir" \
     --desktop-file "$appdir/usr/share/applications/birch.desktop" \
     --icon-file "$appdir/usr/share/icons/hicolor/scalable/apps/birch.svg" \
-    --plugin qt \
-    --output appimage
+    --plugin qt
+# …затем собираем лицензии всего, что попало в usr/lib, и только потом упаковываем.
+"$root/packaging/linux/collect-licenses.sh" "$appdir"
+"$tools/linuxdeploy-x86_64.AppImage" --appdir "$appdir" --output appimage
 
 echo "Готово: $(ls "$build"/Birch*.AppImage)"
