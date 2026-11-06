@@ -46,6 +46,8 @@ if(BIRCH_DEPLOY_QT)
             DESTINATION Birch.app/Contents/PlugIns/platforms)
 
     install(CODE "set(_birch_prune_script \"${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/prune-bundle.cmake\")
+                  set(_birch_licenses_script \"${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/collect-licenses.cmake\")
+                  set(BIRCH_SOURCE_DIR \"${CMAKE_CURRENT_SOURCE_DIR}\")
                   set(BIRCH_LIB_DIRS \"${_birch_lib_dirs}\")")
 
     # macdeployqt переписывает пути в бинарниках, и подпись становится недействительной.
@@ -55,6 +57,7 @@ if(BIRCH_DEPLOY_QT)
         set(_app "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/Birch.app")
         set(BIRCH_APP "${_app}")
         include("${_birch_prune_script}")
+        include("${_birch_licenses_script}")
         message(STATUS "Ad-hoc подпись: ${_app}")
         execute_process(COMMAND codesign --force --deep --sign - "${_app}"
                         RESULT_VARIABLE _rc)
