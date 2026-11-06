@@ -43,8 +43,40 @@ Graphviz
 dot_layout и core; плагины могут быть встроены в программу.
 
 
-Прочие библиотеки
------------------
-Вместе с Qt и Graphviz в пакеты входят библиотеки, от которых они зависят
-(например, Expat и zlib в пакете для Windows). Каждая из них
-распространяется по своей лицензии; Birch их не изменяет.
+Библиотеки в пакетах для macOS и AppImage
+-----------------------------------------
+Вместе с Qt и Graphviz в эти пакеты входят библиотеки, от которых они зависят:
+FreeType, HarfBuzz, ICU, GLib, PCRE2, libpng, zstd, D-Bus, библиотеки X11 и
+другие. Их точный список с версиями и лицензиями собирается автоматически при
+упаковке из пакетов, откуда они взяты, — вместе с текстами лицензий:
+  macOS:    Birch.app/Contents/Resources/licenses/LIBRARIES.txt
+            (пакеты Homebrew, тексты — в licenses/homebrew)
+  AppImage: usr/share/doc/birch/licenses/LIBRARIES.txt
+            (пакеты Ubuntu, тексты — в licenses/ubuntu)
+В AppImage библиотеки ICU взяты из сборки Qt: лицензия — licenses/ICU.txt.
+Birch эти библиотеки не изменяет.
+
+
+Expat
+-----
+Используется Graphviz в пакете для Windows (libexpat.dll).
+Авторы: Thai Open Source Software Center Ltd, Clark Cooper и разработчики Expat.
+Лицензия: MIT — licenses/Expat.txt.
+Исходный код: https://github.com/libexpat/libexpat
+
+
+zlib
+----
+Используется Graphviz в пакете для Windows (zlib1.dll).
+Авторы: Jean-loup Gailly и Mark Adler.
+Лицензия: zlib — licenses/zlib.txt.
+Исходный код: https://zlib.net
+
+
+Среда выполнения Microsoft Visual C++
+-------------------------------------
+В пакетах для Windows лежат библиотеки среды выполнения Microsoft Visual C++
+(msvcp140*.dll, vcruntime140*.dll, concrt140.dll), а в пакете для Windows 8.1
+ещё и универсальная среда выполнения C (ucrtbase.dll, api-ms-win-*.dll).
+Microsoft разрешает распространять их вместе с программами, собранными
+Visual Studio («Distributable Code» в лицензии Visual Studio и Windows SDK).

@@ -82,6 +82,11 @@ jobs:
           grep -q "^find_bar_fits=1" find-macos.png.txt || { echo "::error::Панель поиска не помещается"; exit 1; }
       - name: Командная строка
         run: .github/scripts/check-cli.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
+      - name: Лицензии всех библиотек бандла
+        run: |
+          list=/tmp/birch-dmg/Birch.app/Contents/Resources/licenses/LIBRARIES.txt
+          test -s "$list" || { echo "::error::нет $list"; exit 1; }
+          grep -c "  Библиотеки:" "$list" | xargs echo "Пакетов Homebrew со своими лицензиями:"
       - name: Команда birch по ссылке (как после «Установить команду birch…»)
         run: |
           mkdir -p /tmp/birch-cmd
@@ -268,6 +273,11 @@ jobs:
           grep -q "^find_bar_fits=1" find-appimage.png.txt || { echo "::error::Панель поиска не помещается"; exit 1; }
       - name: Командная строка AppImage (без экрана)
         run: APPIMAGE_EXTRACT_AND_RUN=1 .github/scripts/check-cli.sh "$(ls build/appimage/Birch*.AppImage)"
+      - name: Лицензии всех библиотек AppImage
+        run: |
+          list=build/appimage/AppDir/usr/share/doc/birch/licenses/LIBRARIES.txt
+          test -s "$list" || { echo "::error::нет $list"; exit 1; }
+          grep -c "  Библиотеки:" "$list" | xargs echo "Пакетов Ubuntu со своими лицензиями:"
       - name: Команда birch по ссылке на AppImage (как после «Установить команду birch…»)
         run: |
           mkdir -p /tmp/birch-cmd
@@ -371,6 +381,9 @@ jobs:
           if (-not (Test-Path $shot)) { throw "нет снимка" }
           Get-ChildItem C:\BirchTest\bin -Filter *.dll | Measure-Object -Property Length -Sum |
             ForEach-Object { "DLL: $($_.Count) шт., $([math]::Round($_.Sum / 1MB, 1)) МБ" }
+      - name: Лицензии всех библиотек пакета
+        shell: pwsh
+        run: python .github\scripts\check-windows-licenses.py C:\BirchTest
       - name: Тема применяется ко всему окну
         shell: pwsh
         run: |
@@ -562,6 +575,8 @@ jobs:
           python .github\scripts\check-win81.py $root --qt-version $env:QT_VERSION
           if ($LASTEXITCODE -ne 0) { exit 1 }
           "PKG8=$root" >> $env:GITHUB_ENV
+          python .github\scripts\check-windows-licenses.py $root
+          if ($LASTEXITCODE -ne 0) { exit 1 }
       - name: Запуск в разных режимах (при зависании — стеки потоков)
         shell: pwsh
         timeout-minutes: 15

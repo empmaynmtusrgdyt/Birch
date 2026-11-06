@@ -242,6 +242,7 @@ ctest --preset windows
 - **Windows.** `windeployqt` копирует Qt; из Graphviz берутся только 10 нужных DLL (около 1,4 МБ) вместо ~60 из официальной сборки; среда выполнения MSVC кладётся рядом с программой.
 - **Windows 8.1.** То же, но с `-DBIRCH_QT_WINDOWS8_DIR=<папка>` (распакованный архив [qt6windows7](https://github.com/crystalidea/qt6windows7/releases) той же версии Qt): `packaging/windows/replace-qt.cmake` заменяет им библиотеки Qt, а UCRT кладётся в пакет. В CI `.github/scripts/check-win81.py` разбирает таблицы импорта всех `.exe` и `.dll` пакета и проверяет, что ничего не требует функций новее Windows 8.1 и что подменённый Qt совместим со сборкой. Машин с Windows 8.1 в CI нет, поэтому запуск на самой Windows 8.1 проверяется вручную.
 - **Linux.** Стандартная раскладка `/usr`: бинарник `birch`, `.desktop`-файл, иконка, MIME-тип для `.birch`.
+- **Лицензии библиотек.** В пакеты для macOS и AppImage лицензии всех вложенных библиотек собираются автоматически: `packaging/macos/collect-licenses.cmake` берёт их из пакетов Homebrew, `packaging/linux/collect-licenses.sh` — из пакетов Ubuntu; сводка — в `LIBRARIES.txt` рядом с текстами. Для Windows `.github/scripts/check-windows-licenses.py` проверяет, что каждая DLL описана в `THIRD-PARTY-NOTICES.txt`. Библиотека без лицензии — ошибка сборки.
 
 ## Непрерывная интеграция и релизы
 
