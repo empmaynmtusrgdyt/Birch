@@ -15,9 +15,23 @@ namespace birch::i18n {
 
 namespace {
 
-QString primary(const QString& tag) {
-    // «ru-RU», «ru_RU», «en-Latn-US» → «ru», «en»
-    return tag.section(QRegularExpression(QStringLiteral("[-_]")), 0, 0).toLower();
+// Подходящий тегу язык из доступных: тот же язык и та же письменность. Регион
+// важен, только если есть выбор: «pt-PT» получит pt_BR, «zh-Hans-CN» — zh_CN, а
+// «zh-Hant-TW» (традиционные иероглифы) упрощённый китайский не получит.
+QString match(const QString& tag, const QStringList& available) {
+    // «ru_RU.UTF-8», «sr_RS@latin» → «ru_RU», «sr_RS»
+    const QString name = tag.section(QRegularExpression(QStringLiteral("[.@]")), 0, 0);
+    if (name.isEmpty()) return {};
+    const QLocale wanted(name);
+    if (wanted.language() == QLocale::C || wanted.language() == QLocale::AnyLanguage) return {};
+    QString sameLanguage;
+    for (const QString& code : available) {
+        const QLocale locale(code);
+        if (locale.language() != wanted.language() || locale.script() != wanted.script()) continue;
+        if (locale.territory() == wanted.territory()) return code;
+        if (sameLanguage.isEmpty()) sameLanguage = code;
+    }
+    return sameLanguage;
 }
 
 QString g_current;
@@ -44,11 +58,9 @@ QString nativeName(const QString& code) {
 }
 
 QString choose(const QString& preferred, const QStringList& uiLanguages, const QStringList& available) {
-    const QString wanted = primary(preferred);
-    if (available.contains(wanted)) return wanted;
+    if (const QString code = match(preferred, available); !code.isEmpty()) return code;
     for (const QString& tag : uiLanguages) {
-        const QString code = primary(tag);
-        if (available.contains(code)) return code;
+        if (const QString code = match(tag, available); !code.isEmpty()) return code;
     }
     const QString fallback = QString::fromLatin1(kFallbackLanguage);
     return available.contains(fallback) ? fallback : QString::fromLatin1(kSourceLanguage);

@@ -102,11 +102,16 @@ const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
 }  // namespace keys
 
-// Пример на языке интерфейса: :/examples/<имя>.<язык>.birch, а для исходного
-// языка и языков без своего примера — :/examples/<имя>.birch
+// Пример на языке интерфейса: :/examples/<имя>.<язык>.birch. Если у языка нет
+// своего примера — английский, а для исходного языка — :/examples/<имя>.birch.
 QString examplePath(const QString& name) {
-    const QString localized = QStringLiteral(":/examples/%1.%2.birch").arg(name, i18n::current());
-    return QFile::exists(localized) ? localized : QStringLiteral(":/examples/%1.birch").arg(name);
+    const QString current = i18n::current();
+    if (current == QLatin1String(i18n::kSourceLanguage)) return QStringLiteral(":/examples/%1.birch").arg(name);
+    for (const QString& code : {current, QString::fromLatin1(i18n::kFallbackLanguage)}) {
+        const QString path = QStringLiteral(":/examples/%1.%2.birch").arg(name, code);
+        if (QFile::exists(path)) return path;
+    }
+    return QStringLiteral(":/examples/%1.birch").arg(name);
 }
 
 QString readResourceText(const QString& path) {

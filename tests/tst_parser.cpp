@@ -150,10 +150,14 @@ private slots:
         QTest::addColumn<int>("nodes");
         QTest::addColumn<int>("edges");
         QTest::addColumn<int>("groups");
-        QTest::newRow("welcome") << "welcome.birch" << 6 << 6 << 0;
-        QTest::newRow("welcome.en") << "welcome.en.birch" << 6 << 6 << 0;
-        QTest::newRow("frames") << "frames.birch" << 9 << 10 << 2;
-        QTest::newRow("frames.en") << "frames.en.birch" << 9 << 10 << 2;
+        // Все примеры, на всех языках: перевод примера — та же схема.
+        const QStringList files = QDir(QStringLiteral(BIRCH_EXAMPLES_DIR)).entryList({"*.birch"}, QDir::Files, QDir::Name);
+        QVERIFY(files.size() >= 4);
+        for (const QString& file : files) {
+            if (file.startsWith("welcome.")) QTest::newRow(qPrintable(file)) << file << 6 << 6 << 0;
+            else if (file.startsWith("frames.")) QTest::newRow(qPrintable(file)) << file << 9 << 10 << 2;
+            else QFAIL(qPrintable("неизвестный пример " + file));
+        }
     }
     void bundledExamplesAreValid() {
         QFETCH(QString, file);

@@ -164,6 +164,10 @@ qt_add_executable(Birch WIN32 MACOSX_BUNDLE
     src/ui/SyntaxHighlighter.cpp
 )
 
+# Примеры схем: welcome.birch и frames.birch на исходном языке и
+# welcome.<код>.birch, frames.<код>.birch — для языков интерфейса.
+file(GLOB BIRCH_EXAMPLES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/resources/examples/*.birch")
 qt_add_resources(Birch "birch_resources"
     PREFIX "/"
     BASE resources
@@ -180,10 +184,7 @@ qt_add_resources(Birch "birch_resources"
         resources/icons/render.svg
         resources/icons/zoom-in.svg
         resources/icons/zoom-out.svg
-        resources/examples/welcome.birch
-        resources/examples/welcome.en.birch
-        resources/examples/frames.birch
-        resources/examples/frames.en.birch
+        ${BIRCH_EXAMPLES}
 )
 
 target_link_libraries(Birch PRIVATE birch_core birch_editor Qt6::Widgets Qt6::Svg Qt6::SvgWidgets)
