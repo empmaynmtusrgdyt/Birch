@@ -23,14 +23,9 @@ namespace {
 // Больше совпадений не ищем: на огромном тексте с «.» поиск иначе подвиснет.
 constexpr int kMaxMatches = 10000;
 
-// «1 совпадение», «2 совпадения», «5 совпадений»
-QString matchesText(int n) {
-    const int mod10 = n % 10;
-    const int mod100 = n % 100;
-    if (mod10 == 1 && mod100 != 11) return FindBar::tr("%1 совпадение").arg(n);
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return FindBar::tr("%1 совпадения").arg(n);
-    return FindBar::tr("%1 совпадений").arg(n);
-}
+// «1 совпадение», «2 совпадения», «5 совпадений» — формы для каждого языка
+// берутся из перевода (для русского — translations/birch_ru.ts)
+QString matchesText(int n) { return FindBar::tr("%n совпадений", nullptr, n); }
 
 QToolButton* toolButton(const QString& text, const QString& toolTip, QWidget* parent) {
     auto* b = new QToolButton(parent);

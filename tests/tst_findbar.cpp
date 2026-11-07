@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QTest>
 
+#include "core/Language.h"
 #include "ui/CodeEditor.h"
 #include "ui/FindBar.h"
 
@@ -36,6 +37,9 @@ class TestFindBar : public QObject {
     Q_OBJECT
 
 private slots:
+    // Тексты проверяются по-русски: формы «совпадение/совпадения/совпадений» — из перевода
+    void initTestCase() { birch::i18n::install("ru"); }
+
     // --- поиск ----------------------------------------------------------------
 
     void countsMatches() {
