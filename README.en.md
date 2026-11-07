@@ -6,9 +6,9 @@ An app for **macOS, Windows and Linux** that draws flowcharts from a text descri
 
 | Light theme | Dark theme |
 |---|---|
-| ![Light theme](docs/screenshot-light.png) | ![Dark theme](docs/screenshot-dark.png) |
+| ![Light theme](docs/screenshot-light-en.png) | ![Dark theme](docs/screenshot-dark-en.png) |
 | **Light theme, B/W** | **Dark theme, B/W** |
-| ![Light theme, black and white](docs/screenshot-mono-light.png) | ![Dark theme, black and white](docs/screenshot-mono-dark.png) |
+| ![Light theme, black and white](docs/screenshot-mono-light-en.png) | ![Dark theme, black and white](docs/screenshot-mono-dark-en.png) |
 
 The app looks the same on macOS, Windows and Linux.
 
