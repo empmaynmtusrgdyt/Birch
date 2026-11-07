@@ -50,7 +50,7 @@ private slots:
     }
     void recognizesEveryExample() {
         QFETCH(QString, file);
-        const QString text = read(file);
+        const QString text = read(file).remove(u'\r');  // git на Windows может выложить файл с \r\n
         const QString name = file.section(u'.', 0, 0);
         QCOMPARE(examples::untouchedName(kDir, text), name);
         QCOMPARE(examples::untouchedName(kDir, QString(text).replace("\n", "\r\n")), name);

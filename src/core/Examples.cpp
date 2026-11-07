@@ -13,9 +13,10 @@ namespace birch::examples {
 
 namespace {
 
-// Сравниваем без учёта переводов строк Windows и пустых строк по краям.
+// Сравниваем без учёта переводов строк Windows (в том числе в самих примерах,
+// если git выложил их с \r\n) и пустых строк по краям.
 QString normalized(QString text) {
-    text.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    text.remove(u'\r');
     return text.trimmed();
 }
 
