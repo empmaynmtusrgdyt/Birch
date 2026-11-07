@@ -10,6 +10,8 @@
 #                check-cli.ps1 C:\BirchTest\cmd\birch.com
 param([Parameter(Mandatory)] [string] $Birch)
 $ErrorActionPreference = "Stop"
+# Основные проверки — по-русски; английский проверяется отдельно в конце
+$env:BIRCH_LANGUAGE = "ru"
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $version = (Select-String -Path "$root\CMakeLists.txt" -Pattern '^\s*VERSION ([0-9.]+)$').Matches[0].Groups[1].Value
@@ -82,6 +84,16 @@ if (Test-Path "$work\bad.png") { Fail "при ошибке в схеме фай�
 
 Expect (Run @("$work\нет такого.birch", "-o", "$work\x.png")) 2 "нет входного файла"
 
+# --- английский --------------------------------------------------------------
+$env:BIRCH_LANGUAGE = "en"
+Expect (Run @("--help")) 0 "--help по-английски"
+if (-not ((Out) -cmatch '^Usage: [Bb]irch ')) { Fail "--help по-английски: $((Out).Split("`n")[0])" }
+Expect (Run @("--colour")) 3 "--colour по-английски"
+if ((Err) -notmatch "unrecognized option '--colour'") { Fail "--colour по-английски: $(Err)" }
+Expect (Run @("$work\bad.birch", "-o", "$work\bad.png")) 1 "ошибка в схеме по-английски"
+if ((Err) -notmatch "bad\.birch:1:8: error: Unclosed") { Fail "ошибка в схеме по-английски: $(Err)" }
+$env:BIRCH_LANGUAGE = "ru"
+
 if ($failed) { exit 1 }
-Write-Host "Командная строка: все проверки пройдены"
+Write-Host "Командная строка: все проверки пройдены (по-русски и по-английски)"
 exit 0

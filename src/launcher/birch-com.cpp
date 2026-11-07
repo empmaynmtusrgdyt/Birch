@@ -74,6 +74,16 @@ void printError(const std::wstring& text) {
     WriteFile(h, utf8.data(), static_cast<DWORD>(utf8.size()), &written, nullptr);
 }
 
+// Язык сообщений — как у Birch: BIRCH_LANGUAGE, иначе язык интерфейса Windows.
+// Переводов Qt здесь нет, поэтому обе фразы — прямо в коде.
+bool russian() {
+    wchar_t value[16] = {};
+    if (GetEnvironmentVariableW(L"BIRCH_LANGUAGE", value, 16) > 0) {
+        return (value[0] == L'r' || value[0] == L'R') && (value[1] == L'u' || value[1] == L'U');
+    }
+    return PRIMARYLANGID(GetUserDefaultUILanguage()) == LANG_RUSSIAN;
+}
+
 }  // namespace
 
 int wmain() {
@@ -82,7 +92,8 @@ int wmain() {
     std::wstring exe = dir + L"\\Birch.exe";
     if (!isFile(exe)) exe = dir + L"\\..\\bin\\Birch.exe";
     if (!isFile(exe)) {
-        printError(L"birch: не найден Birch.exe (искал рядом с birch.com и в ..\\bin)\n");
+        printError(russian() ? L"birch: не найден Birch.exe (искал рядом с birch.com и в ..\\bin)\n"
+                             : L"birch: Birch.exe not found (looked next to birch.com and in ..\\bin)\n");
         return 2;
     }
 
@@ -108,8 +119,9 @@ int wmain() {
     PROCESS_INFORMATION pi{};
     if (!CreateProcessW(exe.c_str(), commandLine.data(), nullptr, nullptr, TRUE, 0, nullptr,
                         nullptr, &si, &pi)) {
-        printError(L"birch: не удалось запустить " + exe + L" (код " +
-                   std::to_wstring(GetLastError()) + L")\n");
+        const std::wstring code = std::to_wstring(GetLastError());
+        printError(russian() ? L"birch: не удалось запустить " + exe + L" (код " + code + L")\n"
+                             : L"birch: cannot start " + exe + L" (error " + code + L")\n");
         return 2;
     }
     CloseHandle(pi.hThread);

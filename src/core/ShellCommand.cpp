@@ -4,6 +4,7 @@
 
 #include "core/ShellCommand.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -23,19 +24,19 @@ bool createLink(const QString& link, const QString& target, QString* error) {
     const QFileInfo info(link);
     const QString dir = info.absolutePath();
     if (!QDir().mkpath(dir)) {
-        if (error) *error = QStringLiteral("не удалось создать папку «%1»").arg(dir);
+        if (error) *error = QCoreApplication::translate("ShellCommand", "не удалось создать папку «%1»").arg(dir);
         return false;
     }
     if (info.exists() || info.isSymLink()) {
         QFile old(link);
         if (!old.remove()) {
-            if (error) *error = QStringLiteral("не удалось заменить «%1»: %2").arg(link, old.errorString());
+            if (error) *error = QCoreApplication::translate("ShellCommand", "не удалось заменить «%1»: %2").arg(link, old.errorString());
             return false;
         }
     }
     QFile file(target);
     if (!file.link(link)) {
-        if (error) *error = QStringLiteral("не удалось создать «%1»: %2").arg(link, file.errorString());
+        if (error) *error = QCoreApplication::translate("ShellCommand", "не удалось создать «%1»: %2").arg(link, file.errorString());
         return false;
     }
     return true;

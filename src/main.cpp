@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
+#include <QCoreApplication>
 #include <QApplication>
 #include <QFileOpenEvent>
 #include <QIcon>
@@ -175,7 +176,7 @@ int main(int argc, char* argv[]) {
 
     // Служебные ключи для снимков окна в CI.
     if (!args.screenshotTheme.isEmpty() && !window.setThemeByName(args.screenshotTheme)) {
-        cli::printErr(cli::usageErrorText(program, QStringLiteral("неверное значение «%1» для ключа «--screenshot-theme»")
+        cli::printErr(cli::usageErrorText(program, QCoreApplication::translate("CommandLine", "неверное значение «%1» для ключа «--screenshot-theme»")
                                                        .arg(args.screenshotTheme)));
         return cli::kExitUsage;
     }

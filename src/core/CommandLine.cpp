@@ -4,6 +4,7 @@
 
 #include "core/CommandLine.h"
 
+#include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QFile>
 #include <QFileInfo>
@@ -170,14 +171,14 @@ Arguments parse(const QStringList& args) {
     }
     if (!ok) {
         const QStringList unknown = p.unknownOptionNames();
-        if (!unknown.isEmpty()) return fail(QStringLiteral("неизвестный ключ «%1»").arg(dashed(unknown.first())));
+        if (!unknown.isEmpty()) return fail(QCoreApplication::translate("CommandLine", "неизвестный ключ «%1»").arg(dashed(unknown.first())));
         // Иначе не хватает значения: «Missing value after '-o'.»
         const QRegularExpressionMatch m = QRegularExpression(QStringLiteral("'([^']+)'")).match(p.errorText());
-        return fail(QStringLiteral("ключу «%1» нужно значение").arg(m.hasMatch() ? m.captured(1) : QString()));
+        return fail(QCoreApplication::translate("CommandLine", "ключу «%1» нужно значение").arg(m.hasMatch() ? m.captured(1) : QString()));
     }
 
     const QStringList files = p.positionalArguments();
-    if (files.size() > 1) return fail(QStringLiteral("лишний аргумент «%1»: можно указать только один файл").arg(files[1]));
+    if (files.size() > 1) return fail(QCoreApplication::translate("CommandLine", "лишний аргумент «%1»: можно указать только один файл").arg(files[1]));
     a.input = files.value(0);
 
     a.screenshot = p.value(screenshot);
@@ -193,33 +194,33 @@ Arguments parse(const QStringList& args) {
         };
         for (const auto& [option, name] : pictureOptions) {
             if (p.isSet(*option))
-                return fail(QStringLiteral("ключ «%1» работает только вместе с -o").arg(QLatin1String(name)));
+                return fail(QCoreApplication::translate("CommandLine", "ключ «%1» работает только вместе с -o").arg(QLatin1String(name)));
         }
         if (a.input == QStringLiteral("-"))
-            return fail(QStringLiteral("чтение схемы со стандартного ввода («-») работает только вместе с -o"));
+            return fail(QCoreApplication::translate("CommandLine", "чтение схемы со стандартного ввода («-») работает только вместе с -o"));
         a.mode = Mode::Gui;
         return a;
     }
 
     a.mode = Mode::Render;
     a.output = p.value(output);
-    if (a.output.isEmpty()) return fail(QStringLiteral("ключу «-o» нужно значение"));
+    if (a.output.isEmpty()) return fail(QCoreApplication::translate("CommandLine", "ключу «-o» нужно значение"));
     const QString suffix = QFileInfo(a.output).suffix().toLower();
     if (suffix != QStringLiteral("png") && suffix != QStringLiteral("svg") && suffix != QStringLiteral("mmd"))
-        return fail(QStringLiteral("неизвестный формат файла «%1»: поддерживаются .png, .svg и .mmd").arg(a.output));
-    if (a.input.isEmpty()) return fail(QStringLiteral("не указан файл схемы"));
+        return fail(QCoreApplication::translate("CommandLine", "неизвестный формат файла «%1»: поддерживаются .png, .svg и .mmd").arg(a.output));
+    if (a.input.isEmpty()) return fail(QCoreApplication::translate("CommandLine", "не указан файл схемы"));
 
     if (p.isSet(theme)) {
         const QString t = p.value(theme);
         if (t != QStringLiteral("light") && t != QStringLiteral("dark"))
-            return fail(QStringLiteral("неверное значение «%1» для ключа «--theme»: допустимы light и dark").arg(t));
+            return fail(QCoreApplication::translate("CommandLine", "неверное значение «%1» для ключа «--theme»: допустимы light и dark").arg(t));
         a.dark = t == QStringLiteral("dark");
     }
     if (p.isSet(scale)) {
         bool isNumber = false;
         const int n = p.value(scale).toInt(&isNumber);
         if (!isNumber || n < 1 || n > kMaxScale)
-            return fail(QStringLiteral("неверное значение «%1» для ключа «--scale»: нужно целое число от 1 до %2")
+            return fail(QCoreApplication::translate("CommandLine", "неверное значение «%1» для ключа «--scale»: нужно целое число от 1 до %2")
                             .arg(p.value(scale))
                             .arg(kMaxScale));
         a.scale = n;
@@ -242,8 +243,7 @@ QString programName(const QString& argv0) {
 // --- тексты ------------------------------------------------------------------------
 
 QString helpText(const QString& program) {
-    return QStringLiteral(
-               "Использование: %1 [ПАРАМЕТР]... [ФАЙЛ]\n"
+    return QCoreApplication::translate("CommandLine", "Использование: %1 [ПАРАМЕТР]... [ФАЙЛ]\n"
                "Открывает ФАЙЛ (.birch) в редакторе или, с ключом -o, рисует по нему\n"
                "блок-схему в файл, не открывая окна.\n"
                "Если ФАЙЛ — «-», текст схемы читается со стандартного ввода.\n"
@@ -277,19 +277,19 @@ QString helpText(const QString& program) {
 }
 
 QString versionText(const QString& version) {
-    return QStringLiteral(
-               "birch (Birch) %1\n"
-               "Copyright (C) 2026 Marth Scoobert.\n"
+    // Первые две строки не переводятся: первую разбирают скрипты
+    return QStringLiteral("birch (Birch) %1\nCopyright (C) 2026 Marth Scoobert.\n").arg(version)
+         + QCoreApplication::translate("CommandLine",
                "Лицензия MPL 2.0: Mozilla Public License 2.0 <https://mozilla.org/MPL/2.0/>\n"
                "Это свободное ПО: вы можете изменять и распространять его.\n"
                "НИКАКИХ ГАРАНТИЙ не предоставляется в пределах, допускаемых законом.\n"
                "\n"
-               "Используются: Qt %2, Graphviz %3\n")
-        .arg(version, QString::fromLatin1(qVersion()), Renderer::graphvizVersion());
+               "Используются: Qt %1, Graphviz %2\n")
+               .arg(QString::fromLatin1(qVersion()), Renderer::graphvizVersion());
 }
 
 QString usageErrorText(const QString& program, const QString& error) {
-    return QStringLiteral("%1: %2\nПопробуйте «%1 --help» для получения дополнительной информации.\n")
+    return QCoreApplication::translate("CommandLine", "%1: %2\nПопробуйте «%1 --help» для получения дополнительной информации.\n")
         .arg(program, error);
 }
 
@@ -302,7 +302,7 @@ int render(const Arguments& a, const QString& program, QString& errors) {
     QFile in;
     const bool opened = fromStdin ? in.open(stdin, QIODevice::ReadOnly) : (in.setFileName(a.input), in.open(QIODevice::ReadOnly));
     if (!opened) {
-        errors += QStringLiteral("%1: не удалось открыть «%2»: %3\n").arg(program, a.input, in.errorString());
+        errors += QCoreApplication::translate("CommandLine", "%1: не удалось открыть «%2»: %3\n").arg(program, a.input, in.errorString());
         return kExitIoError;
     }
     const QString source = QString::fromUtf8(in.readAll());
@@ -314,12 +314,12 @@ int render(const Arguments& a, const QString& program, QString& errors) {
                       .arg(sourceName)
                       .arg(d.line)
                       .arg(d.column)
-                      .arg(d.isError() ? QStringLiteral("ошибка") : QStringLiteral("предупреждение"), d.message);
+                      .arg(d.isError() ? QCoreApplication::translate("CommandLine", "ошибка") : QCoreApplication::translate("CommandLine", "предупреждение"), d.message);
     }
     // С ошибками файл не пишем: иначе скрипт молча получил бы неполную схему.
     if (parsed.hasErrors()) return kExitDiagramErrors;
     if (parsed.diagram.isEmpty()) {
-        errors += QStringLiteral("%1: схема пуста — нечего рисовать\n").arg(sourceName);
+        errors += QCoreApplication::translate("CommandLine", "%1: схема пуста — нечего рисовать\n").arg(sourceName);
         return kExitDiagramErrors;
     }
 
@@ -348,7 +348,7 @@ int render(const Arguments& a, const QString& program, QString& errors) {
 
     QSaveFile out(a.output);
     if (!out.open(QIODevice::WriteOnly) || out.write(bytes) != bytes.size() || !out.commit()) {
-        errors += QStringLiteral("%1: не удалось записать «%2»: %3\n").arg(program, a.output, out.errorString());
+        errors += QCoreApplication::translate("CommandLine", "%1: не удалось записать «%2»: %3\n").arg(program, a.output, out.errorString());
         return kExitIoError;
     }
     return kExitOk;

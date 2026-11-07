@@ -2,6 +2,165 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en" sourcelanguage="ru">
 <context>
+    <name>CommandLine</name>
+    <message>
+        <source>неизвестный ключ «%1»</source>
+        <translation>unrecognized option &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>ключу «%1» нужно значение</source>
+        <translation>option &apos;%1&apos; requires an argument</translation>
+    </message>
+    <message>
+        <source>лишний аргумент «%1»: можно указать только один файл</source>
+        <translation>extra operand &apos;%1&apos;: only one file can be given</translation>
+    </message>
+    <message>
+        <source>ключ «%1» работает только вместе с -o</source>
+        <translation>option &apos;%1&apos; only works together with -o</translation>
+    </message>
+    <message>
+        <source>чтение схемы со стандартного ввода («-») работает только вместе с -o</source>
+        <translation>reading the diagram from standard input (&apos;-&apos;) only works together with -o</translation>
+    </message>
+    <message>
+        <source>ключу «-o» нужно значение</source>
+        <translation>option &apos;-o&apos; requires an argument</translation>
+    </message>
+    <message>
+        <source>неизвестный формат файла «%1»: поддерживаются .png, .svg и .mmd</source>
+        <translation>unknown file format &apos;%1&apos;: .png, .svg and .mmd are supported</translation>
+    </message>
+    <message>
+        <source>не указан файл схемы</source>
+        <translation>no diagram file given</translation>
+    </message>
+    <message>
+        <source>неверное значение «%1» для ключа «--theme»: допустимы light и dark</source>
+        <translation>invalid value &apos;%1&apos; for option &apos;--theme&apos;: valid values are light and dark</translation>
+    </message>
+    <message>
+        <source>неверное значение «%1» для ключа «--scale»: нужно целое число от 1 до %2</source>
+        <translation>invalid value &apos;%1&apos; for option &apos;--scale&apos;: expected a whole number from 1 to %2</translation>
+    </message>
+    <message>
+        <source>Использование: %1 [ПАРАМЕТР]... [ФАЙЛ]
+Открывает ФАЙЛ (.birch) в редакторе или, с ключом -o, рисует по нему
+блок-схему в файл, не открывая окна.
+Если ФАЙЛ — «-», текст схемы читается со стандартного ввода.
+
+Аргументы, обязательные для длинных ключей, обязательны и для коротких.
+  -o, --output=ФАЙЛ        сохранить схему в ФАЙЛ и выйти; формат по
+                             расширению: .png, .svg или .mmd (Mermaid)
+  -t, --theme=ТЕМА         тема: light (по умолчанию) или dark
+  -m, --monochrome         чёрно-белая схема
+  -H, --horizontal         располагать блоки слева направо
+  -a, --transparent        прозрачный фон (PNG и SVG)
+  -s, --scale=N            масштаб PNG от 1 до 10 (по умолчанию 2)
+  -h, --help               показать эту справку и выйти
+  -v, --version            показать информацию о версии и выйти
+
+Примеры:
+  %1 схема.birch                       открыть схему в редакторе
+  %1 схема.birch -o схема.png          нарисовать схему в PNG
+  %1 -t dark -s 3 схема.birch -o схема.png
+  cat схема.birch | %1 - -o схема.svg
+
+Коды выхода:
+  0  успешно
+  1  в тексте схемы есть ошибки или схема пуста
+  2  ошибка чтения или записи файла
+  3  неверные ключи командной строки
+
+Домашняя страница: &lt;https://github.com/empmaynmtusrgdyt/Birch&gt;
+Об ошибках сообщайте: &lt;https://github.com/empmaynmtusrgdyt/Birch/issues&gt;
+</source>
+        <translation>Usage: %1 [OPTION]... [FILE]
+Open FILE (.birch) in the editor or, with -o, draw a flowchart from it
+into a file without opening a window.
+If FILE is &quot;-&quot;, the diagram text is read from standard input.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -o, --output=FILE        save the diagram to FILE and exit; the file
+                             extension sets the format: .png, .svg or .mmd
+  -t, --theme=THEME        theme: light (default) or dark
+  -m, --monochrome         black and white diagram
+  -H, --horizontal         lay out blocks from left to right
+  -a, --transparent        transparent background (PNG and SVG)
+  -s, --scale=N            PNG scale from 1 to 10 (default 2)
+  -h, --help               display this help and exit
+  -v, --version            output version information and exit
+
+Examples:
+  %1 diagram.birch                       open the diagram in the editor
+  %1 diagram.birch -o diagram.png        draw the diagram as PNG
+  %1 -t dark -s 3 diagram.birch -o diagram.png
+  cat diagram.birch | %1 - -o diagram.svg
+
+Exit status:
+  0  success
+  1  the diagram text has errors, or the diagram is empty
+  2  error reading or writing a file
+  3  invalid command-line options
+
+Home page: &lt;https://github.com/empmaynmtusrgdyt/Birch&gt;
+Report bugs to: &lt;https://github.com/empmaynmtusrgdyt/Birch/issues&gt;
+</translation>
+    </message>
+    <message>
+        <source>Лицензия MPL 2.0: Mozilla Public License 2.0 &lt;https://mozilla.org/MPL/2.0/&gt;
+Это свободное ПО: вы можете изменять и распространять его.
+НИКАКИХ ГАРАНТИЙ не предоставляется в пределах, допускаемых законом.
+
+Используются: Qt %1, Graphviz %2
+</source>
+        <translation>License MPL 2.0: Mozilla Public License 2.0 &lt;https://mozilla.org/MPL/2.0/&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Using Qt %1, Graphviz %2
+</translation>
+    </message>
+    <message>
+        <source>%1: %2
+Попробуйте «%1 --help» для получения дополнительной информации.
+</source>
+        <translation>%1: %2
+Try &apos;%1 --help&apos; for more information.
+</translation>
+    </message>
+    <message>
+        <source>%1: не удалось открыть «%2»: %3
+</source>
+        <translation>%1: cannot open &apos;%2&apos;: %3
+</translation>
+    </message>
+    <message>
+        <source>ошибка</source>
+        <translation>error</translation>
+    </message>
+    <message>
+        <source>предупреждение</source>
+        <translation>warning</translation>
+    </message>
+    <message>
+        <source>%1: схема пуста — нечего рисовать
+</source>
+        <translation>%1: the diagram is empty — nothing to draw
+</translation>
+    </message>
+    <message>
+        <source>%1: не удалось записать «%2»: %3
+</source>
+        <translation>%1: cannot write &apos;%2&apos;: %3
+</translation>
+    </message>
+    <message>
+        <source>неверное значение «%1» для ключа «--screenshot-theme»</source>
+        <translation>invalid value &apos;%1&apos; for option &apos;--screenshot-theme&apos;</translation>
+    </message>
+</context>
+<context>
     <name>InstallCommand</name>
     <message>
         <source>Откройте новое окно терминала и попробуйте:
@@ -76,6 +235,179 @@ Drag Birch to Applications, open it from there and choose this menu item again. 
     <message>
         <source>Не удалось установить команду birch: %1.</source>
         <translation>Could not install the birch command: %1.</translation>
+    </message>
+</context>
+<context>
+    <name>Parser</name>
+    <message>
+        <source>прямоугольник [ ]</source>
+        <translation>rectangle [ ]</translation>
+    </message>
+    <message>
+        <source>ромб { }</source>
+        <translation>diamond { }</translation>
+    </message>
+    <message>
+        <source>овал ( )</source>
+        <translation>oval ( )</translation>
+    </message>
+    <message>
+        <source>Непонятный текст «%1». Узлы пишутся в скобках: [Шаг], {Условие?}, (Старт)</source>
+        <translation>Unexpected text “%1”. Nodes are written in brackets: [Step], {Condition?}, (Start)</translation>
+    </message>
+    <message>
+        <source>Не закрыта скобка «%1» — ожидалась «%2» до конца строки</source>
+        <translation>Unclosed “%1” — expected “%2” before the end of the line</translation>
+    </message>
+    <message>
+        <source>Пустой узел «%1%2» — добавьте текст</source>
+        <translation>Empty node “%1%2” — add some text</translation>
+    </message>
+    <message>
+        <source>Слишком длинный текст узла (больше %1 символов)</source>
+        <translation>Node text is too long (more than %1 characters)</translation>
+    </message>
+    <message>
+        <source>Не закрыт заголовок рамки — ожидался «=» в конце, например =Авторизация=</source>
+        <translation>Unclosed frame title — expected “=” at the end, for example =Login=</translation>
+    </message>
+    <message>
+        <source>Непонятная запись «%1». Рамка открывается так: =Название=, а закрывается так: ==</source>
+        <translation>Unexpected “%1”. A frame is opened with =Name= and closed with ==</translation>
+    </message>
+    <message>
+        <source>Слишком длинное название рамки (больше %1 символов)</source>
+        <translation>Frame name is too long (more than %1 characters)</translation>
+    </message>
+    <message>
+        <source>Не закрыта кавычка — ожидалась «%1» до конца строки</source>
+        <translation>Unclosed quote — expected “%1” before the end of the line</translation>
+    </message>
+    <message>
+        <source>Слишком длинная подпись (больше %1 символов)</source>
+        <translation>Label is too long (more than %1 characters)</translation>
+    </message>
+    <message>
+        <source>узел «%1»</source>
+        <translation>node “%1”</translation>
+    </message>
+    <message>
+        <source>подпись «%1»</source>
+        <translation>label “%1”</translation>
+    </message>
+    <message>
+        <source>рамка «=%1=»</source>
+        <translation>frame “=%1=”</translation>
+    </message>
+    <message>
+        <source>конец строки</source>
+        <translation>end of line</translation>
+    </message>
+    <message>
+        <source>конец текста</source>
+        <translation>end of text</translation>
+    </message>
+    <message>
+        <source>ошибочный фрагмент</source>
+        <translation>invalid fragment</translation>
+    </message>
+    <message>
+        <source>После «%1» в той же строке может идти только блок, например %1 [Шаг]. Чтобы открыть рамку, напишите %1 на отдельной строке</source>
+        <translation>After “%1” only a block may follow on the same line, for example %1 [Step]. To open a frame, write %1 on its own line</translation>
+    </message>
+    <message>
+        <source>Рамка «%1» не найдена. Рамка открывается на отдельной строке: =%1=</source>
+        <translation>Frame “%1” not found. A frame is opened on its own line: =%1=</translation>
+    </message>
+    <message>
+        <source>%1, а найдено %2</source>
+        <translation>%1, but found %2</translation>
+    </message>
+    <message>
+        <source>Заголовок рамки пишется на отдельной строке: %1</source>
+        <translation>A frame title goes on its own line: %1</translation>
+    </message>
+    <message>
+        <source>Инструкция должна начинаться с узла, например [Шаг], а найдено %1</source>
+        <translation>A statement must start with a node, for example [Step], but found %1</translation>
+    </message>
+    <message>
+        <source>Ожидался узел, например [Шаг]</source>
+        <translation>Expected a node, for example [Step]</translation>
+    </message>
+    <message>
+        <source>Подпись должна идти после стрелки и узла: [A] -&gt; [B] &quot;Да&quot;</source>
+        <translation>A label goes after the arrow and the node: [A] -&gt; [B] &quot;Yes&quot;</translation>
+    </message>
+    <message>
+        <source>После «-&gt;» ожидался узел</source>
+        <translation>Expected a node after “-&gt;”</translation>
+    </message>
+    <message>
+        <source>Ожидались «-&gt;», «;» или новая строка, а найдено %1</source>
+        <translation>Expected “-&gt;”, “;” or a new line, but found %1</translation>
+    </message>
+    <message>
+        <source>Слишком много узлов (максимум %1)</source>
+        <translation>Too many nodes (at most %1)</translation>
+    </message>
+    <message>
+        <source>Узел «%1» уже объявлен как %2 — форма %3 проигнорирована</source>
+        <translation>Node “%1” is already declared as a %2 — shape %3 ignored</translation>
+    </message>
+    <message>
+        <source>Слишком много связей (максимум %1)</source>
+        <translation>Too many edges (at most %1)</translation>
+    </message>
+    <message>
+        <source>Блок «%1» есть среди общих блоков. Чтобы провести стрелку к нему, напишите == %2</source>
+        <translation>Block “%1” is one of the shared blocks. To draw an arrow to it, write == %2</translation>
+    </message>
+    <message>
+        <source>Текст слишком большой (больше %1 символов)</source>
+        <translation>The text is too large (more than %1 characters)</translation>
+    </message>
+</context>
+<context>
+    <name>Renderer</name>
+    <message>
+        <source>Не удалось инициализировать Graphviz</source>
+        <translation>Could not initialize Graphviz</translation>
+    </message>
+    <message>
+        <source>Graphviz: не удалось создать граф</source>
+        <translation>Graphviz: could not create the graph</translation>
+    </message>
+    <message>
+        <source>Graphviz: ошибка раскладки. %1</source>
+        <translation>Graphviz: layout error. %1</translation>
+    </message>
+    <message>
+        <source>Graphviz: ошибка рендеринга SVG. %1</source>
+        <translation>Graphviz: SVG rendering error. %1</translation>
+    </message>
+    <message>
+        <source>Не удалось разобрать SVG от Graphviz</source>
+        <translation>Could not parse the SVG from Graphviz</translation>
+    </message>
+    <message>
+        <source>Недостаточно памяти для картинки %1×%2</source>
+        <translation>Not enough memory for a %1×%2 picture</translation>
+    </message>
+</context>
+<context>
+    <name>ShellCommand</name>
+    <message>
+        <source>не удалось создать папку «%1»</source>
+        <translation>could not create the folder “%1”</translation>
+    </message>
+    <message>
+        <source>не удалось заменить «%1»: %2</source>
+        <translation>could not replace “%1”: %2</translation>
+    </message>
+    <message>
+        <source>не удалось создать «%1»: %2</source>
+        <translation>could not create “%1”: %2</translation>
     </message>
 </context>
 <context>

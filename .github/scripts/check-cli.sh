@@ -22,7 +22,8 @@ trap 'rm -rf "$work"' EXIT
 failed=0
 fail() { echo "::error::$*"; failed=1; }
 same() { [ "$(cksum < "$1")" = "$(cksum < "$2")" ]; }  # cmp есть не во всех контейнерах
-birch() { env -u QT_QPA_PLATFORM -u DISPLAY -u WAYLAND_DISPLAY "$@"; }
+# Основные проверки — по-русски; английский проверяется отдельно ниже.
+birch() { env -u QT_QPA_PLATFORM -u DISPLAY -u WAYLAND_DISPLAY BIRCH_LANGUAGE=ru "$@"; }
 cmd=("$@")
 
 # Запуск: код выхода в $code, вывод в $work/out и $work/err.
@@ -95,5 +96,32 @@ grep -q 'bad.birch:1:8: ошибка: ' "$work/err" || fail "ошибка в с�
 run "$work/нет такого.birch" -o "$work/x.png"
 expect_code 2 "нет входного файла"
 
-[ "$failed" -eq 0 ] && echo "Командная строка: все проверки пройдены"
+# --- английский --------------------------------------------------------------
+en() { env -u QT_QPA_PLATFORM -u DISPLAY -u WAYLAND_DISPLAY BIRCH_LANGUAGE=en "${cmd[@]}" "$@"; }
+en --help > "$work/out" 2> "$work/err"
+head -1 "$work/out" | grep -q '^Usage: ' || fail "--help по-английски: $(head -1 "$work/out")"
+en --version > "$work/out" 2> "$work/err"
+[ "$(head -1 "$work/out")" = "birch (Birch) $version" ] || fail "--version по-английски: первая строка — $(head -1 "$work/out")"
+grep -q '^License MPL 2.0' "$work/out" || fail "--version по-английски: $(sed -n 3p "$work/out")"
+en --colour > "$work/out" 2> "$work/err"
+code=$?
+expect_code 3 "--colour по-английски"
+grep -q "unrecognized option '--colour'" "$work/err" || fail "--colour по-английски: $(cat "$work/err")"
+en "$work/bad.birch" -o "$work/bad.png" > "$work/out" 2> "$work/err"
+code=$?
+expect_code 1 "ошибка в схеме по-английски"
+grep -q 'bad.birch:1:8: error: Unclosed' "$work/err" || fail "ошибка в схеме по-английски: $(cat "$work/err")"
+
+# На Linux язык без BIRCH_LANGUAGE берётся из LANG, как у утилит GNU
+# (на macOS — из настроек системы, их здесь не поменять).
+if [ "$(uname)" = Linux ]; then
+    for pair in "ru_RU.UTF-8:Использование: " "en_US.UTF-8:Usage: " "de_DE.UTF-8:Usage: "; do
+        lang="${pair%%:*}"; want="${pair#*:}"
+        first="$(env -u QT_QPA_PLATFORM -u DISPLAY -u WAYLAND_DISPLAY -u BIRCH_LANGUAGE -u LC_ALL \
+                 -u LC_MESSAGES -u LANGUAGE LANG="$lang" "${cmd[@]}" --help 2>/dev/null | head -1)"
+        case "$first" in "$want"*) ;; *) fail "LANG=$lang: первая строка справки — $first" ;; esac
+    done
+fi
+
+[ "$failed" -eq 0 ] && echo "Командная строка: все проверки пройдены (по-русски и по-английски)"
 exit "$failed"

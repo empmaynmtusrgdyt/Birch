@@ -4,6 +4,7 @@
 
 #include "core/Parser.h"
 
+#include <QCoreApplication>
 #include <QHash>
 #include <QStringList>
 
@@ -41,9 +42,9 @@ constexpr char16_t kUnicodeArrow = u'→';  // →
 
 QString shapeName(NodeShape s) {
     switch (s) {
-    case NodeShape::Process: return QStringLiteral("прямоугольник [ ]");
-    case NodeShape::Decision: return QStringLiteral("ромб { }");
-    case NodeShape::Terminal: return QStringLiteral("овал ( )");
+    case NodeShape::Process: return QCoreApplication::translate("Parser", "прямоугольник [ ]");
+    case NodeShape::Decision: return QCoreApplication::translate("Parser", "ромб { }");
+    case NodeShape::Terminal: return QCoreApplication::translate("Parser", "овал ( )");
     }
     return {};
 }
@@ -140,7 +141,7 @@ private:
             ++pos_;
             while (!atEnd() && !isSpecial(src_[pos_])) ++pos_;
             const QString word = src_.mid(start, pos_ - start);
-            return invalid(start, QStringLiteral("Непонятный текст «%1». Узлы пишутся в скобках: "
+            return invalid(start, QCoreApplication::translate("Parser", "Непонятный текст «%1». Узлы пишутся в скобках: "
                                                  "[Шаг], {Условие?}, (Старт)")
                                       .arg(word.left(40)));
         }
@@ -173,15 +174,15 @@ private:
         const QChar open = src_[start];
         QString raw;
         if (!readUntil(close, raw))
-            return invalid(start, QStringLiteral("Не закрыта скобка «%1» — ожидалась «%2» до конца строки")
+            return invalid(start, QCoreApplication::translate("Parser", "Не закрыта скобка «%1» — ожидалась «%2» до конца строки")
                                       .arg(open)
                                       .arg(close));
 
         const QString text = normalizeText(raw);
         if (text.isEmpty())
-            return invalid(start, QStringLiteral("Пустой узел «%1%2» — добавьте текст").arg(open).arg(close));
+            return invalid(start, QCoreApplication::translate("Parser", "Пустой узел «%1%2» — добавьте текст").arg(open).arg(close));
         if (text.size() > Parser::kMaxLabelLength)
-            return invalid(start, QStringLiteral("Слишком длинный текст узла (больше %1 символов)")
+            return invalid(start, QCoreApplication::translate("Parser", "Слишком длинный текст узла (больше %1 символов)")
                                       .arg(Parser::kMaxLabelLength));
 
         Token t = make(TokKind::Node, start, pos_ - start);
@@ -195,17 +196,17 @@ private:
         const int start = pos_;
         QString raw;
         if (!readUntil(u'=', raw))
-            return invalid(start, QStringLiteral("Не закрыт заголовок рамки — ожидался «=» в конце, "
+            return invalid(start, QCoreApplication::translate("Parser", "Не закрыт заголовок рамки — ожидался «=» в конце, "
                                                  "например =Авторизация="));
         if (at(pos_) == u'=') {  // «===», «=А==»: непонятно, где кончается название
             while (at(pos_) == u'=') ++pos_;
-            return invalid(start, QStringLiteral("Непонятная запись «%1». Рамка открывается так: "
+            return invalid(start, QCoreApplication::translate("Parser", "Непонятная запись «%1». Рамка открывается так: "
                                                  "=Название=, а закрывается так: ==")
                                       .arg(src_.mid(start, pos_ - start).left(40)));
         }
         const QString name = normalizeText(raw);
         if (name.size() > Parser::kMaxLabelLength)
-            return invalid(start, QStringLiteral("Слишком длинное название рамки (больше %1 символов)")
+            return invalid(start, QCoreApplication::translate("Parser", "Слишком длинное название рамки (больше %1 символов)")
                                       .arg(Parser::kMaxLabelLength));
         Token t = make(TokKind::Frame, start, pos_ - start);
         t.text = name;
@@ -216,9 +217,9 @@ private:
         const int start = pos_;
         QString raw;
         if (!readUntil(close, raw))
-            return invalid(start, QStringLiteral("Не закрыта кавычка — ожидалась «%1» до конца строки").arg(close));
+            return invalid(start, QCoreApplication::translate("Parser", "Не закрыта кавычка — ожидалась «%1» до конца строки").arg(close));
         if (raw.size() > Parser::kMaxLabelLength)
-            return invalid(start, QStringLiteral("Слишком длинная подпись (больше %1 символов)")
+            return invalid(start, QCoreApplication::translate("Parser", "Слишком длинная подпись (больше %1 символов)")
                                       .arg(Parser::kMaxLabelLength));
 
         Token t = make(TokKind::String, start, pos_ - start);
@@ -240,15 +241,15 @@ private:
 
 QString describe(const Token& t) {
     switch (t.kind) {
-    case TokKind::Node: return QStringLiteral("узел «%1»").arg(t.text.left(40));
-    case TokKind::String: return QStringLiteral("подпись «%1»").arg(t.text.left(40));
+    case TokKind::Node: return QCoreApplication::translate("Parser", "узел «%1»").arg(t.text.left(40));
+    case TokKind::String: return QCoreApplication::translate("Parser", "подпись «%1»").arg(t.text.left(40));
     case TokKind::Frame:
-        return t.text.isEmpty() ? QStringLiteral("«==»") : QStringLiteral("рамка «=%1=»").arg(t.text.left(40));
+        return t.text.isEmpty() ? QStringLiteral("«==»") : QCoreApplication::translate("Parser", "рамка «=%1=»").arg(t.text.left(40));
     case TokKind::Arrow: return QStringLiteral("«->»");
     case TokKind::Semicolon: return QStringLiteral("«;»");
-    case TokKind::Newline: return QStringLiteral("конец строки");
-    case TokKind::End: return QStringLiteral("конец текста");
-    case TokKind::Invalid: return QStringLiteral("ошибочный фрагмент");
+    case TokKind::Newline: return QCoreApplication::translate("Parser", "конец строки");
+    case TokKind::End: return QCoreApplication::translate("Parser", "конец текста");
+    case TokKind::Invalid: return QCoreApplication::translate("Parser", "ошибочный фрагмент");
     }
     return {};
 }
@@ -349,7 +350,7 @@ private:
             const Token& mark = cur();
             ++i_;
             if (cur().kind != TokKind::Node) {
-                error(mark, QStringLiteral("После «%1» в той же строке может идти только блок, например %1 [Шаг]. "
+                error(mark, QCoreApplication::translate("Parser", "После «%1» в той же строке может идти только блок, например %1 [Шаг]. "
                                            "Чтобы открыть рамку, напишите %1 на отдельной строке")
                                 .arg(frameMark(mark.text)));
                 return false;
@@ -359,13 +360,13 @@ private:
             } else if (auto it = groupIndex_.constFind(mark.text); it != groupIndex_.constEnd()) {
                 group = *it;
             } else {
-                error(mark, QStringLiteral("Рамка «%1» не найдена. Рамка открывается на отдельной строке: =%1=")
+                error(mark, QCoreApplication::translate("Parser", "Рамка «%1» не найдена. Рамка открывается на отдельной строке: =%1=")
                                 .arg(mark.text.left(40)));
                 return false;
             }
         }
         if (cur().kind != TokKind::Node) {
-            error(cur(), QStringLiteral("%1, а найдено %2").arg(what, describe(cur())));
+            error(cur(), QCoreApplication::translate("Parser", "%1, а найдено %2").arg(what, describe(cur())));
             return false;
         }
         st.nodes.push_back({&cur(), group});
@@ -380,7 +381,7 @@ private:
             if (isHeader(i_)) {
                 currentGroup_ = cur().text.isEmpty() ? -1 : groupIndex_.value(cur().text, -1);
             } else {
-                error(cur(), QStringLiteral("Заголовок рамки пишется на отдельной строке: %1")
+                error(cur(), QCoreApplication::translate("Parser", "Заголовок рамки пишется на отдельной строке: %1")
                                  .arg(frameMark(cur().text)));
             }
             ++i_;
@@ -389,12 +390,12 @@ private:
 
         Pending st;
         if (cur().kind != TokKind::Node && cur().kind != TokKind::Frame) {
-            error(cur(), QStringLiteral("Инструкция должна начинаться с узла, например [Шаг], а найдено %1")
+            error(cur(), QCoreApplication::translate("Parser", "Инструкция должна начинаться с узла, например [Шаг], а найдено %1")
                              .arg(describe(cur())));
             ++i_;
             return synchronize();
         }
-        if (!takeNode(st, QStringLiteral("Ожидался узел, например [Шаг]"))) return synchronize();
+        if (!takeNode(st, QCoreApplication::translate("Parser", "Ожидался узел, например [Шаг]"))) return synchronize();
 
         for (;;) {
             // Перенос строки перед '->' продолжает инструкцию.
@@ -404,14 +405,14 @@ private:
             if (at(j).kind == TokKind::Arrow) {
                 i_ = j + 1;
             } else if (cur().kind == TokKind::String) {
-                error(cur(), QStringLiteral("Подпись должна идти после стрелки и узла: [A] -> [B] \"Да\""));
+                error(cur(), QCoreApplication::translate("Parser", "Подпись должна идти после стрелки и узла: [A] -> [B] \"Да\""));
                 return synchronize();
             } else {
                 break;
             }
 
             while (cur().kind == TokKind::Newline) ++i_;
-            if (!takeNode(st, QStringLiteral("После «->» ожидался узел"))) return synchronize();
+            if (!takeNode(st, QCoreApplication::translate("Parser", "После «->» ожидался узел"))) return synchronize();
 
             PendingEdge e;
             e.from = static_cast<int>(st.nodes.size()) - 2;
@@ -424,7 +425,7 @@ private:
         }
 
         if (!isTerminator(cur().kind)) {
-            error(cur(), QStringLiteral("Ожидались «->», «;» или новая строка, а найдено %1").arg(describe(cur())));
+            error(cur(), QCoreApplication::translate("Parser", "Ожидались «->», «;» или новая строка, а найдено %1").arg(describe(cur())));
             return synchronize();
         }
         commit(st);
@@ -448,7 +449,7 @@ private:
             auto it = index_.constFind(key);
             if (it == index_.constEnd()) {
                 if (dia.nodes.size() >= Parser::kMaxNodes) {
-                    error(*t, QStringLiteral("Слишком много узлов (максимум %1)").arg(Parser::kMaxNodes));
+                    error(*t, QCoreApplication::translate("Parser", "Слишком много узлов (максимум %1)").arg(Parser::kMaxNodes));
                     stopped_ = true;
                     return;
                 }
@@ -466,7 +467,7 @@ private:
                 if (n.shape == NodeShape::Process)
                     n.shape = t->shape;  // [] уточняется до {} или ()
                 else
-                    warning(*t, QStringLiteral("Узел «%1» уже объявлен как %2 — форма %3 проигнорирована")
+                    warning(*t, QCoreApplication::translate("Parser", "Узел «%1» уже объявлен как %2 — форма %3 проигнорирована")
                                     .arg(n.label.left(40), shapeName(n.shape), shapeName(t->shape)));
             }
             indices.push_back(*it);
@@ -475,7 +476,7 @@ private:
         for (const PendingEdge& pe : st.edges) {
             if (dia.edges.size() >= Parser::kMaxEdges) {
                 error(*st.nodes[static_cast<size_t>(pe.to)].token,
-                      QStringLiteral("Слишком много связей (максимум %1)").arg(Parser::kMaxEdges));
+                      QCoreApplication::translate("Parser", "Слишком много связей (максимум %1)").arg(Parser::kMaxEdges));
                 stopped_ = true;
                 return;
             }
@@ -495,7 +496,7 @@ private:
             if (global == index_.constEnd()) continue;
             const QString target = bracketed(n.label, dia.nodes[*global].shape);
             warning(*mentions_[i].first,
-                    QStringLiteral("Блок «%1» есть среди общих блоков. Чтобы провести стрелку к нему, напишите == %2")
+                    QCoreApplication::translate("Parser", "Блок «%1» есть среди общих блоков. Чтобы провести стрелку к нему, напишите == %2")
                         .arg(n.label.left(40), target.left(60)));
         }
     }
@@ -522,7 +523,7 @@ ParseResult Parser::parse(const QString& source) const {
 
     if (source.size() > kMaxSourceLength) {
         result.diagnostics.append({Diagnostic::Severity::Error, 1, 1, 0, 1,
-                                   QStringLiteral("Текст слишком большой (больше %1 символов)")
+                                   QCoreApplication::translate("Parser", "Текст слишком большой (больше %1 символов)")
                                        .arg(kMaxSourceLength)});
         return result;
     }

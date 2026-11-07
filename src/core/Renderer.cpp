@@ -4,6 +4,7 @@
 
 #include "core/Renderer.h"
 
+#include <QCoreApplication>
 #include <QBuffer>
 #include <QFont>
 #include <QFontDatabase>
@@ -305,7 +306,7 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
     RenderResult result;
     if (diagram.isEmpty()) return result;
     if (!d->gvc) {
-        result.error = QStringLiteral("Не удалось инициализировать Graphviz");
+        result.error = QCoreApplication::translate("Renderer", "Не удалось инициализировать Graphviz");
         return result;
     }
 
@@ -319,7 +320,7 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
 
         GraphPtr g(agopen(cstr("birch"), Agdirected, nullptr));
         if (!g) {
-            result.error = QStringLiteral("Graphviz: не удалось создать граф");
+            result.error = QCoreApplication::translate("Renderer", "Graphviz: не удалось создать граф");
             return result;
         }
         applyGraphStyle(g.get(), options, font);
@@ -358,7 +359,7 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
         }
 
         if (gvLayout(d->gvc, g.get(), "dot") != 0) {
-            result.error = QStringLiteral("Graphviz: ошибка раскладки. %1").arg(graphvizErrors().trimmed());
+            result.error = QCoreApplication::translate("Renderer", "Graphviz: ошибка раскладки. %1").arg(graphvizErrors().trimmed());
             return result;
         }
         const auto freeLayout = qScopeGuard([&] { gvFreeLayout(d->gvc, g.get()); });
@@ -367,7 +368,7 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
         // Тип длины отличается между версиями (unsigned int / size_t).
         RenderDataLength<decltype(&gvRenderData)>::type length = 0;
         if (gvRenderData(d->gvc, g.get(), "svg", &data, &length) != 0 || !data) {
-            result.error = QStringLiteral("Graphviz: ошибка рендеринга SVG. %1").arg(graphvizErrors().trimmed());
+            result.error = QCoreApplication::translate("Renderer", "Graphviz: ошибка рендеринга SVG. %1").arg(graphvizErrors().trimmed());
             if (data) gvFreeRenderData(data);
             return result;
         }
@@ -378,7 +379,7 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
     // SVG -> QImage. Размер берём из viewBox: он в pt, без пересчёта единиц QtSvg.
     QSvgRenderer svgRenderer(svg);
     if (!svgRenderer.isValid()) {
-        result.error = QStringLiteral("Не удалось разобрать SVG от Graphviz");
+        result.error = QCoreApplication::translate("Renderer", "Не удалось разобрать SVG от Graphviz");
         return result;
     }
     const QSizeF size = svgRenderer.viewBoxF().size();
@@ -392,7 +393,7 @@ RenderResult Renderer::render(const Diagram& diagram, const RenderOptions& optio
 
     QImage image(pixels, QImage::Format_ARGB32_Premultiplied);
     if (image.isNull()) {
-        result.error = QStringLiteral("Недостаточно памяти для картинки %1×%2").arg(pixels.width()).arg(pixels.height());
+        result.error = QCoreApplication::translate("Renderer", "Недостаточно памяти для картинки %1×%2").arg(pixels.width()).arg(pixels.height());
         return result;
     }
     image.fill(options.transparentBackground ? QColor(Qt::transparent) : options.theme.background);

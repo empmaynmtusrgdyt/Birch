@@ -36,9 +36,8 @@ jobs:
         run: .github/scripts/check-license-headers.sh
       - name: Зависимости (Homebrew)
         run: brew install qt graphviz
-      - name: Файлы перевода соответствуют строкам в коде
-        # TODO: убрать --allow-unfinished, когда переведены все строки
-        run: translations/update.sh --check --allow-unfinished
+      - name: Переводы полные и соответствуют строкам в коде
+        run: translations/update.sh --check
       - name: Сборка
         run: |
           cmake --preset macos

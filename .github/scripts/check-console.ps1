@@ -9,6 +9,7 @@
 # Использование: check-console.ps1 C:\BirchTest
 param([Parameter(Mandatory)] [string] $InstallDir)
 $ErrorActionPreference = "Stop"
+$env:BIRCH_LANGUAGE = "ru"  # проверяется русский текст; английский — в check-cli.ps1
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 $root = Resolve-Path (Join-Path $PSScriptRoot "..\..")

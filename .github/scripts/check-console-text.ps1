@@ -11,6 +11,7 @@
 # Использование: check-console-text.ps1 C:\BirchTest
 param([Parameter(Mandatory)] [string] $InstallDir)
 $ErrorActionPreference = "Stop"
+$env:BIRCH_LANGUAGE = "ru"  # проверяется русский текст; английский — в check-cli.ps1
 
 Add-Type -TypeDefinition @'
 using System;
@@ -119,5 +120,9 @@ foreach ($program in $com, $exe) {
     Check $program "--colour" @("неизвестный ключ «--colour»", "Попробуйте") 3
 }
 
+$env:BIRCH_LANGUAGE = "en"
+Check $com "--version" @("License MPL 2.0", "This is free software") 0
+$env:BIRCH_LANGUAGE = "ru"
+
 if ($failed) { exit 1 }
-Write-Host "Кириллица в консоли видна правильно"
+Write-Host "Кириллица в консоли видна правильно (и английский текст тоже)"
