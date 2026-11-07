@@ -98,7 +98,7 @@ jobs:
           mkdir -p /tmp/birch-cmd
           ln -sf /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch /tmp/birch-cmd/birch
           PATH="/tmp/birch-cmd:$PATH" .github/scripts/check-cli.sh birch
-          PATH="/tmp/birch-cmd:$PATH" birch --help | head -1 | grep -q '^Использование: birch ' \
+          PATH="/tmp/birch-cmd:$PATH" BIRCH_LANGUAGE=ru birch --help | head -1 | grep -q '^Использование: birch ' \
             || { echo "::error::в справке не «birch»"; exit 1; }
       - name: Снимки примера с рамками
         run: |
