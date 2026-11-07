@@ -115,7 +115,10 @@ grep -q 'bad.birch:1:8: error: Unclosed' "$work/err" || fail "ошибка в с
 # На Linux язык без BIRCH_LANGUAGE берётся из LANG, как у утилит GNU
 # (на macOS — из настроек системы, их здесь не поменять).
 if [ "$(uname)" = Linux ]; then
-    for pair in "ru_RU.UTF-8:Использование: " "en_US.UTF-8:Usage: " "de_DE.UTF-8:Usage: "; do
+    # pt_PT получает бразильский перевод, zh_TW (традиционные иероглифы) и
+    # итальянский — английский: перевода на них нет.
+    for pair in "ru_RU.UTF-8:Использование: " "en_US.UTF-8:Usage: " "de_DE.UTF-8:Aufruf: " \
+                "pt_PT.UTF-8:Uso: " "zh_TW.UTF-8:Usage: " "it_IT.UTF-8:Usage: "; do
         lang="${pair%%:*}"; want="${pair#*:}"
         first="$(env -u QT_QPA_PLATFORM -u DISPLAY -u WAYLAND_DISPLAY -u BIRCH_LANGUAGE -u LC_ALL \
                  -u LC_MESSAGES -u LANGUAGE LANG="$lang" "${cmd[@]}" --help 2>/dev/null | head -1)"
