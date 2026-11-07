@@ -50,8 +50,16 @@ QStringList availableLanguages() {
 }
 
 QString nativeName(const QString& code) {
-    // Qt называет «en» по региону по умолчанию — «American English»
-    if (code == QLatin1String("en")) return QStringLiteral("English");
+    // Название задаёт сам перевод: у Qt оно бывает с регионом по умолчанию —
+    // «American English», «español de España».
+    //: Название языка этого перевода на нём самом: Deutsch, Español, 日本語
+    static const char* const kOwnName = QT_TRANSLATE_NOOP("Language", "Русский");
+    if (code == QLatin1String(kSourceLanguage)) return QString::fromUtf8(kOwnName);
+    QTranslator translator;
+    if (translator.load(QStringLiteral(":/i18n/birch_%1.qm").arg(code))) {
+        const QString own = translator.translate("Language", kOwnName);
+        if (!own.isEmpty()) return own;
+    }
     const QString name = QLocale(code).nativeLanguageName();
     if (name.isEmpty()) return code;
     return name.left(1).toUpper() + name.mid(1);  // «русский» → «Русский»

@@ -238,6 +238,14 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
     </message>
 </context>
 <context>
+    <name>Language</name>
+    <message>
+        <source>Русский</source>
+        <extracomment>Название языка этого перевода на нём самом: Deutsch, Español, 日本語</extracomment>
+        <translation>日本語</translation>
+    </message>
+</context>
+<context>
     <name>Parser</name>
     <message>
         <source>прямоугольник [ ]</source>

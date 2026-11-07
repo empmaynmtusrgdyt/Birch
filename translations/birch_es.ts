@@ -238,6 +238,14 @@ Arrastre Birch a Aplicaciones, ábralo desde allí y vuelva a elegir esta opció
     </message>
 </context>
 <context>
+    <name>Language</name>
+    <message>
+        <source>Русский</source>
+        <extracomment>Название языка этого перевода на нём самом: Deutsch, Español, 日本語</extracomment>
+        <translation>Español</translation>
+    </message>
+</context>
+<context>
     <name>Parser</name>
     <message>
         <source>прямоугольник [ ]</source>

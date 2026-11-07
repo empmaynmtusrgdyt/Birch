@@ -238,6 +238,14 @@
     </message>
 </context>
 <context>
+    <name>Language</name>
+    <message>
+        <source>Русский</source>
+        <extracomment>Название языка этого перевода на нём самом: Deutsch, Español, 日本語</extracomment>
+        <translation>简体中文</translation>
+    </message>
+</context>
+<context>
     <name>Parser</name>
     <message>
         <source>прямоугольник [ ]</source>

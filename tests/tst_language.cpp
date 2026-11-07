@@ -102,6 +102,13 @@ private slots:
     void nativeNames() {
         QCOMPARE(nativeName("ru"), QStringLiteral("Русский"));
         QCOMPARE(nativeName("en"), QStringLiteral("English"));
+        QCOMPARE(nativeName("es"), QStringLiteral("Español"));
+        QCOMPARE(nativeName("de"), QStringLiteral("Deutsch"));
+        QCOMPARE(nativeName("fr"), QStringLiteral("Français"));
+        QCOMPARE(nativeName("pt_BR"), QStringLiteral("Português (Brasil)"));
+        QCOMPARE(nativeName("zh_CN"), QStringLiteral("简体中文"));
+        QCOMPARE(nativeName("ja"), QStringLiteral("日本語"));
+        QCOMPARE(nativeName("xx"), QStringLiteral("xx"));  // нет ни перевода, ни названия в Qt
     }
 
     // Каждый встроенный перевод подключается, переводит окно, а справка
