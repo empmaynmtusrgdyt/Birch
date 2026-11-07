@@ -59,8 +59,22 @@ QString nativeName(const QString& code) {
 
 QString choose(const QString& preferred, const QStringList& uiLanguages, const QStringList& available) {
     if (const QString code = match(preferred, available); !code.isEmpty()) return code;
-    for (const QString& tag : uiLanguages) {
-        if (const QString code = match(tag, available); !code.isEmpty()) return code;
+    // Qt дописывает в конец списка обрезанные теги: «zh-Hant-TW», «zh-TW», «zh».
+    // Обрезанный тег — не отдельный выбор пользователя: голый «zh» Qt считает
+    // упрощённым китайским, а пользователь просил традиционный.
+    const auto truncationOfEarlier = [&uiLanguages](qsizetype index) {
+        const QString tag = uiLanguages[index];
+        for (qsizetype i = 0; i < index; ++i) {
+            const QString& earlier = uiLanguages[i];
+            if (earlier.size() > tag.size() && earlier.startsWith(tag, Qt::CaseInsensitive)
+                && (earlier[tag.size()] == u'-' || earlier[tag.size()] == u'_'))
+                return true;
+        }
+        return false;
+    };
+    for (qsizetype i = 0; i < uiLanguages.size(); ++i) {
+        if (truncationOfEarlier(i)) continue;
+        if (const QString code = match(uiLanguages[i], available); !code.isEmpty()) return code;
     }
     const QString fallback = QString::fromLatin1(kFallbackLanguage);
     return available.contains(fallback) ? fallback : QString::fromLatin1(kSourceLanguage);

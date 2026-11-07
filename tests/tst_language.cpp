@@ -75,6 +75,10 @@ private slots:
         QTest::newRow("zh-CN") << "" << QStringList{"zh-CN"} << "zh_CN";
         QTest::newRow("явный zh") << "zh" << QStringList{"en-US"} << "zh_CN";
         QTest::newRow("zh-Hant-TW — не упрощённый") << "" << QStringList{"zh-Hant-TW"} << "en";
+        QTest::newRow("zh-Hant-TW с обрезанными тегами Qt") << "" << QStringList{"zh-Hant-TW", "zh-TW", "zh"} << "en";
+        QTest::newRow("традиционный, потом явно упрощённый") << "" << QStringList{"zh-Hant-TW", "zh", "zh-Hans-CN"} << "zh_CN";
+        QTest::newRow("pt-PT с обрезанным pt") << "" << QStringList{"pt-PT", "pt"} << "pt_BR";
+        QTest::newRow("de-AT с обрезанным de") << "" << QStringList{"de-AT", "de"} << "de";
         QTest::newRow("zh-TW, потом японский") << "" << QStringList{"zh-TW", "ja-JP"} << "ja";
         QTest::newRow("fr-CA") << "" << QStringList{"fr-CA"} << "fr";
         QTest::newRow("de-AT") << "" << QStringList{"de-AT"} << "de";
