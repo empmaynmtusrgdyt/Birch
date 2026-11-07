@@ -29,7 +29,7 @@ The app looks the same on macOS, Windows and Linux.
 - **Mermaid export** (File menu): the diagram as text that GitHub, GitLab, Notion and Obsidian draw on their own. “Copy as Mermaid” puts a ready ` ```mermaid ` block on the clipboard, ready to paste into a README. Frames become `subgraph`s; colors are not carried over — Mermaid colors the diagram to match the site's theme.
 - **Command-line rendering** without a window: `birch diagram.birch -o diagram.svg` — for scripts, Makefiles and CI (see [below](#command-line)).
 - Light and dark themes follow the system; you can also pick one by hand. The picture theme can be set separately, for example always light for documents.
-- **Russian and English interface**, chosen from the system language; switch it in **View → Language** (see [Interface language](#interface-language)).
+- **Interface in 8 languages**: English, Russian, German, Spanish, French, Portuguese, Chinese and Japanese, chosen from the system language; switch it in **View → Language** (see [Interface language](#interface-language)).
 - `.birch` files open with a double-click. Unsaved text is restored on the next launch.
 
 ## Installation
@@ -117,7 +117,22 @@ In regular expression mode the replacement can refer to captured groups: `$1`, `
 
 ## Interface language
 
-Birch speaks Russian and English. By default it follows the system language; if the system language is neither, the interface is in English. To pick a language by hand, use **View → Language**; the change takes effect after a restart.
+Birch is translated into 8 languages:
+
+| Language | Code |
+|---|---|
+| English | `en` |
+| Русский | `ru` |
+| Deutsch | `de` |
+| Español | `es` |
+| Français | `fr` |
+| Português (Brasil) | `pt_BR` |
+| 简体中文 | `zh_CN` |
+| 日本語 | `ja` |
+
+By default Birch follows the system language; if there is no translation for it, the interface is in English. To pick a language by hand, use **View → Language**; the change takes effect after a restart. Each language has its own example diagrams.
+
+The translations other than Russian and English have not yet been reviewed by native speakers. If you spot a mistake or an awkward translation, send a fix to `translations/birch_<code>.ts` or open an [issue](https://github.com/empmaynmtusrgdyt/Birch/issues).
 
 For the command line, or to override everything for one launch, set the `BIRCH_LANGUAGE` environment variable:
 
@@ -335,6 +350,7 @@ Birch/
 | `Could NOT find Qt6 … version 6.5` | The system Qt is too old (Ubuntu 24.04, Debian 12): install Qt with the Qt Online Installer or aqtinstall and pass `-DCMAKE_PREFIX_PATH=…`, or use the AppImage. |
 | “Layout type: "dot" not recognized” | Graphviz plugins not found: install the `graphviz` package and run `sudo dot -c`. |
 | Linux: “could not load the Qt platform plugin "xcb"” | Debian/Ubuntu: `sudo apt install qt6-qpa-plugins`; for the AppImage on Ubuntu 22.04/24.04, `sudo apt install libxcb-cursor0`. |
+| Linux: squares instead of Chinese or Japanese characters | The system has no CJK font: `sudo apt install fonts-noto-cjk` (Debian, Ubuntu), `sudo pacman -S noto-fonts-cjk` (Arch). |
 | Windows: `Qt6Core.dll` or `gvc.dll` missing at launch | To run from the build folder, add the Qt and Graphviz `bin` folders to `PATH`; the installed package contains everything itself. |
 | CMake changes have no effect | Option values are cached: pass them explicitly or delete the `build/<preset>` folder. |
 
