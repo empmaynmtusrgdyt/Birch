@@ -1,0 +1,3 @@
+(Inicio) -> [Introducir datos] -> {¿Datos válidos?};
+{¿Datos válidos?} -> [Guardar] "Sí" -> (Fin);
+{¿Datos válidos?} -> [Mostrar error] "No" -> [Introducir datos];
