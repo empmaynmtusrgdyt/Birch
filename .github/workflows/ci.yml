@@ -78,10 +78,14 @@ jobs:
           .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
           # Fusion — запасной стиль на Windows и Linux
           .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch -style fusion
-      - name: Снимок панели поиска
+      - name: Снимки панели поиска (русский и английский)
         run: |
-          /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --find "Данные" --screenshot find-macos.png resources/examples/welcome.birch
-          grep -q "^find_bar_fits=1" find-macos.png.txt || { echo "::error::Панель поиска не помещается"; exit 1; }
+          app=/tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
+          BIRCH_LANGUAGE=ru $app --find "Данные" --screenshot find-macos-ru.png resources/examples/welcome.birch
+          BIRCH_LANGUAGE=en $app --find "data" --screenshot find-macos-en.png resources/examples/welcome.en.birch
+          for f in find-macos-ru find-macos-en; do
+            grep -q "^find_bar_fits=1" $f.png.txt || { echo "::error::Панель поиска не помещается ($f)"; exit 1; }
+          done
       - name: Командная строка
         run: .github/scripts/check-cli.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
       - name: Лицензии всех библиотек бандла
@@ -99,9 +103,14 @@ jobs:
       - name: Снимки примера с рамками
         run: |
           app=/tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
-          $app --screenshot-theme light --screenshot frames-light.png resources/examples/frames.birch
-          $app --screenshot-theme dark --screenshot frames-dark.png resources/examples/frames.birch
-          $app --screenshot-theme light --screenshot-monochrome --screenshot frames-mono.png resources/examples/frames.birch
+          for lang in ru en; do
+            example=resources/examples/frames.birch
+            [ $lang = ru ] || example=resources/examples/frames.$lang.birch
+            export BIRCH_LANGUAGE=$lang
+            $app --screenshot-theme light --screenshot frames-$lang-light.png $example
+            $app --screenshot-theme dark --screenshot frames-$lang-dark.png $example
+            $app --screenshot-theme light --screenshot-monochrome --screenshot frames-$lang-mono.png $example
+          done
           # Образ иногда ещё занят системой (например, Spotlight) — повторяем, потом принудительно
           for i in 1 2 3; do hdiutil detach /tmp/birch-dmg && exit 0; sleep 5; done
           hdiutil detach -force /tmp/birch-dmg
@@ -271,11 +280,15 @@ jobs:
         run: |
           app=$(ls build/appimage/Birch*.AppImage)
           APPIMAGE_EXTRACT_AND_RUN=1 .github/scripts/check-theme.sh xvfb-run -a "$app"
-      - name: Снимок панели поиска (X11 через Xvfb)
+      - name: Снимки панели поиска, русский и английский (X11 через Xvfb)
         run: |
           app=$(ls build/appimage/Birch*.AppImage)
-          APPIMAGE_EXTRACT_AND_RUN=1 xvfb-run -a "$app" --find "Данные" --screenshot find-appimage.png resources/examples/welcome.birch
-          grep -q "^find_bar_fits=1" find-appimage.png.txt || { echo "::error::Панель поиска не помещается"; exit 1; }
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          BIRCH_LANGUAGE=ru xvfb-run -a "$app" --find "Данные" --screenshot find-appimage-ru.png resources/examples/welcome.birch
+          BIRCH_LANGUAGE=en xvfb-run -a "$app" --find "data" --screenshot find-appimage-en.png resources/examples/welcome.en.birch
+          for f in find-appimage-ru find-appimage-en; do
+            grep -q "^find_bar_fits=1" $f.png.txt || { echo "::error::Панель поиска не помещается ($f)"; exit 1; }
+          done
       - name: Командная строка AppImage (без экрана)
         run: APPIMAGE_EXTRACT_AND_RUN=1 .github/scripts/check-cli.sh "$(ls build/appimage/Birch*.AppImage)"
       - name: Лицензии всех библиотек AppImage
@@ -292,9 +305,14 @@ jobs:
         run: |
           app=$(ls build/appimage/Birch*.AppImage)
           export APPIMAGE_EXTRACT_AND_RUN=1
-          xvfb-run -a "$app" --screenshot-theme light --screenshot frames-light.png resources/examples/frames.birch
-          xvfb-run -a "$app" --screenshot-theme dark --screenshot frames-dark.png resources/examples/frames.birch
-          xvfb-run -a "$app" --screenshot-theme light --screenshot-monochrome --screenshot frames-mono.png resources/examples/frames.birch
+          for lang in ru en; do
+            example=resources/examples/frames.birch
+            [ $lang = ru ] || example=resources/examples/frames.$lang.birch
+            export BIRCH_LANGUAGE=$lang
+            xvfb-run -a "$app" --screenshot-theme light --screenshot frames-$lang-light.png $example
+            xvfb-run -a "$app" --screenshot-theme dark --screenshot frames-$lang-dark.png $example
+            xvfb-run -a "$app" --screenshot-theme light --screenshot-monochrome --screenshot frames-$lang-mono.png $example
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: package-appimage
@@ -396,16 +414,19 @@ jobs:
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
           .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
-      - name: Снимок панели поиска
+      - name: Снимки панели поиска (русский и английский)
         shell: pwsh
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
-          $shot = Join-Path $PWD "find-windows.png"
-          $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
-                 -ArgumentList "--find", "Данные", "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
-          if ($p.ExitCode -ne 0) { throw "Birch.exe --find завершился с кодом $($p.ExitCode)" }
-          if (-not (Select-String -Path "$shot.txt" -Pattern "^find_bar_fits=1" -Quiet)) { throw "Панель поиска не помещается" }
+          foreach ($c in @(@("ru", "Данные", "welcome.birch"), @("en", "data", "welcome.en.birch"))) {
+            $env:BIRCH_LANGUAGE = $c[0]
+            $shot = Join-Path $PWD "find-windows-$($c[0]).png"
+            $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                   -ArgumentList "--find", $c[1], "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\$($c[2])`""
+            if ($p.ExitCode -ne 0) { throw "Birch.exe --find ($($c[0])) завершился с кодом $($p.ExitCode)" }
+            if (-not (Select-String -Path "$shot.txt" -Pattern "^find_bar_fits=1" -Quiet)) { throw "Панель поиска не помещается ($($c[0]))" }
+          }
       - name: Командная строка
         shell: pwsh
         run: |
@@ -424,15 +445,19 @@ jobs:
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
-          function Shot([string] $name, [string[]] $options) {
+          function Shot([string] $name, [string] $example, [string[]] $options) {
             $shot = Join-Path $PWD $name
-            $argList = $options + @("--screenshot", "`"$shot`"", "`"$PWD\resources\examples\frames.birch`"")
+            $argList = $options + @("--screenshot", "`"$shot`"", "`"$PWD\resources\examples\$example`"")
             $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru -ArgumentList $argList
             if ($p.ExitCode -ne 0) { throw "Birch.exe ($name) завершился с кодом $($p.ExitCode)" }
           }
-          Shot "frames-light.png" @("--screenshot-theme", "light")
-          Shot "frames-dark.png" @("--screenshot-theme", "dark")
-          Shot "frames-mono.png" @("--screenshot-theme", "light", "--screenshot-monochrome")
+          foreach ($lang in "ru", "en") {
+            $env:BIRCH_LANGUAGE = $lang
+            $example = if ($lang -eq "ru") { "frames.birch" } else { "frames.$lang.birch" }
+            Shot "frames-$lang-light.png" $example @("--screenshot-theme", "light")
+            Shot "frames-$lang-dark.png" $example @("--screenshot-theme", "dark")
+            Shot "frames-$lang-mono.png" $example @("--screenshot-theme", "light", "--screenshot-monochrome")
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: theme-windows
@@ -471,16 +496,19 @@ jobs:
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           .github\scripts\check-theme.ps1 C:\BirchTest\bin\Birch.exe
-      - name: Снимок панели поиска
+      - name: Снимки панели поиска (русский и английский)
         shell: pwsh
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
-          $shot = Join-Path $PWD "find-windows.png"
-          $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
-                 -ArgumentList "--find", "Данные", "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\welcome.birch`""
-          if ($p.ExitCode -ne 0) { throw "Birch.exe --find завершился с кодом $($p.ExitCode)" }
-          if (-not (Select-String -Path "$shot.txt" -Pattern "^find_bar_fits=1" -Quiet)) { throw "Панель поиска не помещается" }
+          foreach ($c in @(@("ru", "Данные", "welcome.birch"), @("en", "data", "welcome.en.birch"))) {
+            $env:BIRCH_LANGUAGE = $c[0]
+            $shot = Join-Path $PWD "find-windows-$($c[0]).png"
+            $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru `
+                   -ArgumentList "--find", $c[1], "--screenshot", "`"$shot`"", "`"$PWD\resources\examples\$($c[2])`""
+            if ($p.ExitCode -ne 0) { throw "Birch.exe --find ($($c[0])) завершился с кодом $($p.ExitCode)" }
+            if (-not (Select-String -Path "$shot.txt" -Pattern "^find_bar_fits=1" -Quiet)) { throw "Панель поиска не помещается ($($c[0]))" }
+          }
       - name: Командная строка
         shell: pwsh
         run: |
@@ -499,15 +527,19 @@ jobs:
         run: |
           $env:PATH = "$env:SystemRoot\system32;$env:SystemRoot"
           Remove-Item Env:QT_QPA_PLATFORM -ErrorAction SilentlyContinue
-          function Shot([string] $name, [string[]] $options) {
+          function Shot([string] $name, [string] $example, [string[]] $options) {
             $shot = Join-Path $PWD $name
-            $argList = $options + @("--screenshot", "`"$shot`"", "`"$PWD\resources\examples\frames.birch`"")
+            $argList = $options + @("--screenshot", "`"$shot`"", "`"$PWD\resources\examples\$example`"")
             $p = Start-Process C:\BirchTest\bin\Birch.exe -Wait -PassThru -ArgumentList $argList
             if ($p.ExitCode -ne 0) { throw "Birch.exe ($name) завершился с кодом $($p.ExitCode)" }
           }
-          Shot "frames-light.png" @("--screenshot-theme", "light")
-          Shot "frames-dark.png" @("--screenshot-theme", "dark")
-          Shot "frames-mono.png" @("--screenshot-theme", "light", "--screenshot-monochrome")
+          foreach ($lang in "ru", "en") {
+            $env:BIRCH_LANGUAGE = $lang
+            $example = if ($lang -eq "ru") { "frames.birch" } else { "frames.$lang.birch" }
+            Shot "frames-$lang-light.png" $example @("--screenshot-theme", "light")
+            Shot "frames-$lang-dark.png" $example @("--screenshot-theme", "dark")
+            Shot "frames-$lang-mono.png" $example @("--screenshot-theme", "light", "--screenshot-monochrome")
+          }
       - name: Удаление убирает birch из PATH
         shell: pwsh
         run: |
