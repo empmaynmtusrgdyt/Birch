@@ -4,6 +4,12 @@
 <dict>
     <key>CFBundleDevelopmentRegion</key>
     <string>ru</string>
+    <!-- Языки интерфейса: macOS показывает их в «Системные настройки → Язык и регион → Программы» -->
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>ru</string>
+        <string>en</string>
+    </array>
     <key>CFBundleExecutable</key>
     <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
     <key>CFBundleIconFile</key>

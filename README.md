@@ -1,5 +1,7 @@
 # Birch
 
+**Русский** · [English](README.en.md)
+
 Приложение для **macOS, Windows и Linux**, которое строит блок-схемы по текстовому описанию. Без ИИ и без интернета: текст разбирает собственный парсер, раскладку и стрелки делает [Graphviz](https://graphviz.org), интерфейс написан на Qt 6.
 
 | Светлая тема | Тёмная тема |
@@ -27,6 +29,7 @@
 - **Экспорт в Mermaid** (меню «Файл»): схема текстом, который GitHub, GitLab, Notion и Obsidian рисуют сами. «Копировать как Mermaid» кладёт в буфер готовый блок ` ```mermaid ` — его можно сразу вставить в README. Рамки становятся `subgraph`; цвета не переносятся — Mermaid раскрашивает схему по теме сайта.
 - **Рендер из командной строки** без окна: `birch схема.birch -o схема.svg` — для скриптов, Makefile и CI (см. [ниже](#командная-строка)).
 - Светлая и тёмная темы следуют системной; тему можно выбрать и вручную. Тему картинки можно задать отдельно, например всегда светлую для документов.
+- **Русский и английский интерфейс** выбирается по языку системы; сменить его можно в меню **Вид → Язык** (см. [Язык интерфейса](#язык-интерфейса)).
 - Файлы `.birch` открываются двойным щелчком. Несохранённый текст восстанавливается при следующем запуске.
 
 ## Установка
@@ -112,6 +115,21 @@
 
 В режиме регулярных выражений в замене можно ссылаться на найденные группы: `$1`, `$2`… (`$0` — всё совпадение, `$$` — сам знак `$`), а `\n` вставляет перенос строки.
 
+## Язык интерфейса
+
+Birch говорит по-русски и по-английски. По умолчанию язык берётся из системы; если это не русский и не английский — интерфейс будет английским. Выбрать язык вручную можно в меню **Вид → Язык**, он сменится после перезапуска.
+
+Для командной строки или чтобы один раз запустить Birch на другом языке, задайте переменную окружения `BIRCH_LANGUAGE`:
+
+```bash
+BIRCH_LANGUAGE=en birch --help
+BIRCH_LANGUAGE=ru birch схема.birch -o схема.png
+```
+
+Командная строка следует языку системы (`LANGUAGE`, `LC_ALL`, `LC_MESSAGES` и `LANG` в Linux, системные настройки в macOS и Windows) и `BIRCH_LANGUAGE`, но не настройке из меню — поэтому скрипт выводит одно и то же у всех пользователей компьютера.
+
+**Новый язык — это один файл.** `translations/update.sh de` создаёт `translations/birch_de.ts` со всеми строками интерфейса; переведите их в Qt Linguist (или любом редакторе) и пересоберите — сборка найдёт файл сама, и язык появится в меню вместе с переводом стандартных диалогов Qt, если он есть в Qt. Исходные строки в коде — русские. После изменения строк в коде снова запустите `translations/update.sh`; `translations/update.sh --check` (его запускает CI) завершается ошибкой, если перевод устарел или не закончен.
+
 ## Командная строка
 
 С ключом `-o` Birch рисует схему в файл и сразу выходит, не открывая окна. Формат выбирается по расширению: `.png`, `.svg` или `.mmd` (Mermaid). Экран не нужен — команда работает по SSH, в cron и в CI.
@@ -175,7 +193,7 @@ docs/%.svg: docs/%.birch
 
 ## Сборка из исходников
 
-Нужны компилятор с C++20, CMake ≥ 3.21, **Qt ≥ 6.5** (модули Base и Svg) и Graphviz ≥ 2.42 с заголовками для разработки. Для каждой системы есть пресет CMake (`CMakePresets.json`).
+Нужны компилятор с C++20, CMake ≥ 3.21, **Qt ≥ 6.5** (модули Base, Svg и Linguist Tools) и Graphviz ≥ 2.42 с заголовками для разработки. Для каждой системы есть пресет CMake (`CMakePresets.json`).
 
 ### macOS (Homebrew)
 
@@ -225,7 +243,7 @@ ctest --preset windows
 
 При настройке CMake печатает строку вида `Birch 0.3.0: Qt 6.9.3, Graphviz 16.1.0, builtin plugins: TRUE`. `builtin plugins: TRUE` означает, что плагины Graphviz встроены в приложение (так на macOS, Windows и в AppImage). В пакетах для Debian, Ubuntu и Arch используются плагины системного Graphviz.
 
-Тесты (парсер, рендерер, экспорт Mermaid и поиск, около 100 проверок) собираются по умолчанию; отключаются флагом `-DBIRCH_BUILD_TESTS=OFF`.
+Тесты (парсер, рендерер, экспорт Mermaid, поиск и языки, около 100 проверок) собираются по умолчанию; отключаются флагом `-DBIRCH_BUILD_TESTS=OFF`.
 
 ## Пакеты
 
@@ -275,6 +293,7 @@ Birch/
 │   ├── main.cpp
 │   ├── core/                 логика без виджетов, покрыта тестами
 │   │   ├── Diagram.h         модель: узлы, связи, фигуры, рамки
+│   │   ├── Language.*        выбор языка интерфейса, загрузка переводов
 │   │   ├── MermaidExporter.* Diagram → текст Mermaid
 │   │   ├── Parser.*          DSL → Diagram, ошибки с позициями
 │   │   ├── Renderer.*        Diagram → Graphviz (cgraph + dot) → SVG → QImage/PNG
@@ -287,14 +306,15 @@ Birch/
 │       ├── FindBar.*         панель поиска и замены
 │       ├── SyntaxHighlighter.*
 │       └── PreviewView.*     интерактивный холст (вектор, зум, прокрутка)
-├── resources/                иконки интерфейса, пример схемы
+├── resources/                иконки интерфейса, примеры схем
+├── translations/             переводы интерфейса (Qt Linguist) и update.sh
 ├── packaging/
 │   ├── macos/                Info.plist, иконка, проверка бандла
 │   ├── windows/              .rc с иконкой и версией, app.ico
 │   ├── linux/                .desktop, MIME-тип, сборка AppImage
 │   ├── arch/                 PKGBUILD
 │   └── generate-icons.sh     app.svg → app.icns и app.ico
-├── tests/                    тесты парсера, рендерера, экспорта Mermaid и поиска (Qt Test)
+├── tests/                    тесты парсера, рендерера, экспорта Mermaid, поиска и языков (Qt Test)
 └── docs/                     скриншоты
 ```
 
@@ -311,6 +331,7 @@ Birch/
 |---|---|
 | `Could NOT find Graphviz` | Установите пакет для разработки (`libgraphviz-dev`, `graphviz` в Arch, `brew install graphviz`) или укажите путь: `-DGRAPHVIZ_ROOT=…`. |
 | `Could NOT find Qt6Svg` / `SvgWidgets` | Установите модуль SVG: `qt6-svg-dev`, `qt6-svg`, в установщике Qt — «Qt SVG». |
+| `Could NOT find Qt6LinguistTools` | Установите инструменты переводов Qt: `qt6-tools-dev qt6-l10n-tools` (Debian, Ubuntu), `qt6-tools` (Arch); в `qt` из Homebrew они уже есть. |
 | `Could NOT find Qt6 … version 6.5` | Системный Qt слишком старый (Ubuntu 24.04, Debian 12): поставьте Qt через Qt Online Installer или aqtinstall и передайте `-DCMAKE_PREFIX_PATH=…`, или используйте AppImage. |
 | «Layout type: "dot" not recognized» | Не найдены плагины Graphviz: установите пакет `graphviz` и выполните `sudo dot -c`. |
 | Linux: «could not load the Qt platform plugin "xcb"» | Debian/Ubuntu: `sudo apt install qt6-qpa-plugins`; для AppImage на Ubuntu 22.04/24.04 — `sudo apt install libxcb-cursor0`. |

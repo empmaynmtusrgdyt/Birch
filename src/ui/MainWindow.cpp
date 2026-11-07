@@ -102,6 +102,13 @@ const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
 }  // namespace keys
 
+// Пример на языке интерфейса: :/examples/<имя>.<язык>.birch, а для исходного
+// языка и языков без своего примера — :/examples/<имя>.birch
+QString examplePath(const QString& name) {
+    const QString localized = QStringLiteral(":/examples/%1.%2.birch").arg(name, i18n::current());
+    return QFile::exists(localized) ? localized : QStringLiteral(":/examples/%1.birch").arg(name);
+}
+
 QString readResourceText(const QString& path) {
     QFile f(path);
     return f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()) : QString();
@@ -205,10 +212,10 @@ void MainWindow::createActions() {
     saveAsAct_ = make(tr("Сохранить как…"), &MainWindow::saveAs, {QKeySequence::SaveAs});
     exampleAct_ = new QAction(tr("Открыть пример"), this);
     connect(exampleAct_, &QAction::triggered, this,
-            [this] { loadExample(QStringLiteral(":/examples/welcome.birch")); });
+            [this] { loadExample(examplePath(QStringLiteral("welcome"))); });
     framesExampleAct_ = new QAction(tr("Открыть пример с рамками"), this);
     connect(framesExampleAct_, &QAction::triggered, this,
-            [this] { loadExample(QStringLiteral(":/examples/frames.birch")); });
+            [this] { loadExample(examplePath(QStringLiteral("frames"))); });
     quitAct_ = make(tr("Выход"), &QWidget::close, {QKeySequence::Quit});
     quitAct_->setMenuRole(QAction::QuitRole);
 
@@ -890,7 +897,7 @@ void MainWindow::restoreSession() {
     if (s.contains(keys::sessionText) && !isOldWelcomeExample(s.value(keys::sessionText).toString())) {
         editor_->setPlainText(s.value(keys::sessionText).toString());
     } else {
-        editor_->setPlainText(readResourceText(QStringLiteral(":/examples/welcome.birch")));
+        editor_->setPlainText(readResourceText(examplePath(QStringLiteral("welcome"))));
     }
     setCurrentFile({});
 }

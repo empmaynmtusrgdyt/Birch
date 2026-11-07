@@ -144,19 +144,43 @@ private slots:
         QCOMPARE(nodeLabels(r.diagram), (QStringList{"f(x) > 0?", "arr[i"}));
     }
 
-    void bundledExampleIsValid() {
-        QFile f(QStringLiteral(BIRCH_EXAMPLES_DIR "/welcome.birch"));
+    // Примеры на всех языках — без ошибок и одинаковые по устройству
+    void bundledExamplesAreValid_data() {
+        QTest::addColumn<QString>("file");
+        QTest::addColumn<int>("nodes");
+        QTest::addColumn<int>("edges");
+        QTest::addColumn<int>("groups");
+        QTest::newRow("welcome") << "welcome.birch" << 6 << 6 << 0;
+        QTest::newRow("welcome.en") << "welcome.en.birch" << 6 << 6 << 0;
+        QTest::newRow("frames") << "frames.birch" << 9 << 10 << 2;
+        QTest::newRow("frames.en") << "frames.en.birch" << 9 << 10 << 2;
+    }
+    void bundledExamplesAreValid() {
+        QFETCH(QString, file);
+        QFETCH(int, nodes);
+        QFETCH(int, edges);
+        QFETCH(int, groups);
+        QFile f(QStringLiteral(BIRCH_EXAMPLES_DIR "/") + file);
         QVERIFY(f.open(QIODevice::ReadOnly));
         const auto r = parse(QString::fromUtf8(f.readAll()));
         QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
-        QCOMPARE(r.diagram.nodes.size(), 6);
-        QCOMPARE(r.diagram.edges.size(), 6);
+        QCOMPARE(r.diagram.nodes.size(), nodes);
+        QCOMPARE(r.diagram.edges.size(), edges);
+        QCOMPARE(r.diagram.groups.size(), groups);
     }
 
+    // Стартовый текст программы — тот же пример, что в начале README на этом языке.
+    void welcomeMatchesReadme_data() {
+        QTest::addColumn<QString>("readmePath");
+        QTest::addColumn<QString>("welcomeFile");
+        QTest::newRow("ru") << QStringLiteral(BIRCH_README) << "welcome.birch";
+        QTest::newRow("en") << QStringLiteral(BIRCH_README_EN) << "welcome.en.birch";
+    }
     void welcomeMatchesReadme() {
-        // Стартовый текст программы — тот же пример, что в начале README.
-        QFile readme(QStringLiteral(BIRCH_README));
-        QFile welcome(QStringLiteral(BIRCH_EXAMPLES_DIR "/welcome.birch"));
+        QFETCH(QString, readmePath);
+        QFETCH(QString, welcomeFile);
+        QFile readme(readmePath);
+        QFile welcome(QStringLiteral(BIRCH_EXAMPLES_DIR "/") + welcomeFile);
         QVERIFY(readme.open(QIODevice::ReadOnly | QIODevice::Text));
         QVERIFY(welcome.open(QIODevice::ReadOnly | QIODevice::Text));
         const QString text = QString::fromUtf8(readme.readAll());

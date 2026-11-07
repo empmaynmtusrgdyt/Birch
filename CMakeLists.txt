@@ -93,15 +93,19 @@ target_include_directories(birch_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # Переводы интерфейса: translations/birch_<язык>.ts → .qm внутри birch_core (:/i18n).
 # Исходный язык строк — русский; birch_ru.ts содержит только формы множественного
 # числа. Файлы .ts обновляет translations/update.sh (lupdate), а не сборка.
-set(BIRCH_TS_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/translations/birch_en.ts
-    ${CMAKE_CURRENT_SOURCE_DIR}/translations/birch_ru.ts)
+# Новый язык — новый файл translations/birch_<код>.ts: сборка найдёт его сама.
+file(GLOB BIRCH_TS_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/translations/birch_*.ts")
 qt_add_lrelease(birch_core
     TS_FILES ${BIRCH_TS_FILES}
     QM_FILES_OUTPUT_VARIABLE _birch_qm_files)
 # Перевод стандартных диалогов и контекстных меню Qt — если есть в этой сборке Qt
-# (иначе Birch попробует взять его из Qt при запуске).
-foreach(_lang IN ITEMS ru)
+# (иначе Birch попробует взять его из Qt при запуске). Языки — те же, что у .ts;
+# английский не нужен: строки Qt и так английские.
+foreach(_ts IN LISTS BIRCH_TS_FILES)
+    string(REGEX REPLACE ".*/birch_(.+)\\.ts$" "\\1" _lang "${_ts}")
+    if(_lang STREQUAL "en")
+        continue()
+    endif()
     set(_qt_qm "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_TRANSLATIONS}/qtbase_${_lang}.qm")
     if(EXISTS "${_qt_qm}")
         set_source_files_properties("${_qt_qm}" PROPERTIES QT_RESOURCE_ALIAS "qtbase_${_lang}.qm")
@@ -177,7 +181,9 @@ qt_add_resources(Birch "birch_resources"
         resources/icons/zoom-in.svg
         resources/icons/zoom-out.svg
         resources/examples/welcome.birch
+        resources/examples/welcome.en.birch
         resources/examples/frames.birch
+        resources/examples/frames.en.birch
 )
 
 target_link_libraries(Birch PRIVATE birch_core birch_editor Qt6::Widgets Qt6::Svg Qt6::SvgWidgets)

@@ -10,7 +10,10 @@
 # Исходный язык строк — русский, поэтому birch_ru.ts содержит только фразы с
 # числами (%n): для них нужны формы множественного числа.
 #
-# Использование: translations/update.sh [--check [--allow-unfinished]]
+# Новый язык: translations/update.sh <код>, например de, — создаст birch_de.ts
+# со всеми строками; переведите их, и после сборки язык появится в меню.
+#
+# Использование: translations/update.sh [--check [--allow-unfinished]] [КОД]...
 #   --check             ничего не меняет; ошибка, если файлы .ts устарели или в
 #                       них есть непереведённые строки (так проверяет CI)
 #   --allow-unfinished  с --check: непереведённые строки — не ошибка
@@ -27,11 +30,15 @@ fi
 
 check=0
 allow_unfinished=0
+new_languages=()
 for arg in "$@"; do
     case "$arg" in
         --check) check=1 ;;
         --allow-unfinished) allow_unfinished=1 ;;
-        *) echo "Неизвестный ключ: $arg" >&2; exit 2 ;;
+        -*) echo "Неизвестный ключ: $arg" >&2; exit 2 ;;
+        *)
+            [[ "$arg" =~ ^[a-z]{2,3}(_[A-Z]{2})?$ ]] || { echo "Код языка вида de или pt_BR, а не «$arg»" >&2; exit 2; }
+            new_languages+=("$arg") ;;
     esac
 done
 
@@ -45,6 +52,11 @@ fi
 cd "$root"
 # Без номеров строк (-locations none): иначе файлы меняются от любой правки кода.
 options=(-locations none -no-obsolete -source-language ru -recursive src)
+for lang in "${new_languages[@]+"${new_languages[@]}"}"; do
+    [ -e "$work/birch_$lang.ts" ] && continue
+    "$lupdate" -silent "${options[@]}" -target-language "$lang" -ts "$work/birch_$lang.ts"
+    echo "Создан translations/birch_$lang.ts"
+done
 others=()
 for ts in "$work"/birch_*.ts; do
     [ "$(basename "$ts")" = birch_ru.ts ] || others+=("$ts")
