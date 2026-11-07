@@ -36,6 +36,7 @@
 
 #include "app/RenderController.h"
 #include "core/MermaidExporter.h"
+#include "core/Examples.h"
 #include "core/Language.h"
 #include "ui/CodeEditor.h"
 #include "ui/FindBar.h"
@@ -102,17 +103,10 @@ const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
 }  // namespace keys
 
-// Пример на языке интерфейса: :/examples/<имя>.<язык>.birch. Если у языка нет
-// своего примера — английский, а для исходного языка — :/examples/<имя>.birch.
-QString examplePath(const QString& name) {
-    const QString current = i18n::current();
-    if (current == QLatin1String(i18n::kSourceLanguage)) return QStringLiteral(":/examples/%1.birch").arg(name);
-    for (const QString& code : {current, QString::fromLatin1(i18n::kFallbackLanguage)}) {
-        const QString path = QStringLiteral(":/examples/%1.%2.birch").arg(name, code);
-        if (QFile::exists(path)) return path;
-    }
-    return QStringLiteral(":/examples/%1.birch").arg(name);
-}
+const QString kExamplesDir = QStringLiteral(":/examples");
+
+// Пример на языке интерфейса (см. core/Examples.h).
+QString examplePath(const QString& name) { return examples::path(kExamplesDir, name, i18n::current()); }
 
 QString readResourceText(const QString& path) {
     QFile f(path);
@@ -899,11 +893,12 @@ void MainWindow::restoreSession() {
             return;
         }
     }
-    if (s.contains(keys::sessionText) && !isOldWelcomeExample(s.value(keys::sessionText).toString())) {
-        editor_->setPlainText(s.value(keys::sessionText).toString());
-    } else {
-        editor_->setPlainText(readResourceText(examplePath(QStringLiteral("welcome"))));
-    }
+    // Нетронутый пример — на языке интерфейса, даже если сохранён на другом;
+    // свой текст пользователя восстанавливается как есть.
+    const QString text = s.value(keys::sessionText).toString();
+    QString example = examples::untouchedName(kExamplesDir, text);
+    if (!s.contains(keys::sessionText) || isOldWelcomeExample(text)) example = QStringLiteral("welcome");
+    editor_->setPlainText(example.isEmpty() ? text : readResourceText(examplePath(example)));
     setCurrentFile({});
 }
 

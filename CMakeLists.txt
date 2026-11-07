@@ -74,6 +74,8 @@ endfunction()
 add_library(birch_core STATIC
     src/core/CommandLine.h
     src/core/CommandLine.cpp
+    src/core/Examples.h
+    src/core/Examples.cpp
     src/core/Language.h
     src/core/Language.cpp
     src/core/Diagram.h
