@@ -42,7 +42,7 @@ option(BIRCH_LINK_GRAPHVIZ_PLUGINS "Встроить плагины Graphviz в 
 # Qt6::Svg нужен, чтобы рендерить SVG от Graphviz в QImage с любым масштабом
 # (чёткая картинка на HiDPI и не нужен cairo-плагин Graphviz).
 # 6.5+ — следим за сменой светлой/тёмной темы системы на лету.
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Svg SvgWidgets)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Svg SvgWidgets LinguistTools)
 qt_standard_project_setup()
 
 # Свой модуль cmake/FindGraphviz.cmake: pkg-config -> поиск вручную.
@@ -74,6 +74,8 @@ endfunction()
 add_library(birch_core STATIC
     src/core/CommandLine.h
     src/core/CommandLine.cpp
+    src/core/Language.h
+    src/core/Language.cpp
     src/core/Diagram.h
     src/core/MermaidExporter.h
     src/core/MermaidExporter.cpp
@@ -87,6 +89,28 @@ add_library(birch_core STATIC
     src/core/Theme.cpp
 )
 target_include_directories(birch_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+# Переводы интерфейса: translations/birch_<язык>.ts → .qm внутри birch_core (:/i18n).
+# Исходный язык строк — русский; birch_ru.ts содержит только формы множественного
+# числа. Файлы .ts обновляет translations/update.sh (lupdate), а не сборка.
+set(BIRCH_TS_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/translations/birch_en.ts
+    ${CMAKE_CURRENT_SOURCE_DIR}/translations/birch_ru.ts)
+qt_add_lrelease(birch_core
+    TS_FILES ${BIRCH_TS_FILES}
+    QM_FILES_OUTPUT_VARIABLE _birch_qm_files)
+# Перевод стандартных диалогов и контекстных меню Qt — если есть в этой сборке Qt
+# (иначе Birch попробует взять его из Qt при запуске).
+foreach(_lang IN ITEMS ru)
+    set(_qt_qm "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_TRANSLATIONS}/qtbase_${_lang}.qm")
+    if(EXISTS "${_qt_qm}")
+        set_source_files_properties("${_qt_qm}" PROPERTIES QT_RESOURCE_ALIAS "qtbase_${_lang}.qm")
+        list(APPEND _birch_qm_files "${_qt_qm}")
+    else()
+        message(STATUS "Нет ${_qt_qm}: стандартные диалоги Qt — на языке Qt по умолчанию")
+    endif()
+endforeach()
+qt_add_resources(birch_core "birch_i18n" PREFIX "/i18n" BASE "${CMAKE_CURRENT_BINARY_DIR}" FILES ${_birch_qm_files})
 target_link_libraries(birch_core
     PUBLIC  Qt6::Core Qt6::Gui
     PRIVATE Qt6::Svg Graphviz::gvc)

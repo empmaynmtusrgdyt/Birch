@@ -109,6 +109,7 @@ private:
 
     void showSyntaxHelp();
     void showAbout();
+    void chooseLanguage(const QString& code);  // пустой код — «как в системе»
 
     // Виджеты
     QSplitter* splitter_ = nullptr;
@@ -155,6 +156,7 @@ private:
     QAction* zoomFitAct_ = nullptr;
     QActionGroup* themeGroup_ = nullptr;
     QActionGroup* exportThemeGroup_ = nullptr;
+    QActionGroup* languageGroup_ = nullptr;  // «Как в системе» и все языки перевода
     QAction* syntaxAct_ = nullptr;
     QAction* aboutAct_ = nullptr;
     QAction* installCommandAct_ = nullptr;  // только macOS и AppImage

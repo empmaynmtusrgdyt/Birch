@@ -191,7 +191,8 @@ open build/macos/Birch.app
 
 ```bash
 sudo apt install build-essential cmake pkg-config qt6-base-dev qt6-svg-dev \
-                 qt6-qpa-plugins libgl-dev libgraphviz-dev graphviz
+                 qt6-qpa-plugins libgl-dev libgraphviz-dev graphviz \
+                 qt6-tools-dev qt6-l10n-tools qt6-translations-l10n
 
 cmake --preset linux && cmake --build --preset linux && ctest --preset linux
 ./build/linux/birch
@@ -200,7 +201,7 @@ cmake --preset linux && cmake --build --preset linux && ctest --preset linux
 ### Arch Linux
 
 ```bash
-sudo pacman -S --needed base-devel cmake qt6-base qt6-svg graphviz
+sudo pacman -S --needed base-devel cmake qt6-base qt6-svg qt6-tools qt6-translations graphviz
 
 cmake --preset linux && cmake --build --preset linux && ctest --preset linux
 ./build/linux/birch

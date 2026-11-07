@@ -20,7 +20,9 @@
 #include <QMimeData>
 #include <QPainter>
 #include <QSaveFile>
+#include <QLocale>
 #include <QSettings>
+#include <QTranslator>
 #include <QShortcut>
 #include <QSplitter>
 #include <QStandardPaths>
@@ -34,6 +36,7 @@
 
 #include "app/RenderController.h"
 #include "core/MermaidExporter.h"
+#include "core/Language.h"
 #include "ui/CodeEditor.h"
 #include "ui/FindBar.h"
 #include "ui/InstallCommand.h"
@@ -340,6 +343,18 @@ void MainWindow::createActions() {
     aboutAct_ = make(tr("О программе Birch"), &MainWindow::showAbout);
     aboutAct_->setMenuRole(QAction::AboutRole);
 
+    // Язык: «как в системе» и все встроенные переводы. Применяется после перезапуска.
+    languageGroup_ = new QActionGroup(this);
+    const QString chosenLanguage = QSettings().value(QLatin1String(i18n::kSettingsKey)).toString();
+    QStringList languageCodes{QString()};
+    languageCodes += i18n::availableLanguages();
+    for (const QString& code : languageCodes) {
+        QAction* a = languageGroup_->addAction(code.isEmpty() ? tr("Как в системе") : i18n::nativeName(code));
+        a->setCheckable(true);
+        a->setChecked(code == chosenLanguage);
+        connect(a, &QAction::triggered, this, [this, code] { chooseLanguage(code); });
+    }
+
     if (canInstallShellCommand()) {
         installCommandAct_ = new QAction(tr("Установить команду birch…"), this);
         // На macOS — в меню программы, рядом с «О программе»
@@ -376,6 +391,10 @@ void MainWindow::createMenus() {
     view->addSeparator();
     QMenu* theme = view->addMenu(tr("Тема"));
     theme->addActions(themeGroup_->actions());
+
+    QMenu* language = view->addMenu(tr("Язык"));
+    language->addActions(languageGroup_->actions());
+    language->insertSeparator(languageGroup_->actions().value(1));
 
     QMenu* exportMenu = view->addMenu(tr("Экспорт картинки"));
     exportMenu->addAction(transparentAct_);
@@ -1057,6 +1076,24 @@ void MainWindow::showSyntaxHelp() {
                    "<p>Если узел хоть раз записан как "
                    "<code>{…}</code> или <code>(…)</code>, он останется этой фигурой.</p>"));
     box.exec();
+}
+
+void MainWindow::chooseLanguage(const QString& code) {
+    QSettings settings;
+    if (settings.value(QLatin1String(i18n::kSettingsKey)).toString() == code) return;
+    settings.setValue(QLatin1String(i18n::kSettingsKey), code);
+    const QString next = i18n::choose(code, QLocale::system().uiLanguages(), i18n::availableLanguages());
+    if (next == i18n::current()) return;  // язык на деле не меняется
+    // Сообщение — на обоих языках: текущем и том, на который переключаемся
+    QTranslator target;
+    const bool loaded = target.load(QStringLiteral(":/i18n/birch_%1.qm").arg(next));
+    const char* text = QT_TR_NOOP("Язык интерфейса изменится после перезапуска Birch.");
+    QString message = tr(text);
+    QString translated;
+    if (next == QLatin1String(i18n::kSourceLanguage)) translated = QString::fromUtf8(text);
+    else if (loaded) translated = target.translate("birch::MainWindow", text);
+    if (!translated.isEmpty() && translated != message) message += QStringLiteral("\n\n") + translated;
+    QMessageBox::information(this, tr("Язык"), message);
 }
 
 void MainWindow::showAbout() {

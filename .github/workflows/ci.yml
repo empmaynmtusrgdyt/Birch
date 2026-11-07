@@ -36,6 +36,9 @@ jobs:
         run: .github/scripts/check-license-headers.sh
       - name: Зависимости (Homebrew)
         run: brew install qt graphviz
+      - name: Файлы перевода соответствуют строкам в коде
+        # TODO: убрать --allow-unfinished, когда переведены все строки
+        run: translations/update.sh --check --allow-unfinished
       - name: Сборка
         run: |
           cmake --preset macos
@@ -136,6 +139,7 @@ jobs:
           apt-get install -y --no-install-recommends \
             build-essential cmake pkg-config git ca-certificates dpkg-dev file \
             qt6-base-dev qt6-svg-dev qt6-qpa-plugins libgl-dev \
+            qt6-tools-dev qt6-l10n-tools qt6-translations-l10n \
             libgraphviz-dev graphviz fonts-dejavu-core
       - uses: actions/checkout@v4
       - name: Сборка
@@ -200,7 +204,7 @@ jobs:
       QT_QPA_PLATFORM: offscreen
     steps:
       - name: Зависимости (pacman)
-        run: pacman -Syu --noconfirm --needed base-devel git cmake qt6-base qt6-svg graphviz noto-fonts
+        run: pacman -Syu --noconfirm --needed base-devel git cmake qt6-base qt6-svg qt6-tools qt6-translations graphviz noto-fonts
       - uses: actions/checkout@v4
       - name: Сборка
         run: |
