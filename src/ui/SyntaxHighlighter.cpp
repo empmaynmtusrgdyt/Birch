@@ -11,7 +11,11 @@ namespace {
 QTextCharFormat makeFormat(const QColor& color, bool bold = false, bool italic = false) {
     QTextCharFormat f;
     f.setForeground(color);
-    if (bold) f.setFontWeight(QFont::DemiBold);
+    // Именно Bold, а не DemiBold: у моноширинных шрифтов редактора (Courier New,
+    // Menlo, DejaVu Sans Mono) есть только обычное и жирное начертания. Для
+    // промежуточного веса Qt подбирает замену, а на Windows 8.1 (Qt с патчами
+    // qt6windows7) такой текст не рисовался вовсе — стрелки были невидимы.
+    if (bold) f.setFontWeight(QFont::Bold);
     f.setFontItalic(italic);
     return f;
 }
