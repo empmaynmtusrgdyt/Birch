@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(Birch
-    VERSION 0.11.1
+    VERSION 0.11.2
     DESCRIPTION "Text-to-flowchart desktop app (Qt 6 + Graphviz)"
     LANGUAGES CXX)
 
