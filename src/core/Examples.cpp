@@ -20,6 +20,27 @@ QString normalized(QString text) {
     return text.trimmed();
 }
 
+// Прошлые версии стартового примера. Если такой текст сохранился в сеансе после
+// обновления Birch, вместо него показывается нынешний пример.
+const char* const kLegacyWelcome[] = {
+    // до 0.3.3 включительно: «_» в тексте узла показывался как пробел
+    "// Добро пожаловать в Birch!\n"
+    "// [Процесс]   {Условие?}   (Старт/Конец)   подпись стрелки — в кавычках после узла\n"
+    "\n"
+    "(Старт) -> [Ввод_данных] -> {Данные корректны?};\n"
+    "{Данные корректны?} -> [Сохранить] \"Да\" -> (Конец);\n"
+    "{Данные корректны?} -> [Показать_ошибку] \"Нет\"\n"
+    "    -> [Ввод_данных];",
+    // с 0.4.0 до 0.7.0: с комментариями в начале
+    "// Добро пожаловать в Birch!\n"
+    "// [Процесс]   {Условие?}   (Старт/Конец)   подпись стрелки — в кавычках после узла\n"
+    "\n"
+    "(Старт) -> [Ввод данных] -> {Данные корректны?};\n"
+    "{Данные корректны?} -> [Сохранить] \"Да\" -> (Конец);\n"
+    "{Данные корректны?} -> [Показать ошибку] \"Нет\"\n"
+    "    -> [Ввод данных];",
+};
+
 }  // namespace
 
 QString path(const QString& dir, const QString& name, const QString& language) {
@@ -35,6 +56,9 @@ QString path(const QString& dir, const QString& name, const QString& language) {
 QString untouchedName(const QString& dir, const QString& text) {
     const QString wanted = normalized(text);
     if (wanted.isEmpty()) return {};
+    for (const char* legacy : kLegacyWelcome) {
+        if (wanted == normalized(QString::fromUtf8(legacy))) return QStringLiteral("welcome");
+    }
     const QStringList files = QDir(dir).entryList({QStringLiteral("*.birch")}, QDir::Files);
     for (const QString& file : files) {
         QFile f(dir + u'/' + file);

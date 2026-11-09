@@ -57,6 +57,26 @@ private slots:
         QCOMPARE(examples::untouchedName(kDir, text + "\n\n"), name);
     }
 
+    // Старые версии стартового примера из прошлых версий Birch — в том числе с
+    // переводами строк Windows, как их сохранял Birch на Windows.
+    void recognizesLegacyWelcome_data() {
+        QTest::addColumn<QString>("text");
+        const QString header = "// Добро пожаловать в Birch!\n"
+                               "// [Процесс]   {Условие?}   (Старт/Конец)   подпись стрелки — в кавычках после узла\n\n";
+        const QString underscores = header + "(Старт) -> [Ввод_данных] -> {Данные корректны?};\n"
+                                    "{Данные корректны?} -> [Сохранить] \"Да\" -> (Конец);\n"
+                                    "{Данные корректны?} -> [Показать_ошибку] \"Нет\"\n    -> [Ввод_данных];\n";
+        const QString spaces = QString(underscores).replace("Ввод_данных", "Ввод данных").replace("Показать_ошибку", "Показать ошибку");
+        QTest::newRow("с подчёркиваниями") << underscores;
+        QTest::newRow("с подчёркиваниями, Windows") << QString(underscores).replace("\n", "\r\n");
+        QTest::newRow("с комментариями") << spaces;
+        QTest::newRow("с комментариями, Windows") << QString(spaces).replace("\n", "\r\n");
+    }
+    void recognizesLegacyWelcome() {
+        QFETCH(QString, text);
+        QCOMPARE(examples::untouchedName(kDir, text), QStringLiteral("welcome"));
+    }
+
     void ownTextIsNotAnExample() {
         QCOMPARE(examples::untouchedName(kDir, ""), QString());
         QCOMPARE(examples::untouchedName(kDir, "[A] -> [B]"), QString());

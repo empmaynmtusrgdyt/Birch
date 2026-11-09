@@ -110,7 +110,9 @@ QString examplePath(const QString& name) { return examples::path(kExamplesDir, n
 
 QString readResourceText(const QString& path) {
     QFile f(path);
-    return f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()) : QString();
+    // Без \r: если пример собран из файла с переводами строк Windows, в редакторе
+    // и в сохранённом сеансе он был бы с лишними символами.
+    return f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()).remove(u'\r') : QString();
 }
 
 QIcon dotIcon(const QColor& color) {
@@ -847,23 +849,6 @@ void MainWindow::updateTitle() {
     setWindowModified(!filePath_.isEmpty() && editor_->document()->isModified());
 }
 
-namespace {
-// До версии 0.3.3 включительно «_» в тексте узла означал пробел, и стартовый пример был
-// записан через подчёркивания. Нетронутый старый пример из прошлого сеанса
-// заменяем новым, иначе в нём появятся «Ввод_данных» и «Показать_ошибку».
-bool isOldWelcomeExample(const QString& text) {
-    static const QString old = QStringLiteral(
-        "// Добро пожаловать в Birch!\n"
-        "// [Процесс]   {Условие?}   (Старт/Конец)   подпись стрелки — в кавычках после узла\n"
-        "\n"
-        "(Старт) -> [Ввод_данных] -> {Данные корректны?};\n"
-        "{Данные корректны?} -> [Сохранить] \"Да\" -> (Конец);\n"
-        "{Данные корректны?} -> [Показать_ошибку] \"Нет\"\n"
-        "    -> [Ввод_данных];");
-    return text.trimmed() == old;
-}
-}  // namespace
-
 void MainWindow::restoreSession() {
     QSettings s;
     restoreGeometry(s.value(keys::geometry).toByteArray());
@@ -897,7 +882,7 @@ void MainWindow::restoreSession() {
     // свой текст пользователя восстанавливается как есть.
     const QString text = s.value(keys::sessionText).toString();
     QString example = examples::untouchedName(kExamplesDir, text);
-    if (!s.contains(keys::sessionText) || isOldWelcomeExample(text)) example = QStringLiteral("welcome");
+    if (!s.contains(keys::sessionText)) example = QStringLiteral("welcome");
     editor_->setPlainText(example.isEmpty() ? text : readResourceText(examplePath(example)));
     setCurrentFile({});
 }

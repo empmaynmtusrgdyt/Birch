@@ -16,7 +16,7 @@ namespace birch::examples {
 QString path(const QString& dir, const QString& name, const QString& language);
 
 // Имя примера («welcome», «frames»), если text — один из примеров без изменений
-// на любом языке; иначе пустая строка. Так после смены языка нетронутый пример
+// на любом языке или прошлая версия стартового примера; иначе пустая строка. Так после смены языка нетронутый пример
 // заменяется тем же примером на новом языке, а свои схемы остаются как есть.
 QString untouchedName(const QString& dir, const QString& text);
 
