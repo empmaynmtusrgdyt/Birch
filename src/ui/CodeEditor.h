@@ -26,11 +26,29 @@ public:
     // Каждое совпадение — пара «начало, длина» в позициях документа.
     void setSearchMatches(const QList<std::pair<int, int>>& matches, int current);
 
+    // Размер шрифта в пунктах. Меняется сочетаниями ⌘/Ctrl + «+», «−», «0» и
+    // ⌘/Ctrl + колесо, когда фокус в редакторе, — не трогая масштаб схемы.
+    static constexpr qreal kMinFontPointSize = 8;
+    static constexpr qreal kMaxFontPointSize = 40;
+    static qreal defaultFontPointSize();
+    qreal fontPointSize() const { return font().pointSizeF(); }
+    // 0 — размер по умолчанию; иначе ограничивается от kMin до kMax.
+    void setFontPointSize(qreal size);
+    void increaseFontSize() { setFontPointSize(fontPointSize() + 1); }
+    void decreaseFontSize() { setFontPointSize(fontPointSize() - 1); }
+    void resetFontSize() { setFontPointSize(0); }
+    bool hasDefaultFontSize() const { return customFontPointSize_ <= 0; }
+
     // Для LineNumberArea
     int lineNumberAreaWidth() const;
     void paintLineNumberArea(QPaintEvent* event);
 
+signals:
+    void fontPointSizeChanged(qreal size);
+
 protected:
+    bool event(QEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     bool viewportEvent(QEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
@@ -58,6 +76,8 @@ private:
     int currentSearchMatch_ = -1;
     bool searchPaletteSet_ = false;
     bool applyingPalette_ = false;
+    qreal customFontPointSize_ = 0;  // 0 — по умолчанию
+    int wheelZoomDelta_ = 0;         // накопленная прокрутка трекпада
 };
 
 }  // namespace birch

@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QTextBlock>
 #include <QToolTip>
+#include <QWheelEvent>
 
 namespace birch {
 
@@ -29,6 +30,26 @@ private:
 constexpr int kTabSpaces = 4;
 constexpr int kGutterPadding = 10;
 
+enum class FontZoom { None, In, Out, Reset };
+
+// ⌘/Ctrl + «+» (или «=» без Shift), «−», «0» — масштаб шрифта редактора.
+FontZoom fontZoomFor(const QKeyEvent* event) {
+    const Qt::KeyboardModifiers mods = event->modifiers() & ~(Qt::ShiftModifier | Qt::KeypadModifier);
+    if (mods != Qt::ControlModifier) return FontZoom::None;
+    switch (event->key()) {
+    case Qt::Key_Plus:
+    case Qt::Key_Equal:
+        return FontZoom::In;
+    case Qt::Key_Minus:
+    case Qt::Key_Underscore:
+        return FontZoom::Out;
+    case Qt::Key_0:
+        return FontZoom::Reset;
+    default:
+        return FontZoom::None;
+    }
+}
+
 }  // namespace
 
 CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent), lineNumberArea_(new LineNumberArea(this)) {
@@ -45,11 +66,53 @@ CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent), lineNumberArea
     updateExtraSelections();
 }
 
+qreal CodeEditor::defaultFontPointSize() {
+    return qMax(QFontDatabase::systemFont(QFontDatabase::FixedFont).pointSizeF(), 13.0);
+}
+
 void CodeEditor::applyEditorFont() {
     QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    f.setPointSizeF(qMax(f.pointSizeF(), 13.0));
+    f.setPointSizeF(customFontPointSize_ > 0 ? customFontPointSize_ : defaultFontPointSize());
     setFont(f);
     setTabStopDistance(QFontMetricsF(f).horizontalAdvance(QString(kTabSpaces, u' ')));
+    updateLineNumberAreaWidth();  // номера строк — тем же шрифтом
+    lineNumberArea_->update();
+}
+
+void CodeEditor::setFontPointSize(qreal size) {
+    const qreal old = fontPointSize();
+    customFontPointSize_ = size > 0 ? qBound(kMinFontPointSize, size, kMaxFontPointSize) : 0;
+    if (qFuzzyCompare(customFontPointSize_, defaultFontPointSize())) customFontPointSize_ = 0;
+    applyEditorFont();
+    if (!qFuzzyCompare(old, fontPointSize())) emit fontPointSizeChanged(fontPointSize());
+}
+
+bool CodeEditor::event(QEvent* event) {
+    // Сочетания масштаба есть и у окна (масштаб схемы). Когда фокус в редакторе,
+    // забираем их себе: они придут в keyPressEvent, а не в действия окна.
+    if (event->type() == QEvent::ShortcutOverride && fontZoomFor(static_cast<QKeyEvent*>(event)) != FontZoom::None) {
+        event->accept();
+        return true;
+    }
+    return QPlainTextEdit::event(event);
+}
+
+void CodeEditor::wheelEvent(QWheelEvent* event) {
+    if (!(event->modifiers() & Qt::ControlModifier)) {
+        QPlainTextEdit::wheelEvent(event);
+        return;
+    }
+    // Колесо мыши — шаг 120; трекпад присылает много мелких шагов, копим их.
+    wheelZoomDelta_ += event->angleDelta().y();
+    while (wheelZoomDelta_ >= 120) {
+        increaseFontSize();
+        wheelZoomDelta_ -= 120;
+    }
+    while (wheelZoomDelta_ <= -120) {
+        decreaseFontSize();
+        wheelZoomDelta_ += 120;
+    }
+    event->accept();
 }
 
 bool CodeEditor::isDark() const { return palette().color(QPalette::Base).lightness() < 128; }
@@ -245,6 +308,19 @@ bool CodeEditor::viewportEvent(QEvent* event) {
 // --- ввод ---------------------------------------------------------------------
 
 void CodeEditor::keyPressEvent(QKeyEvent* event) {
+    switch (fontZoomFor(event)) {
+    case FontZoom::In:
+        increaseFontSize();
+        return;
+    case FontZoom::Out:
+        decreaseFontSize();
+        return;
+    case FontZoom::Reset:
+        resetFontSize();
+        return;
+    case FontZoom::None:
+        break;
+    }
     // Tab -> пробелы
     if (event->key() == Qt::Key_Tab && event->modifiers() == Qt::NoModifier) {
         QTextCursor c = textCursor();

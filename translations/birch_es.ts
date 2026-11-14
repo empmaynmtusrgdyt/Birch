@@ -879,5 +879,25 @@ Descríbalo a la izquierda, por ejemplo:
         <source>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;Блок-схемы из текста — без ИИ, полностью офлайн.&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;Распространяется по лицензии &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt;.&lt;/p&gt;</source>
         <translation>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;Diagramas de flujo a partir de texto, sin IA y totalmente sin conexión.&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;Distribuido bajo la &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt;.&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Крупнее</source>
+        <translation>Más grande</translation>
+    </message>
+    <message>
+        <source>Мельче</source>
+        <translation>Más pequeña</translation>
+    </message>
+    <message>
+        <source>Обычный размер</source>
+        <translation>Tamaño predeterminado</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора</source>
+        <translation>Fuente del editor</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора: %1 пт</source>
+        <translation>Fuente del editor: %1 pt</translation>
+    </message>
 </context>
 </TS>

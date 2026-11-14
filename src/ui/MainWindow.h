@@ -106,6 +106,7 @@ private:
     QIcon icon(const QString& name) const;
     void updateTitle();
     void updateZoomLabel(qreal zoom);
+    void updateEditorFontActions();
 
     void showSyntaxHelp();
     void showAbout();
@@ -154,6 +155,9 @@ private:
     QAction* zoomOutAct_ = nullptr;
     QAction* zoomResetAct_ = nullptr;
     QAction* zoomFitAct_ = nullptr;
+    QAction* editorFontBiggerAct_ = nullptr;
+    QAction* editorFontSmallerAct_ = nullptr;
+    QAction* editorFontResetAct_ = nullptr;
     QActionGroup* themeGroup_ = nullptr;
     QActionGroup* exportThemeGroup_ = nullptr;
     QActionGroup* languageGroup_ = nullptr;  // «Как в системе» и все языки перевода

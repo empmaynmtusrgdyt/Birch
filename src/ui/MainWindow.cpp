@@ -101,6 +101,7 @@ const QString monochrome = QStringLiteral("render/monochrome");
 const QString autoRender = QStringLiteral("render/auto");
 const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
+const QString editorFontSize = QStringLiteral("editor/fontSize");
 }  // namespace keys
 
 const QString kExamplesDir = QStringLiteral(":/examples");
@@ -321,6 +322,12 @@ void MainWindow::createActions() {
         a->setToolTip(QStringLiteral("%1 (%2)").arg(a->text(), a->shortcut().toString(QKeySequence::NativeText)));
     }
 
+    // Шрифт редактора. Без своих сочетаний: ⌘/Ctrl + «+», «−», «0» меняют его,
+    // когда фокус в редакторе (их перехватывает CodeEditor), иначе — масштаб схемы.
+    editorFontBiggerAct_ = new QAction(tr("Крупнее"), this);
+    editorFontSmallerAct_ = new QAction(tr("Мельче"), this);
+    editorFontResetAct_ = new QAction(tr("Обычный размер"), this);
+
     themeGroup_ = new QActionGroup(this);
     const std::pair<QString, ThemeMode> themes[] = {
         {tr("Как в системе"), ThemeMode::System},
@@ -396,6 +403,8 @@ void MainWindow::createMenus() {
     view->addActions({horizontalAct_, monochromeAct_});
     view->addSeparator();
     view->addActions({zoomInAct_, zoomOutAct_, zoomResetAct_, zoomFitAct_});
+    QMenu* editorFont = view->addMenu(tr("Шрифт редактора"));
+    editorFont->addActions({editorFontBiggerAct_, editorFontSmallerAct_, editorFontResetAct_});
     view->addSeparator();
     QMenu* theme = view->addMenu(tr("Тема"));
     theme->addActions(themeGroup_->actions());
@@ -454,6 +463,13 @@ void MainWindow::createCentralWidget() {
     connect(editor_->document(), &QTextDocument::modificationChanged, this, [this] { updateTitle(); });
     connect(editor_, &QPlainTextEdit::undoAvailable, undoAct_, &QAction::setEnabled);
     connect(editor_, &QPlainTextEdit::redoAvailable, redoAct_, &QAction::setEnabled);
+    connect(editorFontBiggerAct_, &QAction::triggered, editor_, &CodeEditor::increaseFontSize);
+    connect(editorFontSmallerAct_, &QAction::triggered, editor_, &CodeEditor::decreaseFontSize);
+    connect(editorFontResetAct_, &QAction::triggered, editor_, &CodeEditor::resetFontSize);
+    connect(editor_, &CodeEditor::fontPointSizeChanged, this, [this](qreal size) {
+        updateEditorFontActions();
+        statusBar()->showMessage(tr("Шрифт редактора: %1 пт").arg(QLocale().toString(size, 'f', 0)), 2000);
+    });
     connect(editor_, &QPlainTextEdit::copyAvailable, cutAct_, &QAction::setEnabled);
     connect(editor_, &QPlainTextEdit::copyAvailable, copyAct_, &QAction::setEnabled);
 
@@ -869,6 +885,8 @@ void MainWindow::restoreSession() {
     setThemeMode(static_cast<ThemeMode>(s.value(keys::theme, 0).toInt()));
 
     const QSignalBlocker block(editor_);  // не запускаем рендер раньше времени
+    editor_->setFontPointSize(s.value(keys::editorFontSize, 0).toReal());
+    updateEditorFontActions();
     const QString file = s.value(keys::sessionFile).toString();
     if (!file.isEmpty() && QFileInfo::exists(file)) {
         QFile f(file);
@@ -898,6 +916,8 @@ void MainWindow::saveSession() {
     s.setValue(keys::transparent, transparentAct_->isChecked());
     s.setValue(keys::theme, static_cast<int>(themeMode_));
     s.setValue(keys::exportTheme, static_cast<int>(exportTheme_));
+    if (editor_->hasDefaultFontSize()) s.remove(keys::editorFontSize);
+    else s.setValue(keys::editorFontSize, editor_->fontPointSize());
 
     if (filePath_.isEmpty()) {
         s.setValue(keys::sessionText, editor_->toPlainText());
@@ -1036,6 +1056,12 @@ void MainWindow::applyTheme() {
 void MainWindow::changeEvent(QEvent* event) {
     QMainWindow::changeEvent(event);
     if (event->type() == QEvent::PaletteChange) applyTheme();
+}
+
+void MainWindow::updateEditorFontActions() {
+    editorFontBiggerAct_->setEnabled(editor_->fontPointSize() < CodeEditor::kMaxFontPointSize);
+    editorFontSmallerAct_->setEnabled(editor_->fontPointSize() > CodeEditor::kMinFontPointSize);
+    editorFontResetAct_->setEnabled(!editor_->hasDefaultFontSize());
 }
 
 void MainWindow::updateZoomLabel(qreal zoom) {

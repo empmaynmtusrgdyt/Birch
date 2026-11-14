@@ -879,5 +879,25 @@ Describe it on the left, for example:
         <source>Язык интерфейса изменится после перезапуска Birch.</source>
         <translation>The interface language will change after you restart Birch.</translation>
     </message>
+    <message>
+        <source>Крупнее</source>
+        <translation>Bigger</translation>
+    </message>
+    <message>
+        <source>Мельче</source>
+        <translation>Smaller</translation>
+    </message>
+    <message>
+        <source>Обычный размер</source>
+        <translation>Default Size</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора</source>
+        <translation>Editor Font</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора: %1 пт</source>
+        <translation>Editor font: %1 pt</translation>
+    </message>
 </context>
 </TS>

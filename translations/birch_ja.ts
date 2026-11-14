@@ -878,5 +878,25 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;Блок-схемы из текста — без ИИ, полностью офлайн.&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;Распространяется по лицензии &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt;.&lt;/p&gt;</source>
         <translation>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;テキストからフローチャートを作成。AI 不要、完全オフライン。&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt; のもとで配布されています。&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Крупнее</source>
+        <translation>大きく</translation>
+    </message>
+    <message>
+        <source>Мельче</source>
+        <translation>小さく</translation>
+    </message>
+    <message>
+        <source>Обычный размер</source>
+        <translation>標準のサイズ</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора</source>
+        <translation>エディターのフォント</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора: %1 пт</source>
+        <translation>エディターのフォント: %1 pt</translation>
+    </message>
 </context>
 </TS>

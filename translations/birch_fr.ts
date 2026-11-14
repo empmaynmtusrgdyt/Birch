@@ -879,5 +879,25 @@ Décrivez-le à gauche, par exemple&#xa0;:
         <source>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;Блок-схемы из текста — без ИИ, полностью офлайн.&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;Распространяется по лицензии &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt;.&lt;/p&gt;</source>
         <translation>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;Des organigrammes à partir de texte — sans IA, entièrement hors ligne.&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;Distribué sous la &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt;.&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Крупнее</source>
+        <translation>Plus grande</translation>
+    </message>
+    <message>
+        <source>Мельче</source>
+        <translation>Plus petite</translation>
+    </message>
+    <message>
+        <source>Обычный размер</source>
+        <translation>Taille par défaut</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора</source>
+        <translation>Police de l’éditeur</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора: %1 пт</source>
+        <translation>Police de l’éditeur&#xa0;: %1&#xa0;pt</translation>
+    </message>
 </context>
 </TS>

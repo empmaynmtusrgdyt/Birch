@@ -878,5 +878,25 @@
         <source>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;Блок-схемы из текста — без ИИ, полностью офлайн.&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;Распространяется по лицензии &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt;.&lt;/p&gt;</source>
         <translation>&lt;h3&gt;Birch %1&lt;/h3&gt;&lt;p&gt;用文本生成流程图：无需 AI，完全离线。&lt;/p&gt;&lt;p&gt;Graphviz %2 · Qt %3&lt;/p&gt;&lt;p&gt;依据 &lt;a href=&quot;https://mozilla.org/MPL/2.0/&quot;&gt;Mozilla Public License 2.0&lt;/a&gt; 发布。&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Крупнее</source>
+        <translation>放大</translation>
+    </message>
+    <message>
+        <source>Мельче</source>
+        <translation>缩小</translation>
+    </message>
+    <message>
+        <source>Обычный размер</source>
+        <translation>默认大小</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора</source>
+        <translation>编辑器字体</translation>
+    </message>
+    <message>
+        <source>Шрифт редактора: %1 пт</source>
+        <translation>编辑器字体：%1 磅</translation>
+    </message>
 </context>
 </TS>
