@@ -33,7 +33,7 @@ The app looks the same on macOS, Windows and Linux.
 - Light and dark themes follow the system; you can also pick one by hand. The picture theme can be set separately, for example always light for documents.
 - **Interface in 8 languages**: English, Russian, German, Spanish, French, Portuguese, Chinese and Japanese, chosen from the system language; switch it in **View → Language** (see [Interface language](#interface-language)).
 - The last 10 diagrams are in **File → Open Recent**.
-- `.birch` files open with a double-click. Unsaved text is restored on the next launch.
+- `.birch` files open with a double-click or by dragging them onto the Birch window. Unsaved text is restored on the next launch.
 
 ## Installation
 

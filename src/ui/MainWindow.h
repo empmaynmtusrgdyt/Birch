@@ -55,6 +55,10 @@ signals:
     void previewRendered(bool ok, const QString& error);
 
 protected:
+    // Перетаскивание файла схемы в окно — в редактор, на схему или на панели.
+    bool eventFilter(QObject* watched, QEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
     void changeEvent(QEvent* event) override;
 

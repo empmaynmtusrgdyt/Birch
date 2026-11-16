@@ -2,11 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-// Тесты списка недавних файлов.
+// Тесты работы с файлами: список недавних и перетаскивание файла в окно.
 
 #include <QDir>
+#include <QFile>
+#include <QMimeData>
+#include <QTemporaryDir>
+#include <QUrl>
 #include <QtTest>
 
+#include "core/FileDrop.h"
 #include "core/RecentFiles.h"
 
 using namespace birch;
@@ -48,6 +53,36 @@ private slots:
         const QStringList list{"/home/me/work/схема.birch", "/home/me/docs/схема.birch", "/home/me/x.birch"};
         QCOMPARE(recent::labels(list),
                  QStringList({"схема.birch — work", "схема.birch — docs", "x.birch"}));
+    }
+
+    // Перетаскивание: берётся первый локальный .birch или .txt, остальное — нет.
+    void droppedFile() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const auto touch = [&dir](const QString& name) {
+            QFile f(dir.filePath(name));
+            if (!f.open(QIODevice::WriteOnly)) return QString();
+            return QFileInfo(f).absoluteFilePath();
+        };
+        const QString png = touch("картинка.png");
+        const QString birch = touch("Схема.BIRCH");
+        const QString txt = touch("notes.txt");
+
+        QMimeData mime;
+        mime.setUrls({QUrl::fromLocalFile(png), QUrl::fromLocalFile(birch), QUrl::fromLocalFile(txt)});
+        QCOMPARE(droppedDiagramFile(&mime), birch);
+
+        mime.setUrls({QUrl::fromLocalFile(txt)});
+        QCOMPARE(droppedDiagramFile(&mime), txt);
+
+        mime.setUrls({QUrl::fromLocalFile(png), QUrl("https://example.com/a.birch"),
+                      QUrl::fromLocalFile(dir.filePath("нет.birch"))});
+        QCOMPARE(droppedDiagramFile(&mime), QString());
+
+        QMimeData text;
+        text.setText("[A] -> [B]");
+        QCOMPARE(droppedDiagramFile(&text), QString());
+        QCOMPARE(droppedDiagramFile(nullptr), QString());
     }
 };
 

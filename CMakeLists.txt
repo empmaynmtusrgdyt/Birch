@@ -76,6 +76,8 @@ add_library(birch_core STATIC
     src/core/CommandLine.cpp
     src/core/Examples.h
     src/core/Examples.cpp
+    src/core/FileDrop.h
+    src/core/FileDrop.cpp
     src/core/Language.h
     src/core/RecentFiles.h
     src/core/RecentFiles.cpp

@@ -20,7 +20,10 @@
 #include <QMimeData>
 #include <QPainter>
 #include <QSaveFile>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QLocale>
+#include <QMimeData>
 #include <QSettings>
 #include <QTranslator>
 #include <QShortcut>
@@ -37,6 +40,7 @@
 #include "app/RenderController.h"
 #include "core/MermaidExporter.h"
 #include "core/Examples.h"
+#include "core/FileDrop.h"
 #include "core/Language.h"
 #include "core/RecentFiles.h"
 #include "ui/CodeEditor.h"
@@ -527,6 +531,11 @@ void MainWindow::createCentralWidget() {
     renderError_->hide();
 
     preview_ = new PreviewView;
+    // Файл схемы можно бросить на окно: в редактор, на схему или на панели.
+    setAcceptDrops(true);
+    preview_->viewport()->setAcceptDrops(true);
+    editor_->viewport()->installEventFilter(this);
+    preview_->viewport()->installEventFilter(this);
     preview_->setPlaceholderText(tr("Схема появится здесь.\nОпишите её слева, например:\n[Старт] -> [Готово]"));
     connect(preview_, &PreviewView::zoomChanged, this, &MainWindow::updateZoomLabel);
     connect(zoomInAct_, &QAction::triggered, preview_, &PreviewView::zoomIn);
@@ -981,6 +990,38 @@ void MainWindow::saveSession() {
         s.setValue(keys::sessionFile, filePath_);
         s.remove(keys::sessionText);
     }
+}
+
+bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
+    const QEvent::Type type = event->type();
+    if (type == QEvent::DragEnter || type == QEvent::DragMove) {
+        auto* drag = static_cast<QDragMoveEvent*>(event);
+        if (!droppedDiagramFile(drag->mimeData()).isEmpty()) {
+            drag->acceptProposedAction();
+            return true;
+        }
+    } else if (type == QEvent::Drop) {
+        auto* drop = static_cast<QDropEvent*>(event);
+        const QString path = droppedDiagramFile(drop->mimeData());
+        if (!path.isEmpty()) {
+            drop->acceptProposedAction();
+            openFromSystem(path);
+            return true;
+        }
+    }
+    // Остальное — как обычно: перетащенный текст вставляется в редактор.
+    return QMainWindow::eventFilter(watched, event);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event) {
+    if (!droppedDiagramFile(event->mimeData()).isEmpty()) event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent* event) {
+    const QString path = droppedDiagramFile(event->mimeData());
+    if (path.isEmpty()) return;
+    event->acceptProposedAction();
+    openFromSystem(path);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
