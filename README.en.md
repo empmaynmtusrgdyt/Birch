@@ -25,6 +25,7 @@ The app looks the same on macOS, Windows and Linux.
 - **Find and replace** (⌘F / Ctrl+F) in a bar under the editor: every match is highlighted, with a “3 of 7” counter, case sensitivity and regular expressions. “Replace All” is undone with a single ⌘Z / Ctrl+Z — handy for renaming a block on every line at once.
 - Vector canvas: zoom with ⌘/Ctrl + wheel or a trackpad pinch, scroll by dragging, double-click to fit the diagram to the window.
 - The editor font size changes separately from the diagram zoom: ⌘/Ctrl + “+”, “−”, “0” or ⌘/Ctrl + wheel while the cursor is in the editor, or **View → Editor Font**. The size is remembered.
+- Brackets and quotes close themselves: type `[` and you get `[]`, while typing `]` steps over the one already there. Selected text gets wrapped in brackets. Turn it off in **Edit → Auto-Close Brackets**.
 - **Save PNG** and **Copy to Clipboard**: paste the picture straight into Telegram, Slack, Word or Discord. SVG export and a transparent background are available too.
 - **Black and white mode** (the “B/W” button): black lines and text on white, for printing and documents.
 - **Mermaid export** (File menu): the diagram as text that GitHub, GitLab, Notion and Obsidian draw on their own. “Copy as Mermaid” puts a ready ` ```mermaid ` block on the clipboard, ready to paste into a README. Frames become `subgraph`s; colors are not carried over — Mermaid colors the diagram to match the site's theme.

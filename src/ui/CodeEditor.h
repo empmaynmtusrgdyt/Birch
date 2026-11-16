@@ -43,6 +43,11 @@ public:
     // если все они уже закомментированы («//» или «#») — убирает. Одним шагом отмены.
     void toggleComment();
 
+    // Закрывать скобки и кавычки: «[» вставляет «[]», «]» перешагивает через
+    // уже стоящую, Backspace между «[]» удаляет обе, выделение оборачивается.
+    bool autoCloseBrackets() const { return autoClose_; }
+    void setAutoCloseBrackets(bool on) { autoClose_ = on; }
+
     // Для LineNumberArea
     int lineNumberAreaWidth() const;
     void paintLineNumberArea(QPaintEvent* event);
@@ -67,6 +72,7 @@ private:
     void applySearchPalette();
     QTextEdit::ExtraSelection rangeSelection(int start, int end) const;
     void applyEditorFont();
+    bool handleAutoClose(QKeyEvent* event);
     void updateLineNumberAreaWidth();
     void updateLineNumberArea(const QRect& rect, int dy);
     void updateExtraSelections();
@@ -82,6 +88,7 @@ private:
     bool applyingPalette_ = false;
     qreal customFontPointSize_ = 0;  // 0 — по умолчанию
     int wheelZoomDelta_ = 0;         // накопленная прокрутка трекпада
+    bool autoClose_ = true;
 };
 
 }  // namespace birch

@@ -903,5 +903,9 @@ Décrivez-le à gauche, par exemple&#xa0;:
         <source>Закомментировать строки</source>
         <translation>Commenter les lignes</translation>
     </message>
+    <message>
+        <source>Закрывать скобки</source>
+        <translation>Fermer les crochets automatiquement</translation>
+    </message>
 </context>
 </TS>

@@ -902,5 +902,9 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Закомментировать строки</source>
         <translation>行をコメントにする</translation>
     </message>
+    <message>
+        <source>Закрывать скобки</source>
+        <translation>括弧を自動で閉じる</translation>
+    </message>
 </context>
 </TS>

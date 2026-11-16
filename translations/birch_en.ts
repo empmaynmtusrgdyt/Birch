@@ -903,5 +903,9 @@ Describe it on the left, for example:
         <source>Закомментировать строки</source>
         <translation>Toggle Comment</translation>
     </message>
+    <message>
+        <source>Закрывать скобки</source>
+        <translation>Auto-Close Brackets</translation>
+    </message>
 </context>
 </TS>

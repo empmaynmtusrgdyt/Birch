@@ -138,6 +138,7 @@ private:
     QAction* pasteAct_ = nullptr;
     QAction* selectAllAct_ = nullptr;
     QAction* toggleCommentAct_ = nullptr;
+    QAction* autoCloseAct_ = nullptr;
     QAction* findAct_ = nullptr;
     QAction* replaceAct_ = nullptr;
     QAction* findNextAct_ = nullptr;

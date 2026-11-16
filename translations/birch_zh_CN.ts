@@ -902,5 +902,9 @@
         <source>Закомментировать строки</source>
         <translation>切换注释</translation>
     </message>
+    <message>
+        <source>Закрывать скобки</source>
+        <translation>自动补全括号</translation>
+    </message>
 </context>
 </TS>

@@ -102,6 +102,7 @@ const QString autoRender = QStringLiteral("render/auto");
 const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
 const QString editorFontSize = QStringLiteral("editor/fontSize");
+const QString autoClose = QStringLiteral("editor/autoClose");
 }  // namespace keys
 
 const QString kExamplesDir = QStringLiteral(":/examples");
@@ -239,6 +240,10 @@ void MainWindow::createActions() {
     toggleCommentAct_ = new QAction(tr("Закомментировать строки"), this);
     toggleCommentAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
     connect(toggleCommentAct_, &QAction::triggered, this, [this] { editor_->toggleComment(); });
+    autoCloseAct_ = new QAction(tr("Закрывать скобки"), this);
+    autoCloseAct_->setCheckable(true);
+    autoCloseAct_->setChecked(true);
+    connect(autoCloseAct_, &QAction::toggled, this, [this](bool on) { editor_->setAutoCloseBrackets(on); });
     undoAct_->setEnabled(false);
     redoAct_->setEnabled(false);
     cutAct_->setEnabled(false);
@@ -399,6 +404,7 @@ void MainWindow::createMenus() {
     edit->addActions({cutAct_, copyAct_, pasteAct_, selectAllAct_});
     edit->addSeparator();
     edit->addAction(toggleCommentAct_);
+    edit->addAction(autoCloseAct_);
     edit->addSeparator();
     edit->addActions({findAct_, replaceAct_, findNextAct_, findPreviousAct_});
 
@@ -891,6 +897,7 @@ void MainWindow::restoreSession() {
 
     const QSignalBlocker block(editor_);  // не запускаем рендер раньше времени
     editor_->setFontPointSize(s.value(keys::editorFontSize, 0).toReal());
+    autoCloseAct_->setChecked(s.value(keys::autoClose, true).toBool());
     updateEditorFontActions();
     const QString file = s.value(keys::sessionFile).toString();
     if (!file.isEmpty() && QFileInfo::exists(file)) {
@@ -921,6 +928,7 @@ void MainWindow::saveSession() {
     s.setValue(keys::transparent, transparentAct_->isChecked());
     s.setValue(keys::theme, static_cast<int>(themeMode_));
     s.setValue(keys::exportTheme, static_cast<int>(exportTheme_));
+    s.setValue(keys::autoClose, autoCloseAct_->isChecked());
     if (editor_->hasDefaultFontSize()) s.remove(keys::editorFontSize);
     else s.setValue(keys::editorFontSize, editor_->fontPointSize());
 

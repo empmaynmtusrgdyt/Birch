@@ -99,6 +99,85 @@ qsizetype indentOf(const QString& line) {
 
 }  // namespace
 
+namespace {
+
+// Пара для открывающего символа или пустой QChar.
+QChar closingFor(QChar open) {
+    switch (open.unicode()) {
+    case u'[': return u']';
+    case u'{': return u'}';
+    case u'(': return u')';
+    case u'"': return u'"';
+    default: return {};
+    }
+}
+
+bool isClosing(QChar c) { return c == u']' || c == u'}' || c == u')' || c == u'"'; }
+
+}  // namespace
+
+bool CodeEditor::handleAutoClose(QKeyEvent* event) {
+    if (!autoClose_ || (event->modifiers() & (Qt::ControlModifier | Qt::MetaModifier | Qt::AltModifier))) return false;
+    QTextCursor cursor = textCursor();
+    const QString line = cursor.block().text();
+    const int column = cursor.positionInBlock();
+    const QChar before = column > 0 ? line[column - 1] : QChar();
+    const QChar after = column < line.size() ? line[column] : QChar();
+
+    // Backspace между только что открытой и закрытой: удалить обе.
+    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::NoModifier && !cursor.hasSelection()) {
+        if (!before.isNull() && !after.isNull() && closingFor(before) == after) {
+            cursor.beginEditBlock();
+            cursor.deletePreviousChar();
+            cursor.deleteChar();
+            cursor.endEditBlock();
+            return true;
+        }
+        return false;
+    }
+
+    const QString text = event->text();
+    if (text.size() != 1) return false;
+    const QChar typed = text[0];
+    if (before == u'\\') return false;  // «\[» — символ как есть, пары не нужно
+
+    // Закрывающая, а справа уже такая же — перешагнуть.
+    if (isClosing(typed) && !cursor.hasSelection() && after == typed) {
+        cursor.movePosition(QTextCursor::NextCharacter);
+        setTextCursor(cursor);
+        return true;
+    }
+
+    const QChar close = closingFor(typed);
+    if (close.isNull()) return false;
+
+    // Выделение оборачивается: «Ввод данных» → «[Ввод данных]».
+    if (cursor.hasSelection()) {
+        const QString selected = cursor.selectedText();
+        if (selected.contains(QChar::ParagraphSeparator)) return false;
+        const int start = cursor.selectionStart();
+        cursor.beginEditBlock();
+        cursor.insertText(typed + selected + close);
+        cursor.endEditBlock();
+        cursor.setPosition(start + 1);
+        cursor.setPosition(start + 1 + static_cast<int>(selected.size()), QTextCursor::KeepAnchor);
+        setTextCursor(cursor);
+        return true;
+    }
+
+    // Перед буквой или цифрой пара мешала бы правке существующего текста.
+    if (after.isLetterOrNumber()) return false;
+    // Кавычка сразу после буквы — скорее закрывающая, чем открывающая.
+    if (typed == u'"' && before.isLetterOrNumber()) return false;
+
+    cursor.beginEditBlock();
+    cursor.insertText(QString(typed) + close);
+    cursor.endEditBlock();
+    cursor.movePosition(QTextCursor::PreviousCharacter);
+    setTextCursor(cursor);
+    return true;
+}
+
 void CodeEditor::toggleComment() {
     const QTextCursor cursor = textCursor();
     QTextBlock first = document()->findBlock(cursor.selectionStart());
@@ -380,6 +459,7 @@ void CodeEditor::keyPressEvent(QKeyEvent* event) {
     case FontZoom::None:
         break;
     }
+    if (handleAutoClose(event)) return;
     // Tab -> пробелы
     if (event->key() == Qt::Key_Tab && event->modifiers() == Qt::NoModifier) {
         QTextCursor c = textCursor();

@@ -903,5 +903,9 @@ Beschreiben Sie es links, zum Beispiel:
         <source>Закомментировать строки</source>
         <translation>Zeilen auskommentieren</translation>
     </message>
+    <message>
+        <source>Закрывать скобки</source>
+        <translation>Klammern automatisch schließen</translation>
+    </message>
 </context>
 </TS>

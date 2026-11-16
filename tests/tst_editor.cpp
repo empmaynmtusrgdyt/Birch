@@ -142,6 +142,74 @@ private slots:
         QCOMPARE(editor.toPlainText(), QStringLiteral("\n\n"));
     }
 
+    // Закрывающие скобки и кавычки.
+    static QString typed(CodeEditor& editor, const QString& keys) {
+        QTest::keyClicks(&editor, keys);
+        return editor.toPlainText();
+    }
+    static int cursorPos(const CodeEditor& editor) { return editor.textCursor().position(); }
+
+    void autoClosePairs() {
+        CodeEditor editor;
+        QCOMPARE(typed(editor, "["), QStringLiteral("[]"));
+        QCOMPARE(cursorPos(editor), 1);
+        editor.clear();
+        QCOMPARE(typed(editor, "{"), QStringLiteral("{}"));
+        editor.clear();
+        QCOMPARE(typed(editor, "("), QStringLiteral("()"));
+        editor.clear();
+        QCOMPARE(typed(editor, "\""), QStringLiteral("\"\""));
+    }
+
+    // Набор по привычке, с закрывающей скобкой, даёт тот же текст.
+    void typingClosingSkipsOver() {
+        CodeEditor editor;
+        QCOMPARE(typed(editor, "[A] -> {B?} \"Yes\""), QStringLiteral("[A] -> {B?} \"Yes\""));
+    }
+
+    void backspaceRemovesPair() {
+        CodeEditor editor;
+        typed(editor, "x [");
+        QTest::keyClick(&editor, Qt::Key_Backspace);
+        QCOMPARE(editor.toPlainText(), QStringLiteral("x "));
+    }
+
+    void wrapsSelection() {
+        CodeEditor editor;
+        editor.setPlainText("Ввод данных -> x");
+        select(editor, 0, 11);
+        QTest::keyClicks(&editor, "[");
+        QCOMPARE(editor.toPlainText(), QStringLiteral("[Ввод данных] -> x"));
+        QCOMPARE(editor.textCursor().selectedText(), QStringLiteral("Ввод данных"));
+    }
+
+    void noPairBeforeLetterOrAfterEscape() {
+        CodeEditor editor;
+        editor.setPlainText("Шаг]");
+        QTextCursor c = editor.textCursor();
+        c.setPosition(0);
+        editor.setTextCursor(c);
+        QCOMPARE(typed(editor, "["), QStringLiteral("[Шаг]"));
+        editor.setPlainText("");
+        QCOMPARE(typed(editor, "[a\\["), QStringLiteral("[a\\[]"));
+        editor.setPlainText("Да");  // QTest не набирает кириллицу клавишами
+        editor.moveCursor(QTextCursor::End);
+        QCOMPARE(typed(editor, "\""), QStringLiteral("Да\""));  // кавычка после буквы — закрывающая
+    }
+
+    void autoCloseCanBeTurnedOff() {
+        CodeEditor editor;
+        editor.setAutoCloseBrackets(false);
+        QCOMPARE(typed(editor, "[A"), QStringLiteral("[A"));
+    }
+
+    void pairIsOneUndoStep() {
+        CodeEditor editor;
+        typed(editor, "[");
+        editor.document()->undo();
+        QCOMPARE(editor.toPlainText(), QString());
+    }
+
     // Когда фокус в редакторе, сочетание масштаба не срабатывает в окне
     // (там оно масштабирует схему), а когда фокус не в редакторе — срабатывает.
     void shortcutsGoToEditorOnlyWithFocus() {
