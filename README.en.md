@@ -24,7 +24,7 @@ The app looks the same on macOS, Windows and Linux.
 - Errors are underlined right in the text, with the line, position and a clear message. An unfinished line doesn't break the rest of the diagram.
 - **Find and replace** (⌘F / Ctrl+F) in a bar under the editor: every match is highlighted, with a “3 of 7” counter, case sensitivity and regular expressions. “Replace All” is undone with a single ⌘Z / Ctrl+Z — handy for renaming a block on every line at once.
 - Vector canvas: zoom with ⌘/Ctrl + wheel or a trackpad pinch, scroll by dragging, double-click to fit the diagram to the window.
-- The editor font size changes separately from the diagram zoom: ⌘/Ctrl + “+”, “−”, “0” or ⌘/Ctrl + wheel while the cursor is in the editor, or **View → Editor Font**. The size is remembered.
+- The editor font size changes separately from the diagram zoom: ⌘/Ctrl + “+”, “−”, “0” or ⌘/Ctrl + wheel while the cursor is in the editor, or **View → Editor Font**. The size is remembered. Long lines can wrap to the editor width: **View → Wrap Lines**.
 - Brackets and quotes close themselves: type `[` and you get `[]`, while typing `]` steps over the one already there. Selected text gets wrapped in brackets. Turn it off in **Edit → Auto-Close Brackets**.
 - **Save PNG** and **Copy to Clipboard**: paste the picture straight into Telegram, Slack, Word or Discord. SVG export and a transparent background are available too. The PNG size — 1×, 2× or 3× — is chosen in **View → Picture Export**.
 - **Black and white mode** (the “B/W” button): black lines and text on white, for printing and documents.

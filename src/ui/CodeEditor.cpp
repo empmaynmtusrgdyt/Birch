@@ -178,6 +178,11 @@ bool CodeEditor::handleAutoClose(QKeyEvent* event) {
     return true;
 }
 
+void CodeEditor::setWordWrap(bool on) {
+    setLineWrapMode(on ? QPlainTextEdit::WidgetWidth : QPlainTextEdit::NoWrap);
+    updateExtraSelections();
+}
+
 void CodeEditor::toggleComment() {
     const QTextCursor cursor = textCursor();
     QTextBlock first = document()->findBlock(cursor.selectionStart());
@@ -371,7 +376,13 @@ void CodeEditor::updateExtraSelections() {
         const QColor base = palette().color(QPalette::Base);
         line.format.setBackground(isDark() ? base.lighter(125) : base.darker(104));
         line.format.setProperty(QTextFormat::FullWidthSelection, true);
+        // Вся строка целиком, а не одна экранная часть: при переносе длинная
+        // строка занимает несколько экранных, и подсветить надо все.
         line.cursor = textCursor();
+        line.cursor.movePosition(QTextCursor::StartOfBlock);
+        line.cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        selections.append(line);
+        // Последнюю экранную часть Qt не закрашивает по всей ширине — добавляем её.
         line.cursor.clearSelection();
         selections.append(line);
     }

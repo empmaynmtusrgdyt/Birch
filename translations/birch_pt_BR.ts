@@ -935,5 +935,9 @@ Descreva-o à esquerda, por exemplo:
         <source>Стр. %1, столб. %2</source>
         <translation>Lin. %1, Col. %2</translation>
     </message>
+    <message>
+        <source>Переносить строки</source>
+        <translation>Quebrar linhas</translation>
+    </message>
 </context>
 </TS>

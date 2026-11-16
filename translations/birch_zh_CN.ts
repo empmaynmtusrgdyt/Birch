@@ -934,5 +934,9 @@
         <source>Стр. %1, столб. %2</source>
         <translation>第 %1 行，第 %2 列</translation>
     </message>
+    <message>
+        <source>Переносить строки</source>
+        <translation>自动换行</translation>
+    </message>
 </context>
 </TS>

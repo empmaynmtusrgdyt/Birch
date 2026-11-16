@@ -10,6 +10,8 @@
 #include <QMainWindow>
 #include <QSignalSpy>
 #include <QTest>
+#include <QTextBlock>
+#include <QTextLayout>
 #include <QWheelEvent>
 
 #include "ui/CodeEditor.h"
@@ -208,6 +210,31 @@ private slots:
         typed(editor, "[");
         editor.document()->undo();
         QCOMPARE(editor.toPlainText(), QString());
+    }
+
+    // Перенос строк — только на экране: текст и номера строк не меняются,
+    // подсвечивается вся строка, а не одна экранная часть.
+    void wordWrapIsVisualOnly() {
+        CodeEditor editor;
+        const QString longLine = QString("[Очень длинный блок] -> ").repeated(12) + "(Конец)";
+        editor.setPlainText(longLine + "\n[A] -> [B]");
+        editor.resize(400, 300);
+        editor.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&editor));
+        QCOMPARE(editor.document()->firstBlock().layout()->lineCount(), 1);
+
+        editor.setWordWrap(true);
+        QVERIFY(editor.wordWrap());
+        QTRY_VERIFY(editor.document()->firstBlock().layout()->lineCount() > 1);
+        QCOMPARE(editor.toPlainText(), longLine + "\n[A] -> [B]");
+        QCOMPARE(editor.blockCount(), 2);
+
+        const QTextCursor highlight = editor.extraSelections().value(0).cursor;
+        QCOMPARE(highlight.selectionStart(), 0);
+        QCOMPARE(highlight.selectionEnd(), static_cast<int>(longLine.size()));
+
+        editor.setWordWrap(false);
+        QTRY_COMPARE(editor.document()->firstBlock().layout()->lineCount(), 1);
     }
 
     // Когда фокус в редакторе, сочетание масштаба не срабатывает в окне

@@ -935,5 +935,9 @@ Beschreiben Sie es links, zum Beispiel:
         <source>Стр. %1, столб. %2</source>
         <translation>Z. %1, Sp. %2</translation>
     </message>
+    <message>
+        <source>Переносить строки</source>
+        <translation>Zeilen umbrechen</translation>
+    </message>
 </context>
 </TS>

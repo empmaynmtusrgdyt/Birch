@@ -48,6 +48,11 @@ public:
     bool autoCloseBrackets() const { return autoClose_; }
     void setAutoCloseBrackets(bool on) { autoClose_ = on; }
 
+    // Перенос длинных строк по ширине редактора — только на экране: в тексте
+    // строка остаётся одной, номер у неё один.
+    bool wordWrap() const { return lineWrapMode() != QPlainTextEdit::NoWrap; }
+    void setWordWrap(bool on);
+
     // Для LineNumberArea
     int lineNumberAreaWidth() const;
     void paintLineNumberArea(QPaintEvent* event);

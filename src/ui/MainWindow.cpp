@@ -112,6 +112,7 @@ const QString editorFontSize = QStringLiteral("editor/fontSize");
 const QString autoClose = QStringLiteral("editor/autoClose");
 const QString recentFiles = QStringLiteral("files/recent");
 const QString exportScale = QStringLiteral("export/scale");
+const QString wordWrap = QStringLiteral("editor/wordWrap");
 }  // namespace keys
 
 const QString kExamplesDir = QStringLiteral(":/examples");
@@ -350,6 +351,9 @@ void MainWindow::createActions() {
     editorFontBiggerAct_ = new QAction(tr("Крупнее"), this);
     editorFontSmallerAct_ = new QAction(tr("Мельче"), this);
     editorFontResetAct_ = new QAction(tr("Обычный размер"), this);
+    wordWrapAct_ = new QAction(tr("Переносить строки"), this);
+    wordWrapAct_->setCheckable(true);
+    connect(wordWrapAct_, &QAction::toggled, this, [this](bool on) { editor_->setWordWrap(on); });
 
     themeGroup_ = new QActionGroup(this);
     const std::pair<QString, ThemeMode> themes[] = {
@@ -444,6 +448,7 @@ void MainWindow::createMenus() {
     view->addActions({zoomInAct_, zoomOutAct_, zoomResetAct_, zoomFitAct_});
     QMenu* editorFont = view->addMenu(tr("Шрифт редактора"));
     editorFont->addActions({editorFontBiggerAct_, editorFontSmallerAct_, editorFontResetAct_});
+    view->addAction(wordWrapAct_);
     view->addSeparator();
     QMenu* theme = view->addMenu(tr("Тема"));
     theme->addActions(themeGroup_->actions());
@@ -971,6 +976,7 @@ void MainWindow::restoreSession() {
     const QSignalBlocker block(editor_);  // не запускаем рендер раньше времени
     editor_->setFontPointSize(s.value(keys::editorFontSize, 0).toReal());
     autoCloseAct_->setChecked(s.value(keys::autoClose, true).toBool());
+    wordWrapAct_->setChecked(s.value(keys::wordWrap, false).toBool());
     updateEditorFontActions();
     const QString file = s.value(keys::sessionFile).toString();
     if (!file.isEmpty() && QFileInfo::exists(file)) {
@@ -1003,6 +1009,7 @@ void MainWindow::saveSession() {
     s.setValue(keys::theme, static_cast<int>(themeMode_));
     s.setValue(keys::exportTheme, static_cast<int>(exportTheme_));
     s.setValue(keys::autoClose, autoCloseAct_->isChecked());
+    s.setValue(keys::wordWrap, wordWrapAct_->isChecked());
     if (editor_->hasDefaultFontSize()) s.remove(keys::editorFontSize);
     else s.setValue(keys::editorFontSize, editor_->fontPointSize());
 

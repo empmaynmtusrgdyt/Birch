@@ -934,5 +934,9 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Стр. %1, столб. %2</source>
         <translation>%1 行、%2 列</translation>
     </message>
+    <message>
+        <source>Переносить строки</source>
+        <translation>行を折り返す</translation>
+    </message>
 </context>
 </TS>
