@@ -907,5 +907,25 @@ Describe it on the left, for example:
         <source>Закрывать скобки</source>
         <translation>Auto-Close Brackets</translation>
     </message>
+    <message>
+        <source>Недавние файлы</source>
+        <translation>Open Recent</translation>
+    </message>
+    <message>
+        <source>Нет недавних файлов</source>
+        <translation>No Recent Files</translation>
+    </message>
+    <message>
+        <source>Очистить список</source>
+        <translation>Clear Menu</translation>
+    </message>
+    <message>
+        <source>Файл не найден</source>
+        <translation>File Not Found</translation>
+    </message>
+    <message>
+        <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
+        <translation>The file “%1” was not found — it may have been moved or deleted. It has been removed from the recent files.</translation>
+    </message>
 </context>
 </TS>

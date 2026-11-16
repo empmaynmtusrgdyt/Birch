@@ -906,5 +906,25 @@
         <source>Закрывать скобки</source>
         <translation>自动补全括号</translation>
     </message>
+    <message>
+        <source>Недавние файлы</source>
+        <translation>最近打开的文件</translation>
+    </message>
+    <message>
+        <source>Нет недавних файлов</source>
+        <translation>没有最近打开的文件</translation>
+    </message>
+    <message>
+        <source>Очистить список</source>
+        <translation>清除列表</translation>
+    </message>
+    <message>
+        <source>Файл не найден</source>
+        <translation>找不到文件</translation>
+    </message>
+    <message>
+        <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
+        <translation>找不到文件“%1”，它可能已被移动或删除。已将其从最近打开的文件中移除。</translation>
+    </message>
 </context>
 </TS>

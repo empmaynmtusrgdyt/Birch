@@ -907,5 +907,25 @@ Beschreiben Sie es links, zum Beispiel:
         <source>Закрывать скобки</source>
         <translation>Klammern automatisch schließen</translation>
     </message>
+    <message>
+        <source>Недавние файлы</source>
+        <translation>Zuletzt geöffnet</translation>
+    </message>
+    <message>
+        <source>Нет недавних файлов</source>
+        <translation>Keine zuletzt geöffneten Dateien</translation>
+    </message>
+    <message>
+        <source>Очистить список</source>
+        <translation>Liste leeren</translation>
+    </message>
+    <message>
+        <source>Файл не найден</source>
+        <translation>Datei nicht gefunden</translation>
+    </message>
+    <message>
+        <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
+        <translation>Die Datei „%1“ wurde nicht gefunden — sie wurde vielleicht verschoben oder gelöscht. Sie wurde aus der Liste entfernt.</translation>
+    </message>
 </context>
 </TS>

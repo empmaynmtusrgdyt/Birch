@@ -107,6 +107,8 @@ private:
     void updateTitle();
     void updateZoomLabel(qreal zoom);
     void updateEditorFontActions();
+    void fillRecentMenu();
+    void openRecent(const QString& path);
 
     void showSyntaxHelp();
     void showAbout();
@@ -139,6 +141,7 @@ private:
     QAction* selectAllAct_ = nullptr;
     QAction* toggleCommentAct_ = nullptr;
     QAction* autoCloseAct_ = nullptr;
+    QMenu* recentMenu_ = nullptr;
     QAction* findAct_ = nullptr;
     QAction* replaceAct_ = nullptr;
     QAction* findNextAct_ = nullptr;

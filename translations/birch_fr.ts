@@ -907,5 +907,25 @@ Décrivez-le à gauche, par exemple&#xa0;:
         <source>Закрывать скобки</source>
         <translation>Fermer les crochets automatiquement</translation>
     </message>
+    <message>
+        <source>Недавние файлы</source>
+        <translation>Fichiers récents</translation>
+    </message>
+    <message>
+        <source>Нет недавних файлов</source>
+        <translation>Aucun fichier récent</translation>
+    </message>
+    <message>
+        <source>Очистить список</source>
+        <translation>Effacer la liste</translation>
+    </message>
+    <message>
+        <source>Файл не найден</source>
+        <translation>Fichier introuvable</translation>
+    </message>
+    <message>
+        <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
+        <translation>Le fichier «&#xa0;%1&#xa0;» est introuvable — il a peut-être été déplacé ou supprimé. Il a été retiré des fichiers récents.</translation>
+    </message>
 </context>
 </TS>

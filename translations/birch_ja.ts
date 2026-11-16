@@ -906,5 +906,25 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Закрывать скобки</source>
         <translation>括弧を自動で閉じる</translation>
     </message>
+    <message>
+        <source>Недавние файлы</source>
+        <translation>最近使ったファイル</translation>
+    </message>
+    <message>
+        <source>Нет недавних файлов</source>
+        <translation>最近使ったファイルはありません</translation>
+    </message>
+    <message>
+        <source>Очистить список</source>
+        <translation>リストを消去</translation>
+    </message>
+    <message>
+        <source>Файл не найден</source>
+        <translation>ファイルが見つかりません</translation>
+    </message>
+    <message>
+        <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
+        <translation>ファイル「%1」が見つかりません。移動または削除された可能性があります。最近使ったファイルから削除しました。</translation>
+    </message>
 </context>
 </TS>

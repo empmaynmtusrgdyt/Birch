@@ -907,5 +907,25 @@ Descríbalo a la izquierda, por ejemplo:
         <source>Закрывать скобки</source>
         <translation>Cerrar corchetes automáticamente</translation>
     </message>
+    <message>
+        <source>Недавние файлы</source>
+        <translation>Archivos recientes</translation>
+    </message>
+    <message>
+        <source>Нет недавних файлов</source>
+        <translation>No hay archivos recientes</translation>
+    </message>
+    <message>
+        <source>Очистить список</source>
+        <translation>Borrar la lista</translation>
+    </message>
+    <message>
+        <source>Файл не найден</source>
+        <translation>Archivo no encontrado</translation>
+    </message>
+    <message>
+        <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
+        <translation>No se encontró el archivo «%1»: puede que se haya movido o eliminado. Se ha quitado de la lista de recientes.</translation>
+    </message>
 </context>
 </TS>

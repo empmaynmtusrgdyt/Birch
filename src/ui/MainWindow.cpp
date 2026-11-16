@@ -38,6 +38,7 @@
 #include "core/MermaidExporter.h"
 #include "core/Examples.h"
 #include "core/Language.h"
+#include "core/RecentFiles.h"
 #include "ui/CodeEditor.h"
 #include "ui/FindBar.h"
 #include "ui/InstallCommand.h"
@@ -103,6 +104,7 @@ const QString sessionText = QStringLiteral("session/text");
 const QString sessionFile = QStringLiteral("session/file");
 const QString editorFontSize = QStringLiteral("editor/fontSize");
 const QString autoClose = QStringLiteral("editor/autoClose");
+const QString recentFiles = QStringLiteral("files/recent");
 }  // namespace keys
 
 const QString kExamplesDir = QStringLiteral(":/examples");
@@ -388,7 +390,11 @@ void MainWindow::createActions() {
 
 void MainWindow::createMenus() {
     QMenu* file = menuBar()->addMenu(tr("Файл"));
-    file->addActions({newAct_, openAct_, saveAct_, saveAsAct_});
+    file->addActions({newAct_, openAct_});
+    recentMenu_ = file->addMenu(tr("Недавние файлы"));
+    recentMenu_->setToolTipsVisible(true);  // полный путь — в подсказке
+    connect(recentMenu_, &QMenu::aboutToShow, this, &MainWindow::fillRecentMenu);
+    file->addActions({saveAct_, saveAsAct_});
     file->addSeparator();
     file->addActions({exampleAct_, framesExampleAct_});
     file->addSeparator();
@@ -856,9 +862,45 @@ bool MainWindow::maybeSave() {
 }
 
 void MainWindow::setCurrentFile(const QString& path) {
+    if (!path.isEmpty()) {
+        QSettings s;
+        s.setValue(keys::recentFiles, recent::add(s.value(keys::recentFiles).toStringList(), path));
+    }
     filePath_ = path;
     editor_->document()->setModified(false);
     updateTitle();
+}
+
+void MainWindow::fillRecentMenu() {
+    recentMenu_->clear();
+    const QStringList files = QSettings().value(keys::recentFiles).toStringList();
+    if (files.isEmpty()) {
+        recentMenu_->addAction(tr("Нет недавних файлов"))->setEnabled(false);
+        return;
+    }
+    const QStringList labels = recent::labels(files);
+    for (qsizetype i = 0; i < files.size(); ++i) {
+        QAction* a = recentMenu_->addAction(labels[i]);
+        a->setToolTip(QDir::toNativeSeparators(files[i]));
+        connect(a, &QAction::triggered, this, [this, path = files[i]] { openRecent(path); });
+    }
+    recentMenu_->addSeparator();
+    connect(recentMenu_->addAction(tr("Очистить список")), &QAction::triggered, this,
+            [] { QSettings().remove(keys::recentFiles); });
+}
+
+void MainWindow::openRecent(const QString& path) {
+    if (!QFileInfo::exists(path)) {
+        QSettings s;
+        s.setValue(keys::recentFiles, recent::remove(s.value(keys::recentFiles).toStringList(), path));
+        QMessageBox::warning(this, tr("Файл не найден"),
+                             tr("Файл «%1» не найден — возможно, его переместили или удалили. "
+                                "Он убран из списка недавних.")
+                                 .arg(QDir::toNativeSeparators(path)));
+        return;
+    }
+    if (QFileInfo(path) == QFileInfo(filePath_)) return;  // уже открыт
+    if (maybeSave()) openFile(path);
 }
 
 void MainWindow::loadExample(const QString& resource) {

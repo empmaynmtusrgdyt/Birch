@@ -77,6 +77,8 @@ add_library(birch_core STATIC
     src/core/Examples.h
     src/core/Examples.cpp
     src/core/Language.h
+    src/core/RecentFiles.h
+    src/core/RecentFiles.cpp
     src/core/Language.cpp
     src/core/Diagram.h
     src/core/MermaidExporter.h
