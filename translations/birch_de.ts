@@ -939,5 +939,17 @@ Beschreiben Sie es links, zum Beispiel:
         <source>Переносить строки</source>
         <translation>Zeilen umbrechen</translation>
     </message>
+    <message>
+        <source>Копировать как SVG</source>
+        <translation>Als SVG kopieren</translation>
+    </message>
+    <message>
+        <source>Векторная картинка — для Figma, Inkscape, draw.io: её можно увеличивать без потери качества</source>
+        <translation>Vektorgrafik für Figma, Inkscape, draw.io — lässt sich ohne Qualitätsverlust vergrößern</translation>
+    </message>
+    <message>
+        <source>SVG скопирован — вставьте его в Figma, Inkscape или draw.io</source>
+        <translation>SVG kopiert — in Figma, Inkscape oder draw.io einfügen</translation>
+    </message>
 </context>
 </TS>

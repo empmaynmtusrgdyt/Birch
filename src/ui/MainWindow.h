@@ -87,6 +87,7 @@ private:
     void exportPng();
     void exportSvg();
     void copyImage();
+    void copySvg();
     QString mermaidForExport();
     void exportMermaid();
     void copyMermaid();
@@ -158,6 +159,7 @@ private:
     QAction* exportPngAct_ = nullptr;
     QAction* exportSvgAct_ = nullptr;
     QAction* copyImageAct_ = nullptr;
+    QAction* copySvgAct_ = nullptr;
     QAction* exportMermaidAct_ = nullptr;
     QAction* copyMermaidAct_ = nullptr;
     QAction* horizontalAct_ = nullptr;

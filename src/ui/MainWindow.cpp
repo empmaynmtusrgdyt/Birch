@@ -309,6 +309,8 @@ void MainWindow::createActions() {
                          {QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C)});
     copyImageAct_->setToolTip(tr("Скопировать PNG — можно сразу вставить в Telegram, Slack, Word (%1)")
                                   .arg(copyImageAct_->shortcut().toString(QKeySequence::NativeText)));
+    copySvgAct_ = make(tr("Копировать как SVG"), &MainWindow::copySvg);
+    copySvgAct_->setToolTip(tr("Векторная картинка — для Figma, Inkscape, draw.io: её можно увеличивать без потери качества"));
 
     horizontalAct_ = new QAction(tr("Горизонтальная схема"), this);
     horizontalAct_->setCheckable(true);
@@ -424,7 +426,7 @@ void MainWindow::createMenus() {
     file->addSeparator();
     file->addActions({exampleAct_, framesExampleAct_});
     file->addSeparator();
-    file->addActions({exportPngAct_, exportSvgAct_, copyImageAct_});
+    file->addActions({exportPngAct_, exportSvgAct_, copyImageAct_, copySvgAct_});
     file->addSeparator();
     file->addActions({exportMermaidAct_, copyMermaidAct_});
     file->addSeparator();
@@ -609,7 +611,7 @@ void MainWindow::renderNow() {
     showProblems(parsed.diagnostics);
 
     const bool empty = parsed.diagram.isEmpty();
-    for (QAction* a : {exportPngAct_, exportSvgAct_, copyImageAct_}) a->setEnabled(!empty);
+    for (QAction* a : {exportPngAct_, exportSvgAct_, copyImageAct_, copySvgAct_}) a->setEnabled(!empty);
 
     if (empty) {
         render_->cancel();
@@ -767,6 +769,20 @@ void MainWindow::copyImage() {
     QGuiApplication::clipboard()->setMimeData(mime);
 
     statusBar()->showMessage(tr("Картинка скопирована — вставьте её в Telegram, Slack, Word…"), 5000);
+}
+
+void MainWindow::copySvg() {
+    const auto r = renderForExport(false);
+    if (!r) return;
+
+    // Тип image/svg+xml понимают Inkscape и Office на Windows, а Figma и
+    // draw.io берут SVG из обычного текста — кладём оба.
+    auto* mime = new QMimeData;
+    mime->setData(QStringLiteral("image/svg+xml"), r->svg);
+    mime->setText(QString::fromUtf8(r->svg));
+    QGuiApplication::clipboard()->setMimeData(mime);
+
+    statusBar()->showMessage(tr("SVG скопирован — вставьте его в Figma, Inkscape или draw.io"), 5000);
 }
 
 // Mermaid — текст схемы для сайтов, которые рисуют его сами (GitHub, Notion…).

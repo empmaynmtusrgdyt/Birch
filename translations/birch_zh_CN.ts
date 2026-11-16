@@ -938,5 +938,17 @@
         <source>Переносить строки</source>
         <translation>自动换行</translation>
     </message>
+    <message>
+        <source>Копировать как SVG</source>
+        <translation>复制为 SVG</translation>
+    </message>
+    <message>
+        <source>Векторная картинка — для Figma, Inkscape, draw.io: её можно увеличивать без потери качества</source>
+        <translation>矢量图片，适用于 Figma、Inkscape、draw.io：放大也不会失真</translation>
+    </message>
+    <message>
+        <source>SVG скопирован — вставьте его в Figma, Inkscape или draw.io</source>
+        <translation>SVG 已复制，可粘贴到 Figma、Inkscape 或 draw.io</translation>
+    </message>
 </context>
 </TS>

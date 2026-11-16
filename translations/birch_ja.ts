@@ -938,5 +938,17 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Переносить строки</source>
         <translation>行を折り返す</translation>
     </message>
+    <message>
+        <source>Копировать как SVG</source>
+        <translation>SVG としてコピー</translation>
+    </message>
+    <message>
+        <source>Векторная картинка — для Figma, Inkscape, draw.io: её можно увеличивать без потери качества</source>
+        <translation>Figma、Inkscape、draw.io 向けのベクター画像。拡大しても画質が落ちません</translation>
+    </message>
+    <message>
+        <source>SVG скопирован — вставьте его в Figma, Inkscape или draw.io</source>
+        <translation>SVG をコピーしました。Figma、Inkscape、draw.io に貼り付けられます</translation>
+    </message>
 </context>
 </TS>

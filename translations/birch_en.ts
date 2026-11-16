@@ -939,5 +939,17 @@ Describe it on the left, for example:
         <source>Переносить строки</source>
         <translation>Wrap Lines</translation>
     </message>
+    <message>
+        <source>Копировать как SVG</source>
+        <translation>Copy as SVG</translation>
+    </message>
+    <message>
+        <source>Векторная картинка — для Figma, Inkscape, draw.io: её можно увеличивать без потери качества</source>
+        <translation>A vector picture for Figma, Inkscape, draw.io — it can be enlarged without losing quality</translation>
+    </message>
+    <message>
+        <source>SVG скопирован — вставьте его в Figma, Inkscape или draw.io</source>
+        <translation>SVG copied — paste it into Figma, Inkscape or draw.io</translation>
+    </message>
 </context>
 </TS>
