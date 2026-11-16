@@ -42,6 +42,7 @@ All packages are on the [Releases](https://github.com/empmaynmtusrgdyt/Birch/rel
 | System | File | How to install |
 |---|---|---|
 | macOS 15+ (Apple Silicon) | `Birch-<version>-macos-arm64.dmg` | open it and drag Birch to Applications |
+| macOS 15+ (Intel) | `Birch-<version>-macos-x86_64.dmg` | the same |
 | Windows 10/11 (x64) | `Birch-<version>-windows-x64.exe` | run the installer |
 | Windows, no installation | `Birch-<version>-windows-x64.zip` | unpack, run `bin\Birch.exe` |
 | Windows 8.1 (x64) | `Birch-<version>-windows8-x64.exe` or `.zip` | same as Windows 10/11 |

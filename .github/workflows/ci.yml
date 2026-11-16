@@ -24,9 +24,18 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # Два пакета для macOS: Apple Silicon и Intel. На Intel-машине GitHub Homebrew
+  # лежит в /usr/local — CMakePresets.json ищет и там, а имя .dmg берётся из
+  # процессора сборочной машины (macos-arm64 или macos-x86_64).
   macos:
-    name: macOS
-    runs-on: macos-15
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "macOS",         runner: "macos-15",       tag: "macos" }
+          - { name: "macOS (Intel)", runner: "macos-15-intel", tag: "macos-intel" }
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -45,6 +54,7 @@ jobs:
       - name: Тесты
         run: ctest --preset macos
       - name: Экспорт в Mermaid проверяется официальным mermaid-cli
+        if: matrix.tag == 'macos'  # не зависит от процессора — достаточно одной машины
         run: |
           # Тест сохраняет экспорт примеров в mermaid/*.mmd; mermaid-cli должен нарисовать каждый без ошибок
           BIRCH_MERMAID_DIR=mermaid ./build/macos/tests/tst_mermaid > /dev/null
@@ -53,11 +63,12 @@ jobs:
             npx -y @mermaid-js/mermaid-cli@11.17.0 -i "$f" -o "${f%.mmd}.svg"
           done
       - uses: actions/upload-artifact@v4
+        if: matrix.tag == 'macos'
         with:
           name: mermaid
           path: mermaid/
       - name: Смоук-тест
-        run: ./build/macos/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos.png resources/examples/welcome.birch
+        run: ./build/macos/Birch.app/Contents/MacOS/Birch --screenshot screenshot-${{ matrix.tag }}.png resources/examples/welcome.birch
       - name: Пакет .dmg (с проверкой самодостаточности бандла)
         run: |
           # hdiutil на машинах GitHub иногда падает с «Resource busy» — повторяем
@@ -71,8 +82,10 @@ jobs:
       - name: Смоук-тест приложения из .dmg
         run: |
           hdiutil attach -nobrowse -readonly build/macos/Birch-*.dmg -mountpoint /tmp/birch-dmg
-          /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --screenshot screenshot-macos-dmg.png resources/examples/welcome.birch
+          /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch --screenshot screenshot-${{ matrix.tag }}-dmg.png resources/examples/welcome.birch
           codesign --verify --deep --strict /tmp/birch-dmg/Birch.app
+          # Бинарник собран для процессора этой машины, а не другого
+          lipo -archs /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
       - name: Тема применяется ко всему окну
         run: |
           .github/scripts/check-theme.sh /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
@@ -94,16 +107,16 @@ jobs:
             || { echo "::error::в справке не «birch»"; exit 1; }
       - name: Снимки панели поиска и примера с рамками на всех языках
         run: |
-          .github/scripts/screenshots.sh macos /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
+          .github/scripts/screenshots.sh ${{ matrix.tag }} /tmp/birch-dmg/Birch.app/Contents/MacOS/Birch
           # Образ иногда ещё занят системой (например, Spotlight) — повторяем, потом принудительно
           for i in 1 2 3; do hdiutil detach /tmp/birch-dmg && exit 0; sleep 5; done
           hdiutil detach -force /tmp/birch-dmg
       - uses: actions/upload-artifact@v4
         with:
-          name: package-macos
+          name: package-${{ matrix.tag }}
           path: |
             build/macos/Birch-*.dmg
-            screenshot-macos-dmg.png
+            screenshot-${{ matrix.tag }}-dmg.png
             theme-*.png
             find-*.png
             frames-*.png

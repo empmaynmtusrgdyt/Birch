@@ -42,6 +42,7 @@
 | Система | Файл | Как установить |
 |---|---|---|
 | macOS 15+ (Apple Silicon) | `Birch-<версия>-macos-arm64.dmg` | открыть и перетащить Birch в «Программы» |
+| macOS 15+ (Intel) | `Birch-<версия>-macos-x86_64.dmg` | так же |
 | Windows 10/11 (x64) | `Birch-<версия>-windows-x64.exe` | запустить установщик |
 | Windows, без установки | `Birch-<версия>-windows-x64.zip` | распаковать, запустить `bin\Birch.exe` |
 | Windows 8.1 (x64) | `Birch-<версия>-windows8-x64.exe` или `.zip` | как для Windows 10/11 |
