@@ -898,5 +898,9 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Шрифт редактора: %1 пт</source>
         <translation>エディターのフォント: %1 pt</translation>
     </message>
+    <message>
+        <source>Закомментировать строки</source>
+        <translation>行をコメントにする</translation>
+    </message>
 </context>
 </TS>

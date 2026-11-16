@@ -236,6 +236,9 @@ void MainWindow::createActions() {
     copyAct_ = editorAction(tr("Копировать"), &QPlainTextEdit::copy, QKeySequence::Copy);
     pasteAct_ = editorAction(tr("Вставить"), &QPlainTextEdit::paste, QKeySequence::Paste);
     selectAllAct_ = editorAction(tr("Выбрать все"), &QPlainTextEdit::selectAll, QKeySequence::SelectAll);
+    toggleCommentAct_ = new QAction(tr("Закомментировать строки"), this);
+    toggleCommentAct_->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
+    connect(toggleCommentAct_, &QAction::triggered, this, [this] { editor_->toggleComment(); });
     undoAct_->setEnabled(false);
     redoAct_->setEnabled(false);
     cutAct_->setEnabled(false);
@@ -394,6 +397,8 @@ void MainWindow::createMenus() {
     edit->addActions({undoAct_, redoAct_});
     edit->addSeparator();
     edit->addActions({cutAct_, copyAct_, pasteAct_, selectAllAct_});
+    edit->addSeparator();
+    edit->addAction(toggleCommentAct_);
     edit->addSeparator();
     edit->addActions({findAct_, replaceAct_, findNextAct_, findPreviousAct_});
 

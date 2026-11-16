@@ -898,5 +898,9 @@
         <source>Шрифт редактора: %1 пт</source>
         <translation>编辑器字体：%1 磅</translation>
     </message>
+    <message>
+        <source>Закомментировать строки</source>
+        <translation>切换注释</translation>
+    </message>
 </context>
 </TS>

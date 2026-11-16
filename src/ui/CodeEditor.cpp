@@ -4,6 +4,8 @@
 
 #include "ui/CodeEditor.h"
 
+#include <limits>
+
 #include <QFontDatabase>
 #include <QHelpEvent>
 #include <QPainter>
@@ -85,6 +87,63 @@ void CodeEditor::setFontPointSize(qreal size) {
     if (qFuzzyCompare(customFontPointSize_, defaultFontPointSize())) customFontPointSize_ = 0;
     applyEditorFont();
     if (!qFuzzyCompare(old, fontPointSize())) emit fontPointSizeChanged(fontPointSize());
+}
+
+namespace {
+
+qsizetype indentOf(const QString& line) {
+    qsizetype i = 0;
+    while (i < line.size() && (line[i] == u' ' || line[i] == u'\t')) ++i;
+    return i;
+}
+
+}  // namespace
+
+void CodeEditor::toggleComment() {
+    const QTextCursor cursor = textCursor();
+    QTextBlock first = document()->findBlock(cursor.selectionStart());
+    QTextBlock last = document()->findBlock(cursor.selectionEnd());
+    // Выделение, которое кончается в начале строки, эту строку не захватывает.
+    if (cursor.hasSelection() && last != first && cursor.selectionEnd() == last.position()) last = last.previous();
+
+    // Комментируем всё, если хоть одна непустая строка не закомментирована;
+    // «//» ставим на один отступ — самый маленький среди строк.
+    bool allCommented = true;
+    bool anyText = false;
+    qsizetype minIndent = std::numeric_limits<qsizetype>::max();
+    for (QTextBlock b = first; b.isValid(); b = b.next()) {
+        const QString text = b.text();
+        const qsizetype indent = indentOf(text);
+        if (indent < text.size()) {
+            anyText = true;
+            minIndent = qMin(minIndent, indent);
+            const QStringView rest = QStringView(text).mid(indent);
+            if (!rest.startsWith(u"//") && !rest.startsWith(u'#')) allCommented = false;
+        }
+        if (b == last) break;
+    }
+    if (!anyText) return;
+
+    QTextCursor edit(document());
+    edit.beginEditBlock();
+    for (QTextBlock b = first; b.isValid(); b = b.next()) {
+        const QString text = b.text();
+        const qsizetype indent = indentOf(text);
+        if (indent < text.size()) {
+            if (allCommented) {
+                qsizetype length = text.mid(indent).startsWith(u"//") ? 2 : 1;
+                if (indent + length < text.size() && text[indent + length] == u' ') ++length;
+                edit.setPosition(b.position() + static_cast<int>(indent));
+                edit.setPosition(b.position() + static_cast<int>(indent + length), QTextCursor::KeepAnchor);
+                edit.removeSelectedText();
+            } else {
+                edit.setPosition(b.position() + static_cast<int>(minIndent));
+                edit.insertText(QStringLiteral("// "));
+            }
+        }
+        if (b == last) break;
+    }
+    edit.endEditBlock();
 }
 
 bool CodeEditor::event(QEvent* event) {

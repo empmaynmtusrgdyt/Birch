@@ -899,5 +899,9 @@ Décrivez-le à gauche, par exemple&#xa0;:
         <source>Шрифт редактора: %1 пт</source>
         <translation>Police de l’éditeur&#xa0;: %1&#xa0;pt</translation>
     </message>
+    <message>
+        <source>Закомментировать строки</source>
+        <translation>Commenter les lignes</translation>
+    </message>
 </context>
 </TS>

@@ -86,6 +86,62 @@ private slots:
         QCOMPARE(editor.fontPointSize(), base);
     }
 
+    // Комментирование строк: текущая строка, выделение, снятие, отступы, отмена.
+    static void select(CodeEditor& editor, int from, int to) {
+        QTextCursor c = editor.textCursor();
+        c.setPosition(from);
+        c.setPosition(to, QTextCursor::KeepAnchor);
+        editor.setTextCursor(c);
+    }
+
+    void commentCurrentLine() {
+        CodeEditor editor;
+        editor.setPlainText("[A] -> [B]\n[B] -> [C]");
+        QTextCursor c = editor.textCursor();
+        c.setPosition(12);  // во второй строке
+        editor.setTextCursor(c);
+        editor.toggleComment();
+        QCOMPARE(editor.toPlainText(), QStringLiteral("[A] -> [B]\n// [B] -> [C]"));
+        editor.toggleComment();
+        QCOMPARE(editor.toPlainText(), QStringLiteral("[A] -> [B]\n[B] -> [C]"));
+    }
+
+    void commentSelectionKeepsIndentAndSkipsEmpty() {
+        CodeEditor editor;
+        const QString text = "=Рамка=\n    [A] -> [B]\n\n  [B] -> [C]\n[C] -> [D]";
+        editor.setPlainText(text);
+        // От середины второй строки до начала последней: последняя не захвачена
+        select(editor, 10, static_cast<int>(text.lastIndexOf("[C] -> [D]")));
+        editor.toggleComment();
+        QCOMPARE(editor.toPlainText(), QStringLiteral("=Рамка=\n  //   [A] -> [B]\n\n  // [B] -> [C]\n[C] -> [D]"));
+        editor.document()->undo();  // один шаг отмены
+        QCOMPARE(editor.toPlainText(), text);
+    }
+
+    void uncommentBothStyles() {
+        CodeEditor editor;
+        editor.setPlainText("// [A] -> [B]\n#[B] -> [C]\n  //[C] -> [D]");
+        editor.selectAll();
+        editor.toggleComment();
+        QCOMPARE(editor.toPlainText(), QStringLiteral("[A] -> [B]\n[B] -> [C]\n  [C] -> [D]"));
+    }
+
+    void mixedSelectionGetsCommented() {
+        CodeEditor editor;
+        editor.setPlainText("// [A] -> [B]\n[B] -> [C]");
+        editor.selectAll();
+        editor.toggleComment();
+        QCOMPARE(editor.toPlainText(), QStringLiteral("// // [A] -> [B]\n// [B] -> [C]"));
+    }
+
+    void emptyTextUntouched() {
+        CodeEditor editor;
+        editor.setPlainText("\n\n");
+        editor.selectAll();
+        editor.toggleComment();
+        QCOMPARE(editor.toPlainText(), QStringLiteral("\n\n"));
+    }
+
     // Когда фокус в редакторе, сочетание масштаба не срабатывает в окне
     // (там оно масштабирует схему), а когда фокус не в редакторе — срабатывает.
     void shortcutsGoToEditorOnlyWithFocus() {

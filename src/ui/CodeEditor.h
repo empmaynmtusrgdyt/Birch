@@ -39,6 +39,10 @@ public:
     void resetFontSize() { setFontPointSize(0); }
     bool hasDefaultFontSize() const { return customFontPointSize_ <= 0; }
 
+    // ⌘/ (Ctrl+/): ставит «//» в начале текущей строки или всех строк выделения;
+    // если все они уже закомментированы («//» или «#») — убирает. Одним шагом отмены.
+    void toggleComment();
+
     // Для LineNumberArea
     int lineNumberAreaWidth() const;
     void paintLineNumberArea(QPaintEvent* event);

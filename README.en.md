@@ -108,6 +108,7 @@ A ready-made example: **File → Open Frames Example**.
 | ⌘0 | Ctrl+0 | diagram actual size; with the cursor in the editor — default font size |
 | ⌘9 | Ctrl+9 | fit to window |
 | ⌘S / ⌘O / ⌘N | Ctrl+S / Ctrl+O / Ctrl+N | save / open / new file |
+| ⌘/ | Ctrl+/ | comment or uncomment lines |
 | ⌘F | Ctrl+F | find |
 | ⌥⌘F | Ctrl+H | find and replace |
 | ⌘G / ⇧⌘G | F3 / Shift+F3 or Ctrl+G / Ctrl+Shift+G | next / previous match |
