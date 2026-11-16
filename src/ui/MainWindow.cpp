@@ -196,7 +196,13 @@ MainWindow::MainWindow(QWidget* parent)
 
     statusInfo_ = new QLabel(this);
     statusBar()->addWidget(statusInfo_, 1);
+    // Строка и столбец — как в сообщениях об ошибках («строка 3, позиция 8»).
+    cursorInfo_ = new QLabel(this);
+    cursorInfo_->setContentsMargins(0, 0, 8, 0);  // не вплотную к краю окна
+    statusBar()->addPermanentWidget(cursorInfo_);
     statusBar()->setSizeGripEnabled(false);
+    connect(editor_, &QPlainTextEdit::cursorPositionChanged, this, &MainWindow::updateCursorInfo);
+    updateCursorInfo();
 
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this] { applyTheme(); });
 
@@ -1169,6 +1175,11 @@ void MainWindow::applyTheme() {
 void MainWindow::changeEvent(QEvent* event) {
     QMainWindow::changeEvent(event);
     if (event->type() == QEvent::PaletteChange) applyTheme();
+}
+
+void MainWindow::updateCursorInfo() {
+    const QTextCursor cursor = editor_->textCursor();
+    cursorInfo_->setText(tr("Стр. %1, столб. %2").arg(cursor.blockNumber() + 1).arg(cursor.positionInBlock() + 1));
 }
 
 void MainWindow::updateEditorFontActions() {

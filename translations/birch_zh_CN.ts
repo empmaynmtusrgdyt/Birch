@@ -930,5 +930,9 @@
         <source>Масштаб PNG</source>
         <translation>PNG 缩放倍数</translation>
     </message>
+    <message>
+        <source>Стр. %1, столб. %2</source>
+        <translation>第 %1 行，第 %2 列</translation>
+    </message>
 </context>
 </TS>

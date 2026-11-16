@@ -931,5 +931,9 @@ Décrivez-le à gauche, par exemple&#xa0;:
         <source>Масштаб PNG</source>
         <translation>Échelle PNG</translation>
     </message>
+    <message>
+        <source>Стр. %1, столб. %2</source>
+        <translation>Ligne %1, col. %2</translation>
+    </message>
 </context>
 </TS>

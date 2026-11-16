@@ -931,5 +931,9 @@ Beschreiben Sie es links, zum Beispiel:
         <source>Масштаб PNG</source>
         <translation>PNG-Maßstab</translation>
     </message>
+    <message>
+        <source>Стр. %1, столб. %2</source>
+        <translation>Z. %1, Sp. %2</translation>
+    </message>
 </context>
 </TS>

@@ -930,5 +930,9 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Масштаб PNG</source>
         <translation>PNG の倍率</translation>
     </message>
+    <message>
+        <source>Стр. %1, столб. %2</source>
+        <translation>%1 行、%2 列</translation>
+    </message>
 </context>
 </TS>

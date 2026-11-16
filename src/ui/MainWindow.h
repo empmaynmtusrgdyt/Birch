@@ -111,6 +111,7 @@ private:
     void updateTitle();
     void updateZoomLabel(qreal zoom);
     void updateEditorFontActions();
+    void updateCursorInfo();
     void fillRecentMenu();
     void openRecent(const QString& path);
 
@@ -127,6 +128,7 @@ private:
     PreviewView* preview_ = nullptr;
     QLabel* renderError_ = nullptr;
     QLabel* statusInfo_ = nullptr;
+    QLabel* cursorInfo_ = nullptr;  // «Стр. 3, столб. 8» справа в строке состояния
     QToolButton* zoomButton_ = nullptr;
 
     // Действия

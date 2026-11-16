@@ -931,5 +931,9 @@ Descríbalo a la izquierda, por ejemplo:
         <source>Масштаб PNG</source>
         <translation>Escala del PNG</translation>
     </message>
+    <message>
+        <source>Стр. %1, столб. %2</source>
+        <translation>Lín. %1, col. %2</translation>
+    </message>
 </context>
 </TS>
