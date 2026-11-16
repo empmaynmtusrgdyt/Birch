@@ -926,5 +926,9 @@
         <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
         <translation>找不到文件“%1”，它可能已被移动或删除。已将其从最近打开的文件中移除。</translation>
     </message>
+    <message>
+        <source>Масштаб PNG</source>
+        <translation>PNG 缩放倍数</translation>
+    </message>
 </context>
 </TS>

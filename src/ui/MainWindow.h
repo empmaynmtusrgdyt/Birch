@@ -169,6 +169,8 @@ private:
     QAction* editorFontResetAct_ = nullptr;
     QActionGroup* themeGroup_ = nullptr;
     QActionGroup* exportThemeGroup_ = nullptr;
+    QActionGroup* exportScaleGroup_ = nullptr;
+    int exportScale_ = 2;
     QActionGroup* languageGroup_ = nullptr;  // «Как в системе» и все языки перевода
     QAction* syntaxAct_ = nullptr;
     QAction* aboutAct_ = nullptr;

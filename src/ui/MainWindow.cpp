@@ -4,6 +4,8 @@
 
 #include "ui/MainWindow.h"
 
+#include <algorithm>
+
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
@@ -91,7 +93,7 @@ private:
 
 constexpr int kDebounceMs = 300;
 constexpr qint64 kMaxFileBytes = 4 * 1024 * 1024;
-constexpr qreal kExportScale = 2.0;
+constexpr int kDefaultExportScale = 2;  // PNG вдвое крупнее схемы на экране — чётко на HiDPI
 
 namespace keys {
 const QString geometry = QStringLiteral("ui/geometry");
@@ -109,6 +111,7 @@ const QString sessionFile = QStringLiteral("session/file");
 const QString editorFontSize = QStringLiteral("editor/fontSize");
 const QString autoClose = QStringLiteral("editor/autoClose");
 const QString recentFiles = QStringLiteral("files/recent");
+const QString exportScale = QStringLiteral("export/scale");
 }  // namespace keys
 
 const QString kExamplesDir = QStringLiteral(":/examples");
@@ -368,6 +371,15 @@ void MainWindow::createActions() {
         connect(a, &QAction::triggered, this, [this, theme] { exportTheme_ = theme; });
     }
 
+    // Масштаб PNG — и для «Скачать PNG», и для «Копировать в буфер»; SVG — вектор.
+    exportScaleGroup_ = new QActionGroup(this);
+    for (int scale : {1, 2, 3}) {
+        QAction* a = exportScaleGroup_->addAction(QStringLiteral("%1×").arg(scale));
+        a->setCheckable(true);
+        a->setData(scale);
+        connect(a, &QAction::triggered, this, [this, scale] { exportScale_ = scale; });
+    }
+
     syntaxAct_ = make(tr("Синтаксис…"), &MainWindow::showSyntaxHelp, {QKeySequence::HelpContents});
     aboutAct_ = make(tr("О программе Birch"), &MainWindow::showAbout);
     aboutAct_->setMenuRole(QAction::AboutRole);
@@ -439,6 +451,8 @@ void MainWindow::createMenus() {
     exportMenu->addSeparator();
     exportMenu->addSection(tr("Тема картинки"));
     exportMenu->addActions(exportThemeGroup_->actions());
+    exportMenu->addSection(tr("Масштаб PNG"));
+    exportMenu->addActions(exportScaleGroup_->actions());
 
     QMenu* help = menuBar()->addMenu(tr("Справка"));
     help->addActions({syntaxAct_, aboutAct_});
@@ -649,7 +663,7 @@ RenderOptions MainWindow::exportOptions() const {
     if (exportTheme_ == ExportTheme::Light) opt.theme = Theme::select(false, mono);
     if (exportTheme_ == ExportTheme::Dark) opt.theme = Theme::select(true, mono);
     opt.transparentBackground = transparentAct_->isChecked();
-    opt.scale = kExportScale;
+    opt.scale = exportScale_;
     opt.rasterize = true;
     return opt;
 }
@@ -941,6 +955,8 @@ void MainWindow::restoreSession() {
     }
     autoRenderAct_->setChecked(s.value(keys::autoRender, true).toBool());
     transparentAct_->setChecked(s.value(keys::transparent, false).toBool());
+    exportScale_ = std::clamp(s.value(keys::exportScale, kDefaultExportScale).toInt(), 1, 3);
+    for (QAction* a : exportScaleGroup_->actions()) a->setChecked(a->data().toInt() == exportScale_);
 
     exportTheme_ = static_cast<ExportTheme>(s.value(keys::exportTheme, 0).toInt());
     for (QAction* a : exportThemeGroup_->actions()) a->setChecked(a->data().toInt() == static_cast<int>(exportTheme_));
@@ -977,6 +993,7 @@ void MainWindow::saveSession() {
     s.setValue(keys::monochrome, monochromeAct_->isChecked());
     s.setValue(keys::autoRender, autoRenderAct_->isChecked());
     s.setValue(keys::transparent, transparentAct_->isChecked());
+    s.setValue(keys::exportScale, exportScale_);
     s.setValue(keys::theme, static_cast<int>(themeMode_));
     s.setValue(keys::exportTheme, static_cast<int>(exportTheme_));
     s.setValue(keys::autoClose, autoCloseAct_->isChecked());

@@ -926,5 +926,9 @@ Birch を「アプリケーション」にドラッグし、そこから開い�
         <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
         <translation>ファイル「%1」が見つかりません。移動または削除された可能性があります。最近使ったファイルから削除しました。</translation>
     </message>
+    <message>
+        <source>Масштаб PNG</source>
+        <translation>PNG の倍率</translation>
+    </message>
 </context>
 </TS>

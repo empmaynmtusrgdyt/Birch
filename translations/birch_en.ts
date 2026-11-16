@@ -927,5 +927,9 @@ Describe it on the left, for example:
         <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
         <translation>The file “%1” was not found — it may have been moved or deleted. It has been removed from the recent files.</translation>
     </message>
+    <message>
+        <source>Масштаб PNG</source>
+        <translation>PNG Scale</translation>
+    </message>
 </context>
 </TS>

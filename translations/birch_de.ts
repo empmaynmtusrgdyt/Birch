@@ -927,5 +927,9 @@ Beschreiben Sie es links, zum Beispiel:
         <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
         <translation>Die Datei „%1“ wurde nicht gefunden — sie wurde vielleicht verschoben oder gelöscht. Sie wurde aus der Liste entfernt.</translation>
     </message>
+    <message>
+        <source>Масштаб PNG</source>
+        <translation>PNG-Maßstab</translation>
+    </message>
 </context>
 </TS>

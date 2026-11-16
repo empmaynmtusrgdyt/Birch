@@ -927,5 +927,9 @@ Décrivez-le à gauche, par exemple&#xa0;:
         <source>Файл «%1» не найден — возможно, его переместили или удалили. Он убран из списка недавних.</source>
         <translation>Le fichier «&#xa0;%1&#xa0;» est introuvable — il a peut-être été déplacé ou supprimé. Il a été retiré des fichiers récents.</translation>
     </message>
+    <message>
+        <source>Масштаб PNG</source>
+        <translation>Échelle PNG</translation>
+    </message>
 </context>
 </TS>
