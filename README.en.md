@@ -4,6 +4,8 @@
 
 An app for **macOS, Windows and Linux** that draws flowcharts from a text description. No AI and no internet: the text is read by Birch's own parser, the layout and arrows come from [Graphviz](https://graphviz.org), and the interface is built with Qt 6.
 
+![The diagram is built as you type](docs/demo-en.gif)
+
 | Light theme | Dark theme |
 |---|---|
 | ![Light theme](docs/screenshot-light-en.png) | ![Dark theme](docs/screenshot-dark-en.png) |
@@ -337,7 +339,7 @@ Birch/
 │   ├── arch/                 PKGBUILD
 │   └── generate-icons.sh     app.svg → app.icns and app.ico
 ├── tests/                    parser, renderer, Mermaid export, search and language tests (Qt Test)
-└── docs/                     screenshots
+└── docs/                     screenshots and animation
 ```
 
 ### How rendering works
