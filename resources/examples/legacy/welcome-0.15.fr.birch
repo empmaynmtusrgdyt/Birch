@@ -1,0 +1,3 @@
+(Début) -> [Saisir les données] -> {Données valides ?};
+{Données valides ?} -> [Enregistrer] "Oui" -> (Fin);
+{Données valides ?} -> [Afficher l'erreur] "Non" -> [Saisir les données];

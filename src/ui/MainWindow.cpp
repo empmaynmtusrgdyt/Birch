@@ -1229,7 +1229,7 @@ void MainWindow::showSyntaxHelp() {
                    "<tr><td><code>{Условие?}</code></td><td>решение (ромб)</td></tr>"
                    "<tr><td><code>(Старт)</code></td><td>начало / конец</td></tr>"
                    "<tr><td><code>[A] -&gt; [B]</code></td><td>стрелка; можно цепочкой: <code>[A] -&gt; [B] -&gt; [C]</code></td></tr>"
-                   "<tr><td><code>[A] -&gt; [B] \"Да\"</code></td><td>подпись стрелки</td></tr>"
+                   "<tr><td><code>[A] -&gt; \"Да\" [B]</code></td><td>подпись стрелки</td></tr>"
                    "<tr><td><code>;</code> или Enter</td><td>конец инструкции</td></tr>"
                    "<tr><td><code>// …</code> или <code># …</code></td><td>комментарий</td></tr>"
                    "<tr><td><code>\\n</code></td><td>перенос строки в тексте</td></tr>"

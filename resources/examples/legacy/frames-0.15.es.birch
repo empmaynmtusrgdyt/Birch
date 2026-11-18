@@ -1,0 +1,15 @@
+// Ejemplo con marcos. =Nombre= abre un marco, == lo cierra.
+// Los bloques de un marco son solo suyos: los dos «Mostrar error» de abajo son bloques distintos.
+// =Marco= [Bloque] es un bloque de otro marco, == (Bloque) es un bloque común fuera de los marcos.
+
+(Inicio) -> =Acceso= [Introducir contraseña]
+
+=Acceso=
+[Introducir contraseña] -> {¿Contraseña correcta?}
+{¿Contraseña correcta?} -> [Mostrar error] "No" -> [Introducir contraseña]
+{¿Contraseña correcta?} -> =Carga= [Abrir perfil] "Sí"
+
+=Carga=
+[Abrir perfil] -> [Cargar ajustes] -> {¿Todo cargado?}
+{¿Todo cargado?} -> [Mostrar error] "No" -> == (Fin)
+{¿Todo cargado?} -> == (Fin) "Sí"

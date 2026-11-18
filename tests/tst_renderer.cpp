@@ -146,7 +146,7 @@ private slots:
     void specialCharactersAreEscaped() {
         Renderer renderer;
         // \\N в DSL -> текст "\N"; без экранирования Graphviz подставил бы имя узла.
-        const auto r = renderer.render(parseOk("[<b>&amp; \"q\"] -> [путь\\\\N] \"a<b\""));
+        const auto r = renderer.render(parseOk("[<b>&amp; \"q\"] -> \"a<b\" [путь\\\\N]"));
         QVERIFY2(r.ok(), qPrintable(r.error));
         QVERIFY(r.svg.contains("&lt;b&gt;&amp;amp;"));
         QVERIFY(r.svg.contains("путь\\N"));
@@ -214,7 +214,7 @@ private slots:
     void largeGraph() {
         QString src;
         for (int i = 0; i < 300; ++i)
-            src += QStringLiteral("[Узел_%1] -> [Узел_%2] \"%3\"\n").arg(i).arg((i * 7 + 3) % 300).arg(i);
+            src += QStringLiteral("[Узел_%1] -> \"%2\" [Узел_%3]\n").arg(i).arg(i).arg((i * 7 + 3) % 300);
         Renderer renderer;
         QElapsedTimer t;
         t.start();

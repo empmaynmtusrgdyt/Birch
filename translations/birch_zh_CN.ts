@@ -344,10 +344,6 @@
         <translation>此处应为节点，例如 [步骤]</translation>
     </message>
     <message>
-        <source>Подпись должна идти после стрелки и узла: [A] -&gt; [B] &quot;Да&quot;</source>
-        <translation>标签写在箭头和节点之后：[A] -&gt; [B] &quot;是&quot;</translation>
-    </message>
-    <message>
         <source>После «-&gt;» ожидался узел</source>
         <translation>“-&gt;”之后应为节点</translation>
     </message>
@@ -374,6 +370,14 @@
     <message>
         <source>Текст слишком большой (больше %1 символов)</source>
         <translation>文本过大（超过 %1 个字符）</translation>
+    </message>
+    <message>
+        <source>Подпись пишется сразу после стрелки, перед блоком: [A] -&gt; &quot;Да&quot; [B]</source>
+        <translation>标签紧跟在箭头之后、节点之前：[A] -&gt; &quot;是&quot; [B]</translation>
+    </message>
+    <message>
+        <source>После подписи ожидался узел</source>
+        <translation>标签后面应为节点</translation>
     </message>
 </context>
 <context>
@@ -867,10 +871,6 @@
         <translation>Birch 语法</translation>
     </message>
     <message>
-        <source>&lt;h3&gt;Синтаксис Birch&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[Текст]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;шаг (прямоугольник)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{Условие?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;решение (ромб)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(Старт)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;начало / конец&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;стрелка; можно цепочкой: &lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B] &quot;Да&quot;&lt;/code&gt;&lt;/td&gt;&lt;td&gt;подпись стрелки&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; или Enter&lt;/td&gt;&lt;td&gt;конец инструкции&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; или &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;комментарий&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;перенос строки в тексте&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;на отдельной строке: открыть рамку; &lt;code&gt;==&lt;/code&gt; — закрыть&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;блок из рамки «Рамка»; &lt;code&gt;== [A]&lt;/code&gt; — общий блок&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;Одинаковый текст — один и тот же узел, но в каждой рамке свои блоки: «[Шаг]» в двух рамках — два разных блока. Пример — «Файл → Открыть пример с рамками».&lt;/p&gt;&lt;p&gt;Если узел хоть раз записан как &lt;code&gt;{…}&lt;/code&gt; или &lt;code&gt;(…)&lt;/code&gt;, он останется этой фигурой.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;Birch 语法&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[文本]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;步骤（矩形）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{条件?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;判断（菱形）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(开始)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;开始 / 结束&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;箭头；也可以连写：&lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B] &quot;是&quot;&lt;/code&gt;&lt;/td&gt;&lt;td&gt;箭头标签&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; 或回车&lt;/td&gt;&lt;td&gt;语句结束&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; 或 &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;注释&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;文本内换行&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=框=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;单独一行：打开一个框；&lt;code&gt;==&lt;/code&gt; 关闭它&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=框= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;来自“框”的方框；&lt;code&gt;== [A]&lt;/code&gt; 是公共方框&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;相同的文本表示同一个节点，但每个框都有自己的方框：两个框中的“[步骤]”是两个不同的方框。参见 文件 → 打开带框的示例。&lt;/p&gt;&lt;p&gt;如果节点至少有一次写成 &lt;code&gt;{…}&lt;/code&gt; 或 &lt;code&gt;(…)&lt;/code&gt;，它就会保持这种形状。&lt;/p&gt;</translation>
-    </message>
-    <message>
         <source>Язык интерфейса изменится после перезапуска Birch.</source>
         <translation>界面语言将在重新启动 Birch 后更改。</translation>
     </message>
@@ -949,6 +949,10 @@
     <message>
         <source>SVG скопирован — вставьте его в Figma, Inkscape или draw.io</source>
         <translation>SVG 已复制，可粘贴到 Figma、Inkscape 或 draw.io</translation>
+    </message>
+    <message>
+        <source>&lt;h3&gt;Синтаксис Birch&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[Текст]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;шаг (прямоугольник)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{Условие?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;решение (ромб)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(Старт)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;начало / конец&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;стрелка; можно цепочкой: &lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; &quot;Да&quot; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;подпись стрелки&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; или Enter&lt;/td&gt;&lt;td&gt;конец инструкции&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; или &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;комментарий&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;перенос строки в тексте&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;на отдельной строке: открыть рамку; &lt;code&gt;==&lt;/code&gt; — закрыть&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;блок из рамки «Рамка»; &lt;code&gt;== [A]&lt;/code&gt; — общий блок&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;Одинаковый текст — один и тот же узел, но в каждой рамке свои блоки: «[Шаг]» в двух рамках — два разных блока. Пример — «Файл → Открыть пример с рамками».&lt;/p&gt;&lt;p&gt;Если узел хоть раз записан как &lt;code&gt;{…}&lt;/code&gt; или &lt;code&gt;(…)&lt;/code&gt;, он останется этой фигурой.&lt;/p&gt;</source>
+        <translation>&lt;h3&gt;Birch 语法&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[文本]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;步骤（矩形）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{条件?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;判断（菱形）&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(开始)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;开始 / 结束&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;箭头；也可以连写：&lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; &quot;是&quot; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;箭头标签&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; 或回车&lt;/td&gt;&lt;td&gt;语句结束&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; 或 &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;注释&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;文本内换行&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=框=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;单独一行：打开一个框；&lt;code&gt;==&lt;/code&gt; 关闭它&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=框= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;来自“框”的方框；&lt;code&gt;== [A]&lt;/code&gt; 是公共方框&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;相同的文本表示同一个节点，但每个框都有自己的方框：两个框中的“[步骤]”是两个不同的方框。参见 文件 → 打开带框的示例。&lt;/p&gt;&lt;p&gt;如果节点至少有一次写成 &lt;code&gt;{…}&lt;/code&gt; 或 &lt;code&gt;(…)&lt;/code&gt;，它就会保持这种形状。&lt;/p&gt;</translation>
     </message>
 </context>
 </TS>

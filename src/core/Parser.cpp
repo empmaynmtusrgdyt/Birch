@@ -405,22 +405,29 @@ private:
             if (at(j).kind == TokKind::Arrow) {
                 i_ = j + 1;
             } else if (cur().kind == TokKind::String) {
-                error(cur(), QCoreApplication::translate("Parser", "Подпись должна идти после стрелки и узла: [A] -> [B] \"Да\""));
-                return synchronize();
+                // Подпись после блока — запись до 0.16.0 или опечатка. Схема рисуется
+                // без этой подписи, а сообщение показывает, где её место.
+                error(cur(), QCoreApplication::translate("Parser", "Подпись пишется сразу после стрелки, перед блоком: [A] -> \"Да\" [B]"));
+                ++i_;
+                continue;
             } else {
                 break;
             }
 
             while (cur().kind == TokKind::Newline) ++i_;
-            if (!takeNode(st, QCoreApplication::translate("Parser", "После «->» ожидался узел"))) return synchronize();
-
             PendingEdge e;
-            e.from = static_cast<int>(st.nodes.size()) - 2;
-            e.to = static_cast<int>(st.nodes.size()) - 1;
-            if (cur().kind == TokKind::String) {
+            const bool labeled = cur().kind == TokKind::String;
+            if (labeled) {
                 e.label = cur().text;
                 ++i_;
+                while (cur().kind == TokKind::Newline) ++i_;
             }
+            if (!takeNode(st, !labeled ? QCoreApplication::translate("Parser", "После «->» ожидался узел")
+                                               : QCoreApplication::translate("Parser", "После подписи ожидался узел")))
+                return synchronize();
+
+            e.from = static_cast<int>(st.nodes.size()) - 2;
+            e.to = static_cast<int>(st.nodes.size()) - 1;
             st.edges.push_back(std::move(e));
         }
 

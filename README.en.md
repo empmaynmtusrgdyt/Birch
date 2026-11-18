@@ -14,8 +14,8 @@ The app looks the same on macOS, Windows and Linux.
 
 ```text
 (Start) -> [Enter data] -> {Data valid?};
-{Data valid?} -> [Save] "Yes" -> (End);
-{Data valid?} -> [Show error] "No" -> [Enter data];
+{Data valid?} -> "Yes" [Save] -> (End);
+{Data valid?} -> "No" [Show error] -> [Enter data];
 ```
 
 ## Features
@@ -67,7 +67,7 @@ Details for each system:
 | `{Condition?}` | decision (diamond) |
 | `(Start)` | start or end |
 | `[A] -> [B]` | arrow; chains work too: `[A] -> [B] -> [C]` |
-| `[A] -> [B] "Yes"` | label of the arrow leading into `[B]` |
+| `[A] -> "Yes" [B]` | arrow label: goes right after `->`, before the block |
 | `;` or a line break | end of statement; a line starting with `->` continues the previous one |
 | `// …` or `# …` | comment |
 | `\n` | line break inside text |
@@ -77,6 +77,8 @@ Details for each system:
 
 Text inside brackets and quotes is taken as is: spaces stay spaces and `_` stays an underscore, for example `[snake_case]`. The same text means the same node. If a node is written as `{…}` or `(…)` at least once, it keeps that shape even if it is later written as `[…]`. The `→` arrow and the `«»` and `“”` quotes (inserted by autocorrect) are supported too.
 
+Before version 0.16.0 a label was written after the block: `[A] -> [B] "Yes"`. This is now an error: the line is underlined, and the hint shows how to rewrite it.
+
 ### Frames
 
 A frame draws a box around several blocks and labels them — useful for showing the parts of a large diagram. Frames are optional: a diagram without them is drawn as before.
@@ -84,12 +86,12 @@ A frame draws a box around several blocks and labels them — useful for showing
 ```text
 =Login=
 [Enter password] -> {Check error}
-{Check error} -> == (Exit) "Error"
-[Enter password] -> =Loading= [Load profile] "Signed in"
+{Check error} -> "Error" == (Exit)
+[Enter password] -> "Signed in" =Loading= [Load profile]
 
 =Loading=
 [Load profile] -> {Check error}
-{Check error} -> == (Exit) "Error"
+{Check error} -> "Error" == (Exit)
 ```
 
 - **Open and close.** `=Title=` on its own line opens a frame, which lasts until the next title; `==` closes it. Spaces around the equals signs don't matter: `= Login =` is the same frame.

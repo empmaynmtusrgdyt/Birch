@@ -1,0 +1,15 @@
+// Frames example. =Name= opens a frame, == closes it.
+// Blocks inside a frame have their own "scope": the two "Show error" blocks below are different.
+// =Frame= [Block] is a block from another frame, == (Block) is a shared block outside frames.
+
+(Start) -> =Login= [Enter password]
+
+=Login=
+[Enter password] -> {Password correct?}
+{Password correct?} -> [Show error] "No" -> [Enter password]
+{Password correct?} -> =Loading= [Open profile] "Yes"
+
+=Loading=
+[Open profile] -> [Load settings] -> {Everything loaded?}
+{Everything loaded?} -> [Show error] "No" -> == (End)
+{Everything loaded?} -> == (End) "Yes"

@@ -6,10 +6,10 @@
 
 =Acceso=
 [Introducir contraseña] -> {¿Contraseña correcta?}
-{¿Contraseña correcta?} -> [Mostrar error] "No" -> [Introducir contraseña]
-{¿Contraseña correcta?} -> =Carga= [Abrir perfil] "Sí"
+{¿Contraseña correcta?} -> "No" [Mostrar error] -> [Introducir contraseña]
+{¿Contraseña correcta?} -> "Sí" =Carga= [Abrir perfil]
 
 =Carga=
 [Abrir perfil] -> [Cargar ajustes] -> {¿Todo cargado?}
-{¿Todo cargado?} -> [Mostrar error] "No" -> == (Fin)
-{¿Todo cargado?} -> == (Fin) "Sí"
+{¿Todo cargado?} -> "No" [Mostrar error] -> == (Fin)
+{¿Todo cargado?} -> "Sí" == (Fin)

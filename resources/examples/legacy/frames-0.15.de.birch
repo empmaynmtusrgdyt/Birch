@@ -1,0 +1,15 @@
+// Beispiel mit Rahmen. =Name= öffnet einen Rahmen, == schließt ihn.
+// Blöcke in einem Rahmen gehören nur zu ihm: die beiden „Fehler anzeigen“ unten sind verschiedene Blöcke.
+// =Rahmen= [Block] ist ein Block aus einem anderen Rahmen, == (Block) ein gemeinsamer Block außerhalb der Rahmen.
+
+(Start) -> =Anmeldung= [Passwort eingeben]
+
+=Anmeldung=
+[Passwort eingeben] -> {Passwort korrekt?}
+{Passwort korrekt?} -> [Fehler anzeigen] "Nein" -> [Passwort eingeben]
+{Passwort korrekt?} -> =Laden= [Profil öffnen] "Ja"
+
+=Laden=
+[Profil öffnen] -> [Einstellungen laden] -> {Alles geladen?}
+{Alles geladen?} -> [Fehler anzeigen] "Nein" -> == (Ende)
+{Alles geladen?} -> == (Ende) "Ja"

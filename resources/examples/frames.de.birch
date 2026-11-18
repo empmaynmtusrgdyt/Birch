@@ -6,10 +6,10 @@
 
 =Anmeldung=
 [Passwort eingeben] -> {Passwort korrekt?}
-{Passwort korrekt?} -> [Fehler anzeigen] "Nein" -> [Passwort eingeben]
-{Passwort korrekt?} -> =Laden= [Profil öffnen] "Ja"
+{Passwort korrekt?} -> "Nein" [Fehler anzeigen] -> [Passwort eingeben]
+{Passwort korrekt?} -> "Ja" =Laden= [Profil öffnen]
 
 =Laden=
 [Profil öffnen] -> [Einstellungen laden] -> {Alles geladen?}
-{Alles geladen?} -> [Fehler anzeigen] "Nein" -> == (Ende)
-{Alles geladen?} -> == (Ende) "Ja"
+{Alles geladen?} -> "Nein" [Fehler anzeigen] -> == (Ende)
+{Alles geladen?} -> "Ja" == (Ende)

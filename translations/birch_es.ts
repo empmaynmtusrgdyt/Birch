@@ -344,10 +344,6 @@ Arrastre Birch a Aplicaciones, ábralo desde allí y vuelva a elegir esta opció
         <translation>Se esperaba un nodo, por ejemplo [Paso]</translation>
     </message>
     <message>
-        <source>Подпись должна идти после стрелки и узла: [A] -&gt; [B] &quot;Да&quot;</source>
-        <translation>La etiqueta va después de la flecha y el nodo: [A] -&gt; [B] &quot;Sí&quot;</translation>
-    </message>
-    <message>
         <source>После «-&gt;» ожидался узел</source>
         <translation>Se esperaba un nodo después de «-&gt;»</translation>
     </message>
@@ -374,6 +370,14 @@ Arrastre Birch a Aplicaciones, ábralo desde allí y vuelva a elegir esta opció
     <message>
         <source>Текст слишком большой (больше %1 символов)</source>
         <translation>El texto es demasiado grande (más de %1 caracteres)</translation>
+    </message>
+    <message>
+        <source>Подпись пишется сразу после стрелки, перед блоком: [A] -&gt; &quot;Да&quot; [B]</source>
+        <translation>La etiqueta va justo después de la flecha, antes del nodo: [A] -&gt; &quot;Sí&quot; [B]</translation>
+    </message>
+    <message>
+        <source>После подписи ожидался узел</source>
+        <translation>Se esperaba un nodo después de la etiqueta</translation>
     </message>
 </context>
 <context>
@@ -868,10 +872,6 @@ Descríbalo a la izquierda, por ejemplo:
         <translation>Sintaxis de Birch</translation>
     </message>
     <message>
-        <source>&lt;h3&gt;Синтаксис Birch&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[Текст]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;шаг (прямоугольник)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{Условие?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;решение (ромб)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(Старт)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;начало / конец&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;стрелка; можно цепочкой: &lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B] &quot;Да&quot;&lt;/code&gt;&lt;/td&gt;&lt;td&gt;подпись стрелки&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; или Enter&lt;/td&gt;&lt;td&gt;конец инструкции&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; или &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;комментарий&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;перенос строки в тексте&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;на отдельной строке: открыть рамку; &lt;code&gt;==&lt;/code&gt; — закрыть&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;блок из рамки «Рамка»; &lt;code&gt;== [A]&lt;/code&gt; — общий блок&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;Одинаковый текст — один и тот же узел, но в каждой рамке свои блоки: «[Шаг]» в двух рамках — два разных блока. Пример — «Файл → Открыть пример с рамками».&lt;/p&gt;&lt;p&gt;Если узел хоть раз записан как &lt;code&gt;{…}&lt;/code&gt; или &lt;code&gt;(…)&lt;/code&gt;, он останется этой фигурой.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;Sintaxis de Birch&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[Texto]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;paso (rectángulo)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{¿Condición?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;decisión (rombo)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(Inicio)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;inicio / fin&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;flecha; también en cadena: &lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B] &quot;Sí&quot;&lt;/code&gt;&lt;/td&gt;&lt;td&gt;etiqueta de la flecha&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; o Intro&lt;/td&gt;&lt;td&gt;fin de la instrucción&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; o &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;comentario&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;salto de línea en el texto&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Marco=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;en una línea aparte: abrir un marco; &lt;code&gt;==&lt;/code&gt; lo cierra&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Marco= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;bloque del marco «Marco»; &lt;code&gt;== [A]&lt;/code&gt; es un bloque común&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;El mismo texto es el mismo nodo, pero cada marco tiene sus propios bloques: «[Paso]» en dos marcos son dos bloques distintos. Vea Archivo → Abrir ejemplo con marcos.&lt;/p&gt;&lt;p&gt;Si un nodo se escribe al menos una vez como &lt;code&gt;{…}&lt;/code&gt; o &lt;code&gt;(…)&lt;/code&gt;, conserva esa forma.&lt;/p&gt;</translation>
-    </message>
-    <message>
         <source>Язык интерфейса изменится после перезапуска Birch.</source>
         <translation>El idioma de la interfaz cambiará al reiniciar Birch.</translation>
     </message>
@@ -950,6 +950,10 @@ Descríbalo a la izquierda, por ejemplo:
     <message>
         <source>SVG скопирован — вставьте его в Figma, Inkscape или draw.io</source>
         <translation>SVG copiado: péguelo en Figma, Inkscape o draw.io</translation>
+    </message>
+    <message>
+        <source>&lt;h3&gt;Синтаксис Birch&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[Текст]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;шаг (прямоугольник)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{Условие?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;решение (ромб)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(Старт)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;начало / конец&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;стрелка; можно цепочкой: &lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; &quot;Да&quot; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;подпись стрелки&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; или Enter&lt;/td&gt;&lt;td&gt;конец инструкции&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; или &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;комментарий&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;перенос строки в тексте&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;на отдельной строке: открыть рамку; &lt;code&gt;==&lt;/code&gt; — закрыть&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Рамка= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;блок из рамки «Рамка»; &lt;code&gt;== [A]&lt;/code&gt; — общий блок&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;Одинаковый текст — один и тот же узел, но в каждой рамке свои блоки: «[Шаг]» в двух рамках — два разных блока. Пример — «Файл → Открыть пример с рамками».&lt;/p&gt;&lt;p&gt;Если узел хоть раз записан как &lt;code&gt;{…}&lt;/code&gt; или &lt;code&gt;(…)&lt;/code&gt;, он останется этой фигурой.&lt;/p&gt;</source>
+        <translation>&lt;h3&gt;Sintaxis de Birch&lt;/h3&gt;&lt;table cellspacing=&apos;6&apos;&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[Texto]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;paso (rectángulo)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;{¿Condición?}&lt;/code&gt;&lt;/td&gt;&lt;td&gt;decisión (rombo)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;(Inicio)&lt;/code&gt;&lt;/td&gt;&lt;td&gt;inicio / fin&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;flecha; también en cadena: &lt;code&gt;[A] -&amp;gt; [B] -&amp;gt; [C]&lt;/code&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;[A] -&amp;gt; &quot;Sí&quot; [B]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;etiqueta de la flecha&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;;&lt;/code&gt; o Intro&lt;/td&gt;&lt;td&gt;fin de la instrucción&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;// …&lt;/code&gt; o &lt;code&gt;# …&lt;/code&gt;&lt;/td&gt;&lt;td&gt;comentario&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;\n&lt;/code&gt;&lt;/td&gt;&lt;td&gt;salto de línea en el texto&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Marco=&lt;/code&gt;&lt;/td&gt;&lt;td&gt;en una línea aparte: abrir un marco; &lt;code&gt;==&lt;/code&gt; lo cierra&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;code&gt;=Marco= [A]&lt;/code&gt;&lt;/td&gt;&lt;td&gt;bloque del marco «Marco»; &lt;code&gt;== [A]&lt;/code&gt; es un bloque común&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p&gt;El mismo texto es el mismo nodo, pero cada marco tiene sus propios bloques: «[Paso]» en dos marcos son dos bloques distintos. Vea Archivo → Abrir ejemplo con marcos.&lt;/p&gt;&lt;p&gt;Si un nodo se escribe al menos una vez como &lt;code&gt;{…}&lt;/code&gt; o &lt;code&gt;(…)&lt;/code&gt;, conserva esa forma.&lt;/p&gt;</translation>
     </message>
 </context>
 </TS>

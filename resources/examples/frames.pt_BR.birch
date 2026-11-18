@@ -6,10 +6,10 @@
 
 =Login=
 [Digitar senha] -> {Senha correta?}
-{Senha correta?} -> [Mostrar erro] "Não" -> [Digitar senha]
-{Senha correta?} -> =Carregamento= [Abrir perfil] "Sim"
+{Senha correta?} -> "Não" [Mostrar erro] -> [Digitar senha]
+{Senha correta?} -> "Sim" =Carregamento= [Abrir perfil]
 
 =Carregamento=
 [Abrir perfil] -> [Carregar configurações] -> {Tudo carregado?}
-{Tudo carregado?} -> [Mostrar erro] "Não" -> == (Fim)
-{Tudo carregado?} -> == (Fim) "Sim"
+{Tudo carregado?} -> "Não" [Mostrar erro] -> == (Fim)
+{Tudo carregado?} -> "Sim" == (Fim)

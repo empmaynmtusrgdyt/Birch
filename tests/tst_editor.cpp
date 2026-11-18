@@ -166,7 +166,7 @@ private slots:
     // Набор по привычке, с закрывающей скобкой, даёт тот же текст.
     void typingClosingSkipsOver() {
         CodeEditor editor;
-        QCOMPARE(typed(editor, "[A] -> {B?} \"Yes\""), QStringLiteral("[A] -> {B?} \"Yes\""));
+        QCOMPARE(typed(editor, "[A] -> \"Yes\" {B?}"), QStringLiteral("[A] -> \"Yes\" {B?}"));
     }
 
     void backspaceRemovesPair() {

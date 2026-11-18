@@ -195,7 +195,7 @@ jobs:
           apt-get install -y --no-install-recommends ./build/linux/birch_*.deb fonts-dejavu-core
       - name: Смоук-тест установленного пакета
         run: |
-          printf '(Старт) -> {Ок?} -> [Шаг] "Да" -> (Конец)\n' > test.birch
+          printf '(Старт) -> {Ок?} -> "Да" [Шаг] -> (Конец)\n' > test.birch
           birch --screenshot screenshot.png test.birch
           test -f /usr/share/applications/birch.desktop
           test -f /usr/share/mime/packages/birch.xml

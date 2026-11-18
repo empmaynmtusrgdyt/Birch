@@ -171,9 +171,11 @@ qt_add_executable(Birch WIN32 MACOSX_BUNDLE
 )
 
 # Примеры схем: welcome.birch и frames.birch на исходном языке и
-# welcome.<код>.birch, frames.<код>.birch — для языков интерфейса.
+# welcome.<код>.birch, frames.<код>.birch — для языков интерфейса; в legacy/ —
+# прошлые версии примеров, чтобы узнавать их в сохранённом сеансе.
 file(GLOB BIRCH_EXAMPLES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/resources/examples/*.birch")
+     "${CMAKE_CURRENT_SOURCE_DIR}/resources/examples/*.birch"
+     "${CMAKE_CURRENT_SOURCE_DIR}/resources/examples/legacy/*.birch")
 qt_add_resources(Birch "birch_resources"
     PREFIX "/"
     BASE resources

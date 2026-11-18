@@ -6,10 +6,10 @@
 
 =Connexion=
 [Saisir le mot de passe] -> {Mot de passe correct ?}
-{Mot de passe correct ?} -> [Afficher l'erreur] "Non" -> [Saisir le mot de passe]
-{Mot de passe correct ?} -> =Chargement= [Ouvrir le profil] "Oui"
+{Mot de passe correct ?} -> "Non" [Afficher l'erreur] -> [Saisir le mot de passe]
+{Mot de passe correct ?} -> "Oui" =Chargement= [Ouvrir le profil]
 
 =Chargement=
 [Ouvrir le profil] -> [Charger les paramètres] -> {Tout est chargé ?}
-{Tout est chargé ?} -> [Afficher l'erreur] "Non" -> == (Fin)
-{Tout est chargé ?} -> == (Fin) "Oui"
+{Tout est chargé ?} -> "Non" [Afficher l'erreur] -> == (Fin)
+{Tout est chargé ?} -> "Oui" == (Fin)

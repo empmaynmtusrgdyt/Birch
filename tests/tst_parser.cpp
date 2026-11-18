@@ -35,8 +35,8 @@ private slots:
 
     void exampleFromSpec() {
         const auto r = parse(QStringLiteral("[Старт] -> [Проверка условия];\n"
-                                            "[Проверка условия] -> [Успех] \"Да\";\n"
-                                            "[Проверка условия] -> [Ошибка] \"Нет\";\n"));
+                                            "[Проверка условия] -> \"Да\" [Успех];\n"
+                                            "[Проверка условия] -> \"Нет\" [Ошибка];\n"));
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(nodeLabels(r.diagram),
                  (QStringList{"Старт", "Проверка условия", "Успех", "Ошибка"}));
@@ -56,7 +56,7 @@ private slots:
     }
 
     void chainWithLabels() {
-        const auto r = parse("[A] -> [B] \"x\" -> [C] -> [D] \"y\"");
+        const auto r = parse("[A] -> \"x\" [B] -> [C] -> \"y\" [D]");
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(r.diagram.edges.size(), 3);
         QCOMPARE(r.diagram.edges[0].label, QStringLiteral("x"));
@@ -103,7 +103,7 @@ private slots:
 
     // Подчёркивание — обычный символ, а не замена пробела
     void underscoreIsLiteral() {
-        const auto r = parse("[snake_case] -> {is_valid?} \"x_y\" -> [snake case]");
+        const auto r = parse("[snake_case] -> \"x_y\" {is_valid?} -> [snake case]");
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(nodeLabels(r.diagram), (QStringList{"snake_case", "is_valid?", "snake case"}));
         QCOMPARE(r.diagram.edges[0].label, QStringLiteral("x_y"));
@@ -116,14 +116,14 @@ private slots:
     }
 
     void multiLineChain() {
-        const auto r = parse("[A]\n  -> [B] \"да\"\n  ->\n  [C];");
+        const auto r = parse("[A]\n  -> \"да\" [B]\n  ->\n  [C];");
         QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
         QCOMPARE(r.diagram.edges.size(), 2);
         QCOMPARE(r.diagram.edges[0].label, QStringLiteral("да"));
     }
 
     void escapes() {
-        const auto r = parse("[a\\]b] -> [snake\\_case] -> [Две\\nстроки] \"кав\\\"ычки\"");
+        const auto r = parse("[a\\]b] -> [snake\\_case] -> \"кав\\\"ычки\" [Две\\nстроки]");
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(nodeLabels(r.diagram),
                  (QStringList{"a]b", "snake_case", "Две\nстроки"}));
@@ -131,7 +131,7 @@ private slots:
     }
 
     void unicodeArrowAndQuotes() {
-        const auto r = parse("[A] → [B] «Да» → [C] “Нет”");
+        const auto r = parse("[A] → «Да» [B] → “Нет” [C]");
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(r.diagram.edges.size(), 2);
         QCOMPARE(r.diagram.edges[0].label, QStringLiteral("Да"));
@@ -244,7 +244,7 @@ private slots:
     }
 
     void qualifiedNodeFromAnotherFrame() {
-        const auto r = parse("=А=\n[Ввод] -> =Б= [Профиль] \"Вход\"\n=Б=\n[Профиль] -> [Готово]\n"
+        const auto r = parse("=А=\n[Ввод] -> \"Вход\" =Б= [Профиль]\n=Б=\n[Профиль] -> [Готово]\n"
                              "==\n[Старт] -> =А= [Ввод]");
         QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
         QCOMPARE(nodeLabels(r.diagram), (QStringList{"Ввод", "Профиль", "Готово", "Старт"}));
@@ -254,7 +254,7 @@ private slots:
     }
 
     void identicalFramesConnected() {
-        const auto r = parse("=Попытка 1=\n[Ввод] -> {Проверка}\n{Проверка} -> =Попытка 2= [Ввод] \"Ещё раз\"\n"
+        const auto r = parse("=Попытка 1=\n[Ввод] -> {Проверка}\n{Проверка} -> \"Ещё раз\" =Попытка 2= [Ввод]\n"
                              "=Попытка 2=\n[Ввод] -> {Проверка}");
         QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
         QCOMPARE(r.diagram.nodes.size(), 4);
@@ -366,10 +366,35 @@ private slots:
     }
 
     void equalsInsideTextIsPlain() {
-        const auto r = parse("[a = b] -> [x == y] \"=\"");
+        const auto r = parse("[a = b] -> \"=\" [x == y]");
         QVERIFY(r.diagnostics.isEmpty());
         QCOMPARE(nodeLabels(r.diagram), (QStringList{"a = b", "x == y"}));
         QCOMPARE(r.diagram.edges[0].label, QStringLiteral("="));
+    }
+
+    // Подпись после блока — запись до 0.16.0: ошибка с подсказкой, стрелка рисуется без подписи.
+    void labelAfterNodeIsError() {
+        const auto r = parse("{Ок?} -> [Сохранить] \"Да\" -> (Конец)");
+        QCOMPARE(errorCount(r), 1);
+        QVERIFY(r.diagnostics[0].message.contains(QStringLiteral("-> \"Да\" [B]")));
+        QCOMPARE(r.diagram.edges.size(), 2);
+        QCOMPARE(r.diagram.edges[0].label, QString());
+        QCOMPARE(r.diagram.edges[1].label, QString());
+    }
+
+    void labelThenNodeOnNextLine() {
+        const auto r = parse("{Ок?} -> \"Да\"\n  [Сохранить]");
+        QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
+        QCOMPARE(r.diagram.edges.size(), 1);
+        QCOMPARE(r.diagram.edges[0].label, QStringLiteral("Да"));
+    }
+
+    void labelBeforeCommonNode() {
+        const auto r = parse("=А=\n{Ошибка?} -> \"Да\" == (Выход)\n==\n(Выход)");
+        QVERIFY2(r.diagnostics.isEmpty(), qPrintable(r.diagnostics.value(0).message));
+        QCOMPARE(r.diagram.nodes.size(), 2);
+        QCOMPARE(r.diagram.nodes[1].group, -1);
+        QCOMPARE(r.diagram.edges[0].label, QStringLiteral("Да"));
     }
 
     // --- ошибки -------------------------------------------------------------
@@ -386,9 +411,11 @@ private slots:
         QTest::newRow("arrow without node") << "[A] -> ;"                  << 1 << 8 << 1;
         QTest::newRow("dangling arrow")     << "[A] ->"                    << 1 << 7 << 1;
         QTest::newRow("label w/o arrow")    << "[A] \"Да\""                << 1 << 5 << 4;
+        QTest::newRow("label w/o node")     << "[A] -> \"Да\""            << 1 << 12 << 1;
+        QTest::newRow("label after node")   << "[A] -> [B] \"Да\""        << 1 << 12 << 4;
         QTest::newRow("missing separator")  << "[A] -> [B] [C]"            << 1 << 12 << 3;
         QTest::newRow("starts with arrow")  << "-> [B]"                    << 1 << 1 << 2;
-        QTest::newRow("unclosed quote")     << "[A] -> [B] \"Да"           << 1 << 12 << 3;
+        QTest::newRow("unclosed quote")     << "[A] -> \"Да"               << 1 << 8 << 3;
     }
 
     void errorPositions() {

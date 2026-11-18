@@ -1,0 +1,3 @@
+(Start) -> [Daten eingeben] -> {Daten gültig?};
+{Daten gültig?} -> [Speichern] "Ja" -> (Ende);
+{Daten gültig?} -> [Fehler anzeigen] "Nein" -> [Daten eingeben];

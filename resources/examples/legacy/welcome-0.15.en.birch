@@ -1,0 +1,3 @@
+(Start) -> [Enter data] -> {Data valid?};
+{Data valid?} -> [Save] "Yes" -> (End);
+{Data valid?} -> [Show error] "No" -> [Enter data];

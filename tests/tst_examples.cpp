@@ -77,6 +77,19 @@ private slots:
         QCOMPARE(examples::untouchedName(kDir, text), QStringLiteral("welcome"));
     }
 
+    // Примеры 0.15 (подпись после блока) — на всех языках, и с переводами строк Windows.
+    void recognizesExamplesBeforeLabelSyntaxChange() {
+        const QStringList files = QDir(kDir + "/legacy").entryList({"*-0.15*.birch"}, QDir::Files);
+        QCOMPARE(files.size(), QDir(kDir).entryList({"*.birch"}, QDir::Files).size());
+        for (const QString& file : files) {
+            const QString text = read("legacy/" + file);
+            QVERIFY2(text.contains(QRegularExpression("[\\]})] \"")), qPrintable(file));  // в самом деле старая запись
+            const QString name = file.section(u'-', 0, 0);
+            QCOMPARE(examples::untouchedName(kDir, text), name);
+            QCOMPARE(examples::untouchedName(kDir, QString(text).replace("\n", "\r\n")), name);
+        }
+    }
+
     void ownTextIsNotAnExample() {
         QCOMPARE(examples::untouchedName(kDir, ""), QString());
         QCOMPARE(examples::untouchedName(kDir, "[A] -> [B]"), QString());

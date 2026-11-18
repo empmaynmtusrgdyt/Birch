@@ -1,0 +1,15 @@
+// Exemplo com molduras. =Nome= abre uma moldura, == a fecha.
+// Os blocos de uma moldura são só dela: os dois "Mostrar erro" abaixo são blocos diferentes.
+// =Moldura= [Bloco] é um bloco de outra moldura, == (Bloco) é um bloco comum fora das molduras.
+
+(Início) -> =Login= [Digitar senha]
+
+=Login=
+[Digitar senha] -> {Senha correta?}
+{Senha correta?} -> [Mostrar erro] "Não" -> [Digitar senha]
+{Senha correta?} -> =Carregamento= [Abrir perfil] "Sim"
+
+=Carregamento=
+[Abrir perfil] -> [Carregar configurações] -> {Tudo carregado?}
+{Tudo carregado?} -> [Mostrar erro] "Não" -> == (Fim)
+{Tudo carregado?} -> == (Fim) "Sim"

@@ -59,11 +59,15 @@ QString untouchedName(const QString& dir, const QString& text) {
     for (const char* legacy : kLegacyWelcome) {
         if (wanted == normalized(QString::fromUtf8(legacy))) return QStringLiteral("welcome");
     }
-    const QStringList files = QDir(dir).entryList({QStringLiteral("*.birch")}, QDir::Files);
-    for (const QString& file : files) {
-        QFile f(dir + u'/' + file);
-        if (f.open(QIODevice::ReadOnly) && normalized(QString::fromUtf8(f.readAll())) == wanted)
-            return file.section(u'.', 0, 0);
+    // Нынешние примеры и прошлые версии в legacy/ (welcome-0.15.en.birch — стартовый
+    // пример из 0.15 на английском, до смены записи подписей).
+    for (const QString& sub : {QString(), QStringLiteral("/legacy")}) {
+        const QStringList files = QDir(dir + sub).entryList({QStringLiteral("*.birch")}, QDir::Files);
+        for (const QString& file : files) {
+            QFile f(dir + sub + u'/' + file);
+            if (f.open(QIODevice::ReadOnly) && normalized(QString::fromUtf8(f.readAll())) == wanted)
+                return file.section(u'.', 0, 0).section(u'-', 0, 0);
+        }
     }
     return {};
 }

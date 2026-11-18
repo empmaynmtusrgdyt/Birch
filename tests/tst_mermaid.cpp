@@ -44,7 +44,7 @@ class TestMermaid : public QObject {
 
 private slots:
     void shapesAndEdges() {
-        const QString m = toMermaid(parseOk("(Старт) -> [Шаг] -> {Ок?}\n{Ок?} -> (Конец) \"Да\""));
+        const QString m = toMermaid(parseOk("(Старт) -> [Шаг] -> {Ок?}\n{Ок?} -> \"Да\" (Конец)"));
         QCOMPARE(m, QStringLiteral("flowchart TD\n"
                                    "    n1([\"Старт\"])\n"
                                    "    n2(\"Шаг\")\n"
@@ -62,7 +62,7 @@ private slots:
     }
 
     void escaping() {
-        const QString m = toMermaid(parseOk("[Сказал \\\"привет\\\"] -> [a<b & c>d] \"#1; x\"\n[Две\\nстроки]"));
+        const QString m = toMermaid(parseOk("[Сказал \\\"привет\\\"] -> \"#1; x\" [a<b & c>d]\n[Две\\nстроки]"));
         QVERIFY(m.contains(QStringLiteral("n1(\"Сказал #quot;привет#quot;\")")));
         QVERIFY(m.contains(QStringLiteral("n2(\"a#lt;b #amp; c#gt;d\")")));
         QVERIFY(m.contains(QStringLiteral("-->|\"#35;1; x\"|")));
@@ -117,7 +117,7 @@ private slots:
         lr.leftToRight = true;
         dump(QStringLiteral("frames-lr"), toMermaid(parseOk(readExample(QStringLiteral("frames.birch"))), lr));
         dump(QStringLiteral("special"),
-             toMermaid(parseOk("[Сказал \\\"привет\\\"] -> [a<b & c>d] \"#1; x\"\n"
+             toMermaid(parseOk("[Сказал \\\"привет\\\"] -> \"#1; x\" [a<b & c>d]\n"
                                "[Две\\nстроки] -> {end?} -> (subgraph)\n=Рамка \\\"1\\\" <b>=\n[Шаг]")));
     }
 };

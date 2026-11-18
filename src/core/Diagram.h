@@ -33,7 +33,7 @@ struct Node {
 struct Edge {
     QString from;
     QString to;
-    QString label;  // необязательная подпись: -> [B] "Да"
+    QString label;  // необязательная подпись: -> "Да" [B]
 };
 
 struct Diagram {
